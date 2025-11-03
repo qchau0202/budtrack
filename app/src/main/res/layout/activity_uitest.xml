@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UITestActivity">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Home screen"
+            android:textFontWeight="1000"
+            android:textSize="24sp"
+            android:layout_marginRight="2dp"
+            android:textColor="@color/primary_black" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title - primary black - 1000"
+            android:textFontWeight="1000"
+            android:textSize="24sp"
+            android:layout_marginRight="2dp"
+            android:textColor="@color/primary_black" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subtitle - Primary grey - 500"
+            android:textFontWeight="500"
+            android:textSize="18sp"
+            android:textColor="@color/primary_grey" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subtitle - Primary grey - 500"
+            android:textFontWeight="500"
+            android:textSize="18sp"
+            android:textColor="@color/primary_red" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/primary_red"
+                android:textColor="@color/primary_white"
+                android:textFontWeight="800"
+                android:text="Delete"/>
+
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/secondary_green"
+                android:textColor="@color/primary_white"
+                android:textFontWeight="800"
+                android:text="Success"/>
+
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/primary_yellow"
+                android:textColor="@color/primary_white"
+                android:textFontWeight="800"
+                android:text="Warning"/>
+
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/primary_green"
+                android:textColor="@color/primary_white"
+                android:textFontWeight="800"
+                android:text="Primary button"/>
+
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/primary_black"
+                android:textColor="@color/primary_white"
+                android:textFontWeight="800"
+                android:text="Secondary button"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

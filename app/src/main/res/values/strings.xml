@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Budtrack</string>
+    <string name="illustration_description">Onboarding illustration</string>
+    <string name="onboarding_title">Your Future, Your Finances, Your Buddy!</string>
+    <string name="onboarding_description">Now it\'s easier to manage your finances with us and do the transaction more securely.</string>
+    <string name="btn_get_started">Get Started</string>
 </resources>
