@@ -1,98 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:background="@color/primary_white"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center_horizontal">
+    <!-- White Rounded Card Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/card_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="18dp"
+        app:layout_constraintBottom_toTopOf="@id/btn_get_started"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Illustration -->
+        <ImageView
+            android:id="@+id/illustration"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/illustration_splashscreen"
+            android:contentDescription="@string/illustration_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Title -->
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/title"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Home screen"
-            android:textFontWeight="1000"
-            android:textSize="24sp"
-            android:layout_marginRight="2dp"
-            android:textColor="@color/primary_black" />
+            android:text="@string/onboarding_title"
+            android:textColor="@color/primary_black"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/illustration" />
 
+        <!-- Description -->
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/description"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Title - primary black - 1000"
-            android:textFontWeight="1000"
-            android:textSize="24sp"
-            android:layout_marginRight="2dp"
-            android:textColor="@color/primary_black" />
+            android:text="@string/onboarding_description"
+            android:textColor="@color/primary_grey"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Subtitle - Primary grey - 500"
-            android:textFontWeight="500"
-            android:textSize="18sp"
-            android:textColor="@color/primary_grey" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Subtitle - Primary grey - 500"
-            android:textFontWeight="500"
-            android:textSize="18sp"
-            android:textColor="@color/primary_red" />
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            >
+    <!-- Get Started Button - Fixed at Bottom -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_get_started"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="@string/btn_get_started"
+        android:textColor="@color/primary_white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="@color/primary_green"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-
-            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/primary_red"
-                android:textColor="@color/primary_white"
-                android:textFontWeight="800"
-                android:text="Delete"/>
-
-            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/secondary_green"
-                android:textColor="@color/primary_white"
-                android:textFontWeight="800"
-                android:text="Success"/>
-
-            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/primary_yellow"
-                android:textColor="@color/primary_white"
-                android:textFontWeight="800"
-                android:text="Warning"/>
-
-            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/primary_green"
-                android:textColor="@color/primary_white"
-                android:textFontWeight="800"
-                android:text="Primary button"/>
-
-            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/primary_black"
-                android:textColor="@color/primary_white"
-                android:textFontWeight="800"
-                android:text="Secondary button"/>
-        </LinearLayout>
-    </LinearLayout>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
