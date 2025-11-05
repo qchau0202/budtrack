@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary_white"
+    android:background="@drawable/bg_gradient_green"
     android:padding="24dp"
     tools:context=".activities.LoginActivity">
 
@@ -21,7 +21,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Lock Icon -->
+        <!-- App Icon -->
         <ImageView
             android:id="@+id/icon_lock"
             android:layout_width="64dp"
@@ -92,9 +92,10 @@
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxStrokeWidth="1dp"
             app:boxStrokeWidthFocused="1dp"
+            app:boxStrokeColor="@color/primary_grey"
+            app:boxBackgroundColor="@color/primary_white"
             app:cursorColor="@color/primary_grey"
             app:placeholderTextColor="@color/primary_black"
-            app:boxStrokeColor="@color/primary_grey"
             app:hintTextColor="@color/primary_grey"
             android:layout_marginBottom="16dp">
 
@@ -137,6 +138,7 @@
             app:boxStrokeWidth="1dp"
             app:boxStrokeWidthFocused="1dp"
             app:boxStrokeColor="@color/primary_grey"
+            app:boxBackgroundColor="@color/primary_white"
             app:cursorColor="@color/primary_grey"
             app:placeholderTextColor="@color/primary_black"
             app:hintTextColor="@color/primary_grey"
@@ -152,8 +154,7 @@
                 android:textColor="@color/primary_black"
                 android:fontFamily="@font/quicksand"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                />
+                android:paddingEnd="16dp"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
