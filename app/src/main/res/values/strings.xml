@@ -1,12 +1,12 @@
 <resources>
-<!--    Get started-->
+<!--Get started-->
     <string name="app_name">Budtrack</string>
     <string name="illustration_description">Onboarding illustration</string>
     <string name="onboarding_title">Your Future, Your Finances, Your Buddy!</string>
     <string name="onboarding_description">Now it\'s easier to manage your finances with Budtrack.</string>
     <string name="btn_get_started">Get Started</string>
 
-<!--    Login-->
+<!--Login-->
     <string name="login_title">Login to Budtrack</string>
     <string name="login_subtitle">Welcome back! Sign in to continue.</string>
     <string name="email_label">Email</string>
@@ -16,8 +16,8 @@
     <string name="btn_login">Login</string>
     <string name="no_account">Don\'t have an account? </string>
     <string name="sign_up_link">Sign Up</string>
- 
-<!--    Register-->
+
+<!--Register-->
     <string name="register_title">Create your account</string>
     <string name="register_subtitle">Join us! It only takes a minute.</string>
     <string name="full_name_label">Full Name</string>
@@ -27,4 +27,16 @@
     <string name="btn_register">Sign up</string>
     <string name="have_account">Already have an account? </string>
     <string name="login_link">Login</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!--Home-->
+    <string name="home_page">Home page</string>
+    <!--wallet-->
+    <string name="wallet_page">Wallet page</string>
+    <!--dashboard-->
+    <string name="dashboard_page">Dashboard page</string>
+    <!--profile-->
+    <string name="profile_page">Profile page</string>
 </resources>
