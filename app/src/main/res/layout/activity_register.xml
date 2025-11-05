@@ -24,8 +24,8 @@
         <!-- App Icon -->
         <ImageView
             android:id="@+id/icon_register"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:src="@drawable/ic_budtrack"
             android:contentDescription="Register icon"
             android:layout_marginBottom="16dp" />
@@ -49,6 +49,7 @@
             android:layout_height="wrap_content"
             android:text="@string/register_subtitle"
             android:textColor="@color/primary_grey"
+            android:textStyle="bold"
             android:textSize="16sp"
             android:gravity="center"
             android:fontFamily="@font/quicksand" />
@@ -89,12 +90,13 @@
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeWidth="1dp"
-            app:boxStrokeWidthFocused="1dp"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp"
             app:boxStrokeColor="@color/primary_grey"
+            app:boxBackgroundColor="@color/primary_white"
             app:cursorColor="@color/primary_grey"
             app:placeholderTextColor="@color/primary_black"
-            app:hintTextColor="@color/primary_grey"
+            app:hintTextColor="@color/primary_black"
             android:layout_marginBottom="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -133,12 +135,13 @@
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeWidth="1dp"
-            app:boxStrokeWidthFocused="1dp"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp"
+            app:boxStrokeColor="@color/primary_grey"
+            app:boxBackgroundColor="@color/primary_white"
             app:cursorColor="@color/primary_grey"
             app:placeholderTextColor="@color/primary_black"
-            app:boxStrokeColor="@color/primary_grey"
-            app:hintTextColor="@color/primary_grey"
+            app:hintTextColor="@color/primary_black"
             android:layout_marginBottom="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -177,12 +180,13 @@
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeWidth="1dp"
-            app:boxStrokeWidthFocused="1dp"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp"
             app:boxStrokeColor="@color/primary_grey"
+            app:boxBackgroundColor="@color/primary_white"
             app:cursorColor="@color/primary_grey"
             app:placeholderTextColor="@color/primary_black"
-            app:hintTextColor="@color/primary_grey"
+            app:hintTextColor="@color/primary_black"
             android:layout_marginBottom="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -221,12 +225,13 @@
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeWidth="1dp"
-            app:boxStrokeWidthFocused="1dp"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp"
             app:boxStrokeColor="@color/primary_grey"
+            app:boxBackgroundColor="@color/primary_white"
             app:cursorColor="@color/primary_grey"
             app:placeholderTextColor="@color/primary_black"
-            app:hintTextColor="@color/primary_grey"
+            app:hintTextColor="@color/primary_black"
             android:layout_marginBottom="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -263,6 +268,7 @@
             android:text="@string/have_account"
             android:textColor="@color/primary_grey"
             android:textSize="14sp"
+            android:textStyle="bold"
             android:fontFamily="@font/quicksand"
             android:layout_marginRight="12dp"/>
 
