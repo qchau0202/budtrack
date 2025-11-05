@@ -8,6 +8,7 @@ import com.google.android.material.button.MaterialButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 
@@ -16,6 +17,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 

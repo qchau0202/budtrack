@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- primary colors (dark overrides) -->
+    <color name="primary_black">#FFFFFF</color>
+    <color name="primary_white">#121212</color>
+    <color name="primary_grey">#B0B0B0</color>
+    <color name="primary_green">#7ed957</color>
+    <color name="primary_yellow">#D6A51A</color>
+    <color name="primary_red">#CF4A4F</color>
+
+    <!-- secondary colors (dark overrides) -->
+    <color name="secondary_white">#1A1A1A</color>
+    <color name="secondary_grey">#2A2A2A</color>
+    <color name="secondary_green">#2E6F40</color>
+
+    <!-- gradient colors (dark) -->
+    <color name="gradient_top_tint">#1F3326</color>
+    <color name="gradient_base">#121212</color>
+</resources>
+
