@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 
@@ -60,7 +62,26 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        View root = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        // Dark mode switch wiring
+        SwitchMaterial sw = root.findViewById(R.id.sw_dark_mode);
+        if (sw != null && getContext() != null) {
+            boolean isDark = vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager.isDarkEnabled(getContext());
+            sw.setChecked(isDark);
+            sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager.setTheme(
+                            requireContext(),
+                            isChecked
+                                    ? vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager.ThemeMode.DARK
+                                    : vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager.ThemeMode.LIGHT
+                    );
+                }
+            });
+        }
+
+        return root;
     }
 }

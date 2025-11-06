@@ -11,7 +11,7 @@
     <!--secondary colors-->
     <color name="secondary_white">#f1f1f1</color>
     <color name="secondary_grey">#E5E5E5</color>
-    <color name="secondary_green">#2E6F40</color>
+    <color name="secondary_green">#4caf50</color>
 
     <!-- gradient colors (light) -->
     <color name="gradient_top_tint">#E5F4DC</color>

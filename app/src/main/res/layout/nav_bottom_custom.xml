@@ -31,34 +31,6 @@
 
     </LinearLayout>
 
-    <!-- Wallet -->
-    <LinearLayout
-        android:id="@+id/nav_wallet"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="8dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground">
-
-        <ImageView
-            android:id="@+id/nav_wallet_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_wallet_24dp"
-            app:tint="@color/nav_icon_color"/>
-
-    </LinearLayout>
-
-    <!-- Spacer for FAB -->
-    <View
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_weight="1"/>
-
     <!-- Dashboard (Analytics) -->
     <LinearLayout
         android:id="@+id/nav_dashboard"
@@ -77,6 +49,34 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_analytics_24dp"
+            app:tint="@color/nav_icon_color"/>
+
+    </LinearLayout>
+
+    <!-- Spacer for FAB -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_weight="1"/>
+
+    <!-- Wallet -->
+    <LinearLayout
+        android:id="@+id/nav_wallet"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground">
+
+        <ImageView
+            android:id="@+id/nav_wallet_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_wallet_24dp"
             app:tint="@color/nav_icon_color"/>
 
     </LinearLayout>

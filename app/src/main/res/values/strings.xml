@@ -33,10 +33,33 @@
 
     <!--Home-->
     <string name="home_page">Home page</string>
+    <string name="welcome_text">Hello Chou,</string>
+    <string name="good_morning">Good morning,</string>
+    <string name="welcome_name">Chou</string>
+    <string name="your_balance">Your balance</string>
+    <string name="add_expenses">Add income</string>
+    <string name="total_expenses">Total Expenses</string>
+    <string name="total_income">Total Income</string>
+    <string name="tab_income">Income</string>
+    <string name="tab_expenses">Expenses</string>
+    <string name="total_spent">Total Spent</string>
+    <string name="this_month_total_spend">This month total spend</string>
+    <string name="sample_date">01 Jan 2025</string>
     <!--wallet-->
     <string name="wallet_page">Wallet page</string>
     <!--dashboard-->
     <string name="dashboard_page">Dashboard page</string>
     <!--profile-->
     <string name="profile_page">Profile page</string>
+    <string name="profile_name">Name</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_address">Address</string>
+    <string name="name_hint">Enter your name</string>
+    <string name="address_hint">Enter your address</string>
+    <string name="settings">Settings</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="language">Language</string>
+    <string name="currency">Currency</string>
+    <string name="language_value">English</string>
+    <string name="currency_value">VND</string>
 </resources>
