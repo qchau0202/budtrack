@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient_green"
-    android:padding="24dp"
+    android:fillViewport="true"
     tools:context=".activities.RegisterActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_gradient_green"
+        android:padding="24dp">
 
     <!-- Header Section -->
     <LinearLayout
@@ -24,8 +29,8 @@
         <!-- App Icon -->
         <ImageView
             android:id="@+id/icon_register"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:src="@drawable/ic_budtrack"
             android:contentDescription="Register icon"
             android:layout_marginBottom="16dp" />
@@ -37,7 +42,7 @@
             android:layout_height="wrap_content"
             android:text="@string/register_title"
             android:textColor="@color/primary_black"
-            android:textSize="32sp"
+            android:textSize="28sp"
             android:textStyle="bold"
             android:fontFamily="@font/quicksand"
             android:layout_marginBottom="8dp" />
@@ -286,7 +291,7 @@
 
     </LinearLayout>
 
-    <!-- Register Button - Fixed at Bottom -->
+    <!-- Register Button - placed after content to allow scrolling -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_register"
         android:layout_width="0dp"
@@ -297,8 +302,12 @@
         android:textStyle="bold"
         android:backgroundTint="@color/primary_green"
         android:fontFamily="@font/quicksand"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/login_link_section"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>
