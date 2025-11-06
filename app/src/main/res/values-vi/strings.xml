@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--Get started-->
+    <string name="app_name">Budtrack</string>
+    <string name="illustration_description">Minh họa giới thiệu</string>
+    <string name="onboarding_title">Tương Lai Của Bạn, Tài Chính Của Bạn, Người Bạn Đồng Hành!</string>
+    <string name="onboarding_description">Giờ đây quản lý tài chính của bạn dễ dàng hơn với Budtrack.</string>
+    <string name="btn_get_started">Bắt Đầu</string>
+
+<!--Login-->
+    <string name="login_title">Đăng nhập vào Budtrack</string>
+    <string name="login_subtitle">Chào mừng trở lại! Đăng nhập để tiếp tục.</string>
+    <string name="email_label">Email</string>
+    <string name="email_hint">Nhập email</string>
+    <string name="password_label">Mật khẩu</string>
+    <string name="password_hint">Mật khẩu</string>
+    <string name="btn_login">Đăng nhập</string>
+    <string name="no_account">Chưa có tài khoản? </string>
+    <string name="sign_up_link">Đăng ký</string>
+
+<!--Register-->
+    <string name="register_title">Tạo tài khoản của bạn</string>
+    <string name="register_subtitle">Tham gia cùng chúng tôi! Chỉ mất một phút.</string>
+    <string name="full_name_label">Họ và tên</string>
+    <string name="full_name_hint">Nhập họ và tên</string>
+    <string name="confirm_password_label">Xác nhận mật khẩu</string>
+    <string name="confirm_password_hint">Nhập lại mật khẩu</string>
+    <string name="btn_register">Đăng ký</string>
+    <string name="have_account">Đã có tài khoản? </string>
+    <string name="login_link">Đăng nhập</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Xin chào fragment trống</string>
+
+    <!--Home-->
+    <string name="home_page">Trang chủ</string>
+    <!--wallet-->
+    <string name="wallet_page">Trang ví</string>
+    <!--dashboard-->
+    <string name="dashboard_page">Trang thông tin</string>
+    <!--profile-->
+    <string name="profile_page">Trang hồ sơ</string>
+</resources>
+
