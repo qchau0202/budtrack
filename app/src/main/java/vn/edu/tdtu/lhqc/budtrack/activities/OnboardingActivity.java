@@ -1,5 +1,6 @@
 package vn.edu.tdtu.lhqc.budtrack.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -11,12 +12,21 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
+import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
 public class OnboardingActivity extends AppCompatActivity {
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LanguageManager.wrapContext(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LanguageManager.applySavedLanguage(this);
+        ThemeManager.applySavedTheme(this);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_onboarding);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
