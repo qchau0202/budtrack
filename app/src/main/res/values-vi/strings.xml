@@ -52,7 +52,7 @@
     <string name="dashboard_page">Trang thông tin</string>
     <!--profile-->
     <string name="profile_page">Trang hồ sơ</string>
-    <string name="profile_header">Thông tin cá </string>
+    <string name="profile_header">Thông tin cá nhân </string>
     <string name="profile_name">Tên</string>
     <string name="profile_email">Email</string>
     <string name="profile_address">Địa chỉ</string>

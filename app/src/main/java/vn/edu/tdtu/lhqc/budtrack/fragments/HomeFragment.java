@@ -7,9 +7,11 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.services.BalanceService;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,7 +64,22 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
+        TextView tvBalance = root.findViewById(R.id.tv_total_balance_amount);
+        ImageButton btnVisibility = root.findViewById(R.id.btn_visibility);
 
+        if (tvBalance != null && btnVisibility != null) {
+            // Preserve the original unmasked balance text
+            final String originalBalanceText = tvBalance.getText() != null ? tvBalance.getText().toString() : "";
+            boolean hidden = BalanceService.isHidden(requireContext());
+            tvBalance.setText(BalanceService.formatDisplay(originalBalanceText, hidden));
+            btnVisibility.setImageResource(hidden ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
+
+            btnVisibility.setOnClickListener(v -> {
+                boolean nowHidden = BalanceService.toggleHidden(requireContext());
+                tvBalance.setText(BalanceService.formatDisplay(originalBalanceText, nowHidden));
+                btnVisibility.setImageResource(nowHidden ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
+            });
+        }
         return root;
     }
 }
