@@ -51,6 +51,7 @@
     <string name="dashboard_page">Dashboard page</string>
     <!--profile-->
     <string name="profile_page">Profile page</string>
+    <string name="profile_header">Personal info</string>
     <string name="profile_name">Name</string>
     <string name="profile_email">Email</string>
     <string name="profile_address">Address</string>
@@ -62,4 +63,8 @@
     <string name="currency">Currency</string>
     <string name="language_value">English</string>
     <string name="currency_value">VND</string>
+    <string name="language_dialog_title">Choose language</string>
+    <string name="language_option_vietnamese">Tiếng Việt</string>
+    <string name="language_option_english">English</string>
+    <string name="language_dialog_confirm">Confirm</string>
 </resources>

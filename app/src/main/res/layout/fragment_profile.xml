@@ -48,7 +48,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Personal info"
+                android:text=""
                 android:textColor="@color/primary_black"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -249,6 +249,7 @@
 
             <!-- Language row -->
             <LinearLayout
+                android:id="@+id/row_language"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
