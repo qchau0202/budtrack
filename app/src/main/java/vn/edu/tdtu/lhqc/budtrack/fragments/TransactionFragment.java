@@ -1,14 +1,15 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
 import android.app.DatePickerDialog;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,7 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -28,14 +29,14 @@ import vn.edu.tdtu.lhqc.budtrack.R;
 
 public class TransactionFragment extends Fragment {
 
-    private TabLayout tabLayout;
+    private TextView tabExpense, tabIncome, tabLoan, tvDate, tvCategory, tvCancel, tvTitle;
     private EditText editAmount, editNote;
-    private TextView tvDate, tvCategory, tvCancel;
-    private CardView cardDate, cardCategory;
-    private Button btnSave;
+    private CardView cardDate, cardCategory, cardWallet;
+    private MaterialButton btnSave, btnAddDetails;
 
     private Calendar selectedDate = Calendar.getInstance();
     private String selectedType = "chi";
+    private String currentAmount = "";
 
     @Nullable
     @Override
@@ -50,32 +51,83 @@ public class TransactionFragment extends Fragment {
     }
 
     private void initViews(View view) {
-        tabLayout = view.findViewById(R.id.tabLayout);
+        // Tabs
+        tabExpense = view.findViewById(R.id.tabExpense);
+        tabIncome = view.findViewById(R.id.tabIncome);
+        tabLoan = view.findViewById(R.id.tabLoan);
+
+        // Input fields
         editAmount = view.findViewById(R.id.editAmount);
         editNote = view.findViewById(R.id.editNote);
+
+        // Text views
         tvDate = view.findViewById(R.id.tvDate);
         tvCategory = view.findViewById(R.id.tvCategory);
         tvCancel = view.findViewById(R.id.tvCancel);
+        tvTitle = view.findViewById(R.id.tvTitle);
+
+        // Cards
         cardDate = view.findViewById(R.id.cardDate);
         cardCategory = view.findViewById(R.id.cardCategory);
+        cardWallet = view.findViewById(R.id.cardWallet);
+
+        // Buttons
         btnSave = view.findViewById(R.id.btnSave);
+        btnAddDetails = view.findViewById(R.id.btnAddDetails);
 
         updateDateText();
+        updateTabSelection(); // Set initial tab selection
     }
 
     private void setupTabs() {
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                switch (tab.getPosition()) {
-                    case 0: selectedType = "chi"; break;
-                    case 1: selectedType = "thu"; break;
-                    case 2: selectedType = "vayno"; break;
-                }
-            }
-            @Override public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        tabExpense.setOnClickListener(v -> {
+            selectedType = "chi";
+            updateTabSelection();
         });
+
+        tabIncome.setOnClickListener(v -> {
+            selectedType = "thu";
+            updateTabSelection();
+        });
+
+        tabLoan.setOnClickListener(v -> {
+            selectedType = "vayno";
+            updateTabSelection();
+        });
+    }
+
+    private void updateTabSelection() {
+        // Reset all tabs to unselected state
+        tabExpense.setSelected(false);
+        tabExpense.setTextSize(14f);
+        setTextStyle(tabExpense, false);
+
+        tabIncome.setSelected(false);
+        tabIncome.setTextSize(14f);
+        setTextStyle(tabIncome, false);
+
+        tabLoan.setSelected(false);
+        tabLoan.setTextSize(14f);
+        setTextStyle(tabLoan, false);
+
+        // Set selected tab (selector drawable handles the background color change)
+        switch (selectedType) {
+            case "chi":
+                tabExpense.setSelected(true);
+                tabExpense.setTextSize(16f);
+                setTextStyle(tabExpense, true);
+                break;
+            case "thu":
+                tabIncome.setSelected(true);
+                tabIncome.setTextSize(16f);
+                setTextStyle(tabIncome, true);
+                break;
+            case "vayno":
+                tabLoan.setSelected(true);
+                tabLoan.setTextSize(16f);
+                setTextStyle(tabLoan, true);
+                break;
+        }
     }
 
     private void setupDatePicker() {
@@ -103,8 +155,6 @@ public class TransactionFragment extends Fragment {
 
     private void setupAmountFormatter() {
         editAmount.addTextChangedListener(new TextWatcher() {
-            private String current = "";
-
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -113,16 +163,26 @@ public class TransactionFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!s.toString().equals(current)) {
+                if (!s.toString().equals(currentAmount)) {
                     editAmount.removeTextChangedListener(this);
-                    String clean = s.toString().replaceAll("[,.]", "");
-                    if (!clean.isEmpty()) {
-                        double parsed = Double.parseDouble(clean);
-                        String formatted = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(parsed);
-                        current = formatted;
-                        editAmount.setText(formatted);
-                        editAmount.setSelection(formatted.length());
+
+                    String cleanString = s.toString().replaceAll("[.,\\s]", "");
+
+                    if (!cleanString.isEmpty()) {
+                        try {
+                            double parsed = Double.parseDouble(cleanString);
+                            String formatted = NumberFormat.getNumberInstance(Locale.GERMANY).format(parsed);
+                            currentAmount = formatted;
+                            editAmount.setText(formatted);
+                            editAmount.setSelection(formatted.length());
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        currentAmount = "";
+                        editAmount.setText("");
                     }
+
                     editAmount.addTextChangedListener(this);
                 }
             }
@@ -136,26 +196,76 @@ public class TransactionFragment extends Fragment {
             }
         });
 
+        cardCategory.setOnClickListener(v -> {
+            // TODO: Implement category selection dialog
+            Toast.makeText(requireContext(), "Chọn nhóm", Toast.LENGTH_SHORT).show();
+        });
+
+        cardWallet.setOnClickListener(v -> {
+            // TODO: Implement wallet selection dialog
+            Toast.makeText(requireContext(), "Chọn ví tiền", Toast.LENGTH_SHORT).show();
+        });
+
+        btnAddDetails.setOnClickListener(v -> {
+            // TODO: Implement add details functionality
+            Toast.makeText(requireContext(), "Thêm chi tiết", Toast.LENGTH_SHORT).show();
+        });
+
         btnSave.setOnClickListener(v -> {
-            String amountStr = editAmount.getText().toString().replaceAll("[,.]", "");
+            String amountStr = editAmount.getText().toString().replaceAll("[.,\\s]", "");
             String note = editNote.getText().toString().trim();
 
-            if (amountStr.isEmpty() || Double.parseDouble(amountStr) == 0) {
+            if (amountStr.isEmpty()) {
                 Toast.makeText(requireContext(), "Vui lòng nhập số tiền", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (note.isEmpty()) {
-                Toast.makeText(requireContext(), "Vui lòng nhập ghi chú", Toast.LENGTH_SHORT).show();
-                return;
-            }
 
-            // Gửi dữ liệu về Activity hoặc ViewModel
-            Toast.makeText(requireContext(), "Đã thêm giao dịch!", Toast.LENGTH_SHORT).show();
+            try {
+                double amount = Double.parseDouble(amountStr);
+                if (amount == 0) {
+                    Toast.makeText(requireContext(), "Số tiền phải lớn hơn 0", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-            // Đóng fragment
-            if (getActivity() != null) {
-                getActivity().getSupportFragmentManager().popBackStack();
+                // TODO: Save transaction to database
+                saveTransaction(amount, note);
+
+            } catch (NumberFormatException e) {
+                Toast.makeText(requireContext(), "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void saveTransaction(double amount, String note) {
+        // TODO: Implement transaction saving logic
+        // This should connect to your database or ViewModel
+
+        String typeText = "";
+        switch (selectedType) {
+            case "chi": typeText = "chi tiêu"; break;
+            case "thu": typeText = "thu nhập"; break;
+            case "vayno": typeText = "vay/nợ"; break;
+        }
+
+        String message = String.format("Đã thêm giao dịch %s: %s VND - %s",
+                typeText,
+                NumberFormat.getNumberInstance(Locale.GERMANY).format(amount),
+                note.isEmpty() ? "Không có ghi chú" : note);
+
+        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+
+        // Close fragment
+        if (getActivity() != null) {
+            getActivity().getSupportFragmentManager().popBackStack();
+        }
+    }
+
+    // Helper method to set text style (you might need to adjust this based on your actual implementation)
+    private void setTextStyle(TextView textView, boolean isBold) {
+        if (isBold) {
+            textView.setTypeface(textView.getTypeface(), android.graphics.Typeface.BOLD);
+        } else {
+            textView.setTypeface(textView.getTypeface(), android.graphics.Typeface.NORMAL);
+        }
     }
 }

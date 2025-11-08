@@ -9,14 +9,15 @@
     <!-- Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:background="@color/primary_white">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/primary_white"
-            android:elevation="4dp"
+            android:elevation="0dp"
             app:titleTextColor="@color/primary_black"
             app:contentInsetStartWithNavigation="0dp">
 
@@ -44,7 +45,8 @@
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true" />
-    </androidx.appcompat.widget.Toolbar>
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -60,63 +62,90 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="24dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                app:cardElevation="2dp"
+                app:strokeColor="@color/primary_grey"
+                app:cardBackgroundColor="@color/primary_grey">
 
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/tabLayout"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:background="@color/secondary_grey"
-                    app:tabMode="fixed"
-                    app:tabGravity="fill"
-                    app:tabRippleColor="@android:color/transparent"
-                    app:tabTextColor="@color/primary_grey"
-                    app:tabSelectedTextColor="@color/primary_black"
-                    app:tabIndicatorColor="@color/primary_green"
-                    app:tabIndicatorHeight="3dp"
-                    app:tabTextAppearance="@style/TextAppearance.MaterialComponents.Button">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Khoản chi" />
+                    <!-- Khoản chi Tab -->
+                    <TextView
+                        android:id="@+id/tabExpense"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:text="Khoản chi"
+                        android:textColor="@color/primary_white"
+                        android:textSize="14sp"
+                        android:textStyle="normal"
+                        android:gravity="center"
+                        android:background="@drawable/tab_item_selector"
+                        android:clickable="true"
+                        android:focusable="true" />
 
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Khoản thu" />
+                    <!-- Khoản thu Tab -->
+                    <TextView
+                        android:id="@+id/tabIncome"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:text="Khoản thu"
+                        android:textColor="@color/primary_white"
+                        android:textSize="14sp"
+                        android:textStyle="normal"
+                        android:gravity="center"
+                        android:background="@drawable/tab_item_selector"
+                        android:clickable="true"
+                        android:focusable="true"/>
 
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Vay/Nợ" />
-                </com.google.android.material.tabs.TabLayout>
+                    <!-- Vay/Nợ Tab -->
+                    <TextView
+                        android:id="@+id/tabLoan"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:text="Vay/Nợ"
+                        android:textColor="@color/primary_white"
+                        android:textSize="14sp"
+                        android:textStyle="normal"
+                        android:gravity="center"
+                        android:background="@drawable/tab_item_selector"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Tiền mặt -->
-            <androidx.cardview.widget.CardView
+            <!-- Tiền mặt Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardWallet"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/primary_yellow"
                 app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                app:cardElevation="1dp"
+                app:strokeColor="@color/primary_grey"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="12dp"
+                    android:padding="16dp"
                     android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_money"
-                        app:tint="@color/primary_red" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -125,45 +154,73 @@
                         android:text="Tiền mặt"
                         android:textColor="@color/primary_black"
                         android:textSize="16sp"
-                        android:layout_marginStart="12dp" />
+                        android:textStyle="bold" />
 
                     <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@android:drawable/ic_menu_close_clear_cancel"
-                        app:tint="@color/primary_grey" />
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_drop_down"
+                        app:tint="@color/primary_black" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Số tiền -->
-            <com.google.android.material.textfield.TextInputLayout
+            <!-- Số tiền Section -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Số tiền"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:hintTextColor="@color/primary_grey"
-                app:boxStrokeColor="@color/primary_grey"
-                app:boxBackgroundColor="@color/secondary_white">
+                app:cardCornerRadius="8dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/primary_grey"
+                app:strokeWidth="1dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editAmount"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    android:textSize="18sp"
-                    android:textColor="@color/primary_black" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-            <!-- Chọn nhóm -->
-            <androidx.cardview.widget.CardView
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Số tiền"
+                        android:textColor="@color/primary_grey"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/editAmount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:hint="0"
+                        android:textColor="@color/primary_black"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:background="@android:color/transparent"
+                        android:inputType="numberDecimal"
+                        android:padding="0dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="VND"
+                        android:textColor="@color/primary_grey"
+                        android:textSize="14sp"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Chọn nhóm Card -->
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardCategory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/secondary_grey"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="1dp"
+                app:strokeColor="@color/primary_grey"
+                app:strokeWidth="1dp"
                 android:clickable="true"
                 android:focusable="true">
 
@@ -171,14 +228,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="12dp"
+                    android:padding="16dp"
                     android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_manage"
-                        app:tint="@color/primary_grey" />
 
                     <TextView
                         android:id="@+id/tvCategory"
@@ -187,46 +238,65 @@
                         android:layout_height="wrap_content"
                         android:text="Chọn nhóm"
                         android:textColor="@color/primary_grey"
-                        android:textSize="16sp"
-                        android:layout_marginStart="12dp" />
+                        android:textSize="16sp" />
 
                     <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_drop_down"
                         app:tint="@color/primary_grey" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Ghi chú -->
-            <com.google.android.material.textfield.TextInputLayout
+            <!-- Ghi chú Card -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Ghi chú"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:hintTextColor="@color/primary_grey"
-                app:boxStrokeColor="@color/primary_grey"
-                app:boxBackgroundColor="@color/secondary_white">
+                app:cardCornerRadius="8dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/primary_grey"
+                app:strokeWidth="1dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editNote"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
-                    android:lines="3"
-                    android:textColor="@color/primary_black" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-            <!-- Ngày -->
-            <androidx.cardview.widget.CardView
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ghi chú"
+                        android:textColor="@color/primary_grey"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <EditText
+                        android:id="@+id/editNote"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:hint="Thêm ghi chú"
+                        android:textColor="@color/primary_black"
+                        android:textSize="16sp"
+                        android:background="@android:color/transparent"
+                        android:inputType="textMultiLine"
+                        android:minLines="2"
+                        android:padding="0dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Ngày Card -->
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="@color/secondary_grey"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="1dp"
+                app:strokeColor="@color/primary_grey"
+                app:strokeWidth="1dp"
                 android:clickable="true"
                 android:focusable="true">
 
@@ -234,14 +304,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="12dp"
+                    android:padding="16dp"
                     android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_today"
-                        app:tint="@color/primary_grey" />
 
                     <TextView
                         android:id="@+id/tvDate"
@@ -249,19 +313,34 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="Thứ Năm, 06/11/2025"
-                        android:textColor="@color/primary_green"
-                        android:textSize="16sp"
-                        android:layout_marginStart="12dp" />
+                        android:textColor="@color/primary_black"
+                        android:textSize="16sp" />
 
                     <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_calendar"
                         app:tint="@color/primary_grey" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Bottom Save Button -->
+            <!-- Thêm chi tiết Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddDetails"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Thêm chi tiết"
+                android:textColor="@color/primary_green"
+                android:backgroundTint="@color/secondary_grey"
+                android:textSize="16sp"
+                app:cornerRadius="8dp"
+                android:layout_marginBottom="24dp"
+                android:textAllCaps="false"
+                app:strokeColor="@color/primary_grey"
+                app:strokeWidth="1dp"
+                app:elevation="0dp" />
+
+            <!-- Lưu Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"
@@ -272,8 +351,6 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:cornerRadius="8dp"
-                android:layout_marginHorizontal="4dp"
-                android:layout_marginVertical="16dp"
                 android:textAllCaps="false"
                 app:elevation="2dp" />
 
