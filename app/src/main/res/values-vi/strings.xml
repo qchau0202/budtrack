@@ -69,6 +69,7 @@
     <string name="language_option_english">English</string>
     <string name="language_dialog_confirm">Xác nhận</string>
     <string name="edit">Chỉnh sửa</string>
+    <string name="signout_text">ĐĂNG XUẤT</string>
     <!--Transaction-->
     <string name="add_transaction">Thêm Giao Dịch</string>
     <string name="cancel">Hủy</string>

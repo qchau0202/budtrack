@@ -68,6 +68,7 @@
     <string name="language_option_english">English</string>
     <string name="language_dialog_confirm">Confirm</string>
     <string name="edit">Edit</string>
+    <string name="signout_text">SIGN OUT</string>
     <!--Transaction-->
     <string name="add_transaction">Add Transaction</string>
     <string name="cancel">Cancel</string>
