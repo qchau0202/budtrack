@@ -68,5 +68,6 @@
     <string name="language_option_vietnamese">Tiếng Việt</string>
     <string name="language_option_english">English</string>
     <string name="language_dialog_confirm">Xác nhận</string>
+    <string name="edit">Chỉnh sửa</string>
 </resources>
 
