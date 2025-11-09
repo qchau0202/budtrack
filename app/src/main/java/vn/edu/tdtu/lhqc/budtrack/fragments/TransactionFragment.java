@@ -1,66 +1,271 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
+import android.app.DatePickerDialog;
+import android.graphics.Typeface;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.button.MaterialButton;
+
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TransactionFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class TransactionFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private TextView tabExpense, tabIncome, tabLoan, tvDate, tvCategory, tvCancel, tvTitle;
+    private EditText editAmount, editNote;
+    private CardView cardDate, cardCategory, cardWallet;
+    private MaterialButton btnSave, btnAddDetails;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private Calendar selectedDate = Calendar.getInstance();
+    private String selectedType = "chi";
+    private String currentAmount = "";
 
-    public TransactionFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TransactionFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static TransactionFragment newInstance(String param1, String param2) {
-        TransactionFragment fragment = new TransactionFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_transaction, container, false);
+        initViews(view);
+        setupTabs();
+        setupDatePicker();
+        setupAmountFormatter();
+        setupButtons();
+        return view;
+    }
+
+    private void initViews(View view) {
+        // Tabs
+        tabExpense = view.findViewById(R.id.tabExpense);
+        tabIncome = view.findViewById(R.id.tabIncome);
+        tabLoan = view.findViewById(R.id.tabLoan);
+
+        // Input fields
+        editAmount = view.findViewById(R.id.editAmount);
+        editNote = view.findViewById(R.id.editNote);
+
+        // Text views
+        tvDate = view.findViewById(R.id.tvDate);
+        tvCategory = view.findViewById(R.id.tvCategory);
+        tvCancel = view.findViewById(R.id.tvCancel);
+        tvTitle = view.findViewById(R.id.tvTitle);
+
+        // Cards
+        cardDate = view.findViewById(R.id.cardDate);
+        cardCategory = view.findViewById(R.id.cardCategory);
+        cardWallet = view.findViewById(R.id.cardWallet);
+
+        // Buttons
+        btnSave = view.findViewById(R.id.btnSave);
+        btnAddDetails = view.findViewById(R.id.btnAddDetails);
+
+        updateDateText();
+        updateTabSelection(); // Set initial tab selection
+    }
+
+    private void setupTabs() {
+        tabExpense.setOnClickListener(v -> {
+            selectedType = "chi";
+            updateTabSelection();
+        });
+
+        tabIncome.setOnClickListener(v -> {
+            selectedType = "thu";
+            updateTabSelection();
+        });
+
+        tabLoan.setOnClickListener(v -> {
+            selectedType = "vayno";
+            updateTabSelection();
+        });
+    }
+
+    private void updateTabSelection() {
+        // Reset all tabs to unselected state
+        tabExpense.setSelected(false);
+        tabExpense.setTextSize(14f);
+        setTextStyle(tabExpense, false);
+
+        tabIncome.setSelected(false);
+        tabIncome.setTextSize(14f);
+        setTextStyle(tabIncome, false);
+
+        tabLoan.setSelected(false);
+        tabLoan.setTextSize(14f);
+        setTextStyle(tabLoan, false);
+
+        // Set selected tab (selector drawable handles the background color change)
+        switch (selectedType) {
+            case "chi":
+                tabExpense.setSelected(true);
+                tabExpense.setTextSize(16f);
+                setTextStyle(tabExpense, true);
+                break;
+            case "thu":
+                tabIncome.setSelected(true);
+                tabIncome.setTextSize(16f);
+                setTextStyle(tabIncome, true);
+                break;
+            case "vayno":
+                tabLoan.setSelected(true);
+                tabLoan.setTextSize(16f);
+                setTextStyle(tabLoan, true);
+                break;
         }
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_transaction, container, false);
+    private void setupDatePicker() {
+        cardDate.setOnClickListener(v -> showDatePicker());
+        updateDateText();
+    }
+
+    private void showDatePicker() {
+        new DatePickerDialog(
+                requireContext(),
+                (view, year, month, day) -> {
+                    selectedDate.set(year, month, day);
+                    updateDateText();
+                },
+                selectedDate.get(Calendar.YEAR),
+                selectedDate.get(Calendar.MONTH),
+                selectedDate.get(Calendar.DAY_OF_MONTH)
+        ).show();
+    }
+
+    private void updateDateText() {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd/MM/yyyy", new Locale("vi", "VN"));
+        tvDate.setText(sdf.format(selectedDate.getTime()));
+    }
+
+    private void setupAmountFormatter() {
+        editAmount.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!s.toString().equals(currentAmount)) {
+                    editAmount.removeTextChangedListener(this);
+
+                    String cleanString = s.toString().replaceAll("[.,\\s]", "");
+
+                    if (!cleanString.isEmpty()) {
+                        try {
+                            double parsed = Double.parseDouble(cleanString);
+                            String formatted = NumberFormat.getNumberInstance(Locale.GERMANY).format(parsed);
+                            currentAmount = formatted;
+                            editAmount.setText(formatted);
+                            editAmount.setSelection(formatted.length());
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        currentAmount = "";
+                        editAmount.setText("");
+                    }
+
+                    editAmount.addTextChangedListener(this);
+                }
+            }
+        });
+    }
+
+    private void setupButtons() {
+        tvCancel.setOnClickListener(v -> {
+            if (getActivity() != null) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
+
+        cardCategory.setOnClickListener(v -> {
+            // TODO: Implement category selection dialog
+            Toast.makeText(requireContext(), "Chọn nhóm", Toast.LENGTH_SHORT).show();
+        });
+
+        cardWallet.setOnClickListener(v -> {
+            // TODO: Implement wallet selection dialog
+            Toast.makeText(requireContext(), "Chọn ví tiền", Toast.LENGTH_SHORT).show();
+        });
+
+        btnAddDetails.setOnClickListener(v -> {
+            // TODO: Implement add details functionality
+            Toast.makeText(requireContext(), "Thêm chi tiết", Toast.LENGTH_SHORT).show();
+        });
+
+        btnSave.setOnClickListener(v -> {
+            String amountStr = editAmount.getText().toString().replaceAll("[.,\\s]", "");
+            String note = editNote.getText().toString().trim();
+
+            if (amountStr.isEmpty()) {
+                Toast.makeText(requireContext(), "Vui lòng nhập số tiền", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try {
+                double amount = Double.parseDouble(amountStr);
+                if (amount == 0) {
+                    Toast.makeText(requireContext(), "Số tiền phải lớn hơn 0", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // TODO: Save transaction to database
+                saveTransaction(amount, note);
+
+            } catch (NumberFormatException e) {
+                Toast.makeText(requireContext(), "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void saveTransaction(double amount, String note) {
+        // TODO: Implement transaction saving logic
+        // This should connect to your database or ViewModel
+
+        String typeText = "";
+        switch (selectedType) {
+            case "chi": typeText = "chi tiêu"; break;
+            case "thu": typeText = "thu nhập"; break;
+            case "vayno": typeText = "vay/nợ"; break;
+        }
+
+        String message = String.format("Đã thêm giao dịch %s: %s VND - %s",
+                typeText,
+                NumberFormat.getNumberInstance(Locale.GERMANY).format(amount),
+                note.isEmpty() ? "Không có ghi chú" : note);
+
+        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+
+        // Close fragment
+        if (getActivity() != null) {
+            getActivity().getSupportFragmentManager().popBackStack();
+        }
+    }
+
+    // Helper method to set text style (you might need to adjust this based on your actual implementation)
+    private void setTextStyle(TextView textView, boolean isBold) {
+        if (isBold) {
+            textView.setTypeface(textView.getTypeface(), android.graphics.Typeface.BOLD);
+        } else {
+            textView.setTypeface(textView.getTypeface(), android.graphics.Typeface.NORMAL);
+        }
     }
 }

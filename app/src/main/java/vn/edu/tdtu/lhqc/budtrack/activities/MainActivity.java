@@ -17,6 +17,7 @@ import vn.edu.tdtu.lhqc.budtrack.fragments.DashboardFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.HomeFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.ProfileFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.WalletFragment;
+import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionFragment;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
@@ -56,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fabAdd = findViewById(R.id.fab_add);
 
 
+
+        // Set Home as active by default and load HomeFragment
+		if (savedInstanceState == null) {
+			FragmentManager fm = getSupportFragmentManager();
 		FragmentManager fm = getSupportFragmentManager();
 		Fragment existingHome = fm.findFragmentByTag("HOME_FRAGMENT");
 
@@ -109,8 +114,11 @@ public class MainActivity extends AppCompatActivity {
         navDashboard.setOnClickListener(v -> setNavSelected(R.id.nav_dashboard));
         navProfile.setOnClickListener(v -> setNavSelected(R.id.nav_profile));
         fabAdd.setOnClickListener(v -> {
-            // Handle FAB click - add new item
-            // TODO: Implement add functionality
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new TransactionFragment(), "TRANSACTION_FRAGMENT")
+                    .addToBackStack("add_transaction")
+                    .commit();
         });
     }
 
