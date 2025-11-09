@@ -125,11 +125,12 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_cancel"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@android:string/cancel"
-            android:textColor="@color/primary_grey"
+            android:backgroundTint="@color/primary_red"
+            android:textColor="@color/primary_white"
+            android:textStyle="bold"
             />
 
         <com.google.android.material.button.MaterialButton
