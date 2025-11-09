@@ -109,7 +109,7 @@
                 app:iconTint="@color/primary_grey"
                 android:paddingStart="12dp"
                 android:paddingEnd="8dp"
-                app:icon="@drawable/ic_calendar_month_24dp"
+                app:icon="@drawable/ic_calendar_24dp"
                 app:iconGravity="textEnd"
                 app:iconPadding="8dp"
                 app:cornerRadius="18dp"

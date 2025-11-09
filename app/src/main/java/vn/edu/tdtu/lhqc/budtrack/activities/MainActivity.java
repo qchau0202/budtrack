@@ -56,15 +56,12 @@ public class MainActivity extends AppCompatActivity {
         navProfile = findViewById(R.id.nav_profile);
         FloatingActionButton fabAdd = findViewById(R.id.fab_add);
 
-
-
         // Set Home as active by default and load HomeFragment
-		if (savedInstanceState == null) {
-			FragmentManager fm = getSupportFragmentManager();
 		FragmentManager fm = getSupportFragmentManager();
 		Fragment existingHome = fm.findFragmentByTag("HOME_FRAGMENT");
 
-		if (savedInstanceState == null || existingHome == null) {
+		if (savedInstanceState == null && existingHome == null) {
+			// First time creation - create new fragments
 			homeFragment = new HomeFragment();
 			walletFragment = new WalletFragment();
 			dashboardFragment = new DashboardFragment();
@@ -82,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
 			currentFragmentTag = "HOME_FRAGMENT";
 			highlightNavigation(currentFragmentTag);
 		} else {
-			homeFragment = existingHome;
+			// Restore fragments from saved state
+			homeFragment = fm.findFragmentByTag("HOME_FRAGMENT");
 			walletFragment = fm.findFragmentByTag("WALLET_FRAGMENT");
 			dashboardFragment = fm.findFragmentByTag("DASHBOARD_FRAGMENT");
 			profileFragment = fm.findFragmentByTag("PROFILE_FRAGMENT");
@@ -114,11 +112,8 @@ public class MainActivity extends AppCompatActivity {
         navDashboard.setOnClickListener(v -> setNavSelected(R.id.nav_dashboard));
         navProfile.setOnClickListener(v -> setNavSelected(R.id.nav_profile));
         fabAdd.setOnClickListener(v -> {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, new TransactionFragment(), "TRANSACTION_FRAGMENT")
-                    .addToBackStack("add_transaction")
-                    .commit();
+            TransactionFragment transactionFragment = new TransactionFragment();
+            transactionFragment.show(getSupportFragmentManager(), TransactionFragment.TAG);
         });
     }
 
