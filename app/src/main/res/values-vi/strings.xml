@@ -52,6 +52,7 @@
     <string name="dashboard_page">Trang thông tin</string>
     <!--profile-->
     <string name="profile_page">Trang hồ sơ</string>
+    <string name="profile_header">Thông tin cá nhân </string>
     <string name="profile_name">Tên</string>
     <string name="profile_email">Email</string>
     <string name="profile_address">Địa chỉ</string>
@@ -63,5 +64,10 @@
     <string name="currency">Tiền tệ</string>
     <string name="language_value">Tiếng Việt</string>
     <string name="currency_value">VND</string>
+    <string name="language_dialog_title">Chọn ngôn ngữ</string>
+    <string name="language_option_vietnamese">Tiếng Việt</string>
+    <string name="language_option_english">English</string>
+    <string name="language_dialog_confirm">Xác nhận</string>
+    <string name="edit">Chỉnh sửa</string>
 </resources>
 

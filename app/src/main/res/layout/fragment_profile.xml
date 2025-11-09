@@ -45,14 +45,33 @@
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="16dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Personal info"
-                android:textColor="@color/primary_black"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/profile_header"
+                    android:textColor="@color/primary_black"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+
+                <ImageButton
+                    android:id="@+id/btn_edit_personal_info"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_edit_square_24dp"
+                    android:contentDescription="@string/edit"
+                    app:tint="@color/primary_grey"
+                    android:padding="8dp"/>
+
+            </LinearLayout>
             <!-- Name -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -249,6 +268,7 @@
 
             <!-- Language row -->
             <LinearLayout
+                android:id="@+id/row_language"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"

@@ -1,5 +1,6 @@
 package vn.edu.tdtu.lhqc.budtrack.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -9,13 +10,21 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
+import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
 public class RegisterActivity extends AppCompatActivity {
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LanguageManager.wrapContext(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager.applySavedTheme(this);
+        LanguageManager.applySavedLanguage(this);
+        ThemeManager.applySavedTheme(this);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register);
 

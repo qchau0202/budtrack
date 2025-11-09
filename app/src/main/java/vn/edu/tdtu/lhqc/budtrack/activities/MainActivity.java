@@ -1,5 +1,6 @@
 package vn.edu.tdtu.lhqc.budtrack.activities;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
@@ -17,6 +18,8 @@ import vn.edu.tdtu.lhqc.budtrack.fragments.HomeFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.ProfileFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.WalletFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionFragment;
+import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
+import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,10 +36,16 @@ public class MainActivity extends AppCompatActivity {
 	private Fragment profileFragment;
 	private Fragment activeFragment;
 
+	@Override
+	protected void attachBaseContext(Context newBase) {
+		super.attachBaseContext(LanguageManager.wrapContext(newBase));
+	}
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager.applySavedTheme(this);
+		LanguageManager.applySavedLanguage(this);
+		ThemeManager.applySavedTheme(this);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
@@ -52,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
         // Set Home as active by default and load HomeFragment
 		if (savedInstanceState == null) {
 			FragmentManager fm = getSupportFragmentManager();
+		FragmentManager fm = getSupportFragmentManager();
+		Fragment existingHome = fm.findFragmentByTag("HOME_FRAGMENT");
+
+		if (savedInstanceState == null || existingHome == null) {
 			homeFragment = new HomeFragment();
 			walletFragment = new WalletFragment();
 			dashboardFragment = new DashboardFragment();
@@ -67,7 +80,32 @@ public class MainActivity extends AppCompatActivity {
 
 			activeFragment = homeFragment;
 			currentFragmentTag = "HOME_FRAGMENT";
-			navHome.setSelected(true);
+			highlightNavigation(currentFragmentTag);
+		} else {
+			homeFragment = existingHome;
+			walletFragment = fm.findFragmentByTag("WALLET_FRAGMENT");
+			dashboardFragment = fm.findFragmentByTag("DASHBOARD_FRAGMENT");
+			profileFragment = fm.findFragmentByTag("PROFILE_FRAGMENT");
+
+			// Determine which fragment is currently visible
+			if (homeFragment != null && !homeFragment.isHidden()) {
+				activeFragment = homeFragment;
+				currentFragmentTag = "HOME_FRAGMENT";
+			} else if (walletFragment != null && !walletFragment.isHidden()) {
+				activeFragment = walletFragment;
+				currentFragmentTag = "WALLET_FRAGMENT";
+			} else if (dashboardFragment != null && !dashboardFragment.isHidden()) {
+				activeFragment = dashboardFragment;
+				currentFragmentTag = "DASHBOARD_FRAGMENT";
+			} else if (profileFragment != null && !profileFragment.isHidden()) {
+				activeFragment = profileFragment;
+				currentFragmentTag = "PROFILE_FRAGMENT";
+			} else {
+				// Fallback to home fragment
+				activeFragment = homeFragment;
+				currentFragmentTag = "HOME_FRAGMENT";
+			}
+			highlightNavigation(currentFragmentTag);
 		}
 
         // Set up click listeners
@@ -85,18 +123,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 	private void setNavSelected(int navId) {
-        // Deselect all
-        navHome.setSelected(false);
-        navWallet.setSelected(false);
-        navDashboard.setSelected(false);
-        navProfile.setSelected(false);
-
-        // Select the clicked one
-        View selectedView = findViewById(navId);
-        if (selectedView != null) {
-            selectedView.setSelected(true);
-        }
-
 		// Determine target fragment
 		Fragment target = null;
 		String fragmentTag = null;
@@ -114,6 +140,11 @@ public class MainActivity extends AppCompatActivity {
 			target = profileFragment != null ? profileFragment : getSupportFragmentManager().findFragmentByTag("PROFILE_FRAGMENT");
 		}
 
+		highlightNavigation(fragmentTag);
+		if (fragmentTag != null) {
+			currentFragmentTag = fragmentTag;
+		}
+
 		if (target != null && target != activeFragment) {
 			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 			ft.setReorderingAllowed(true);
@@ -123,19 +154,14 @@ public class MainActivity extends AppCompatActivity {
 			ft.show(target);
 			ft.commit();
 			activeFragment = target;
-			currentFragmentTag = fragmentTag;
 		}
-    }
+	}
 
-	private void loadFragment(Fragment fragment, String tag) {
-		// Deprecated by show/hide pattern; kept for backward compatibility if needed.
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		Fragment existingFragment = fragmentManager.findFragmentByTag(tag);
-		if (existingFragment == null) {
-			FragmentTransaction transaction = fragmentManager.beginTransaction();
-			transaction.setReorderingAllowed(true);
-			transaction.add(R.id.fragment_container, fragment, tag);
-			transaction.commit();
-		}
+
+	private void highlightNavigation(String fragmentTag) {
+		navHome.setSelected("HOME_FRAGMENT".equals(fragmentTag));
+		navWallet.setSelected("WALLET_FRAGMENT".equals(fragmentTag));
+		navDashboard.setSelected("DASHBOARD_FRAGMENT".equals(fragmentTag));
+		navProfile.setSelected("PROFILE_FRAGMENT".equals(fragmentTag));
 	}
 }

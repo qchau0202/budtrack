@@ -73,6 +73,9 @@ public class TransactionHistoryFragment extends Fragment {
         LinearLayout listExpenses = root.findViewById(R.id.list_expenses);
 
         if (tabIncome != null && tabExpenses != null && title != null && listIncome != null && listExpenses != null) {
+            // Ensure amount colors are applied to initial content
+            colorizeAmounts(listIncome, R.color.secondary_green);
+            colorizeAmounts(listExpenses, R.color.primary_red);
             tabIncome.setOnClickListener(v -> selectTab(true, tabIncome, tabExpenses, title, listIncome, listExpenses));
             tabExpenses.setOnClickListener(v -> selectTab(false, tabIncome, tabExpenses, title, listIncome, listExpenses));
             // default
@@ -96,6 +99,7 @@ public class TransactionHistoryFragment extends Fragment {
             if (title != null) title.setText(R.string.total_income);
             listIncome.setVisibility(View.VISIBLE);
             listExpenses.setVisibility(View.GONE);
+            colorizeAmounts(listIncome, R.color.secondary_green);
         } else {
             tabExpenses.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
             tabExpenses.setTextColor(getResources().getColor(R.color.primary_white));
@@ -104,6 +108,34 @@ public class TransactionHistoryFragment extends Fragment {
             if (title != null) title.setText(R.string.total_spent);
             listIncome.setVisibility(View.GONE);
             listExpenses.setVisibility(View.VISIBLE);
+            colorizeAmounts(listExpenses, R.color.primary_red);
+        }
+    }
+
+    private void colorizeAmounts(LinearLayout listContainer, int colorResId) {
+        if (listContainer == null) return;
+        int color = getResources().getColor(colorResId);
+        final int childCount = listContainer.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View row = listContainer.getChildAt(i);
+            if (!(row instanceof LinearLayout)) continue;
+
+            LinearLayout rowLayout = (LinearLayout) row;
+            final int rowChildCount = rowLayout.getChildCount();
+            // Heuristic: the last child is the end-aligned amount/date container
+            if (rowChildCount == 0) continue;
+            View last = rowLayout.getChildAt(rowChildCount - 1);
+            if (last instanceof LinearLayout) {
+                LinearLayout amountContainer = (LinearLayout) last;
+                // First TextView in this container is the amount
+                for (int j = 0; j < amountContainer.getChildCount(); j++) {
+                    View v = amountContainer.getChildAt(j);
+                    if (v instanceof TextView) {
+                        ((TextView) v).setTextColor(color);
+                        break;
+                    }
+                }
+            }
         }
     }
 }
