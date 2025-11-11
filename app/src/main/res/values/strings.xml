@@ -45,8 +45,8 @@
     <string name="total_spent">Total Spent</string>
     <string name="this_month_total_spend">This month total spend</string>
     <string name="sample_date">01 Jan 2025</string>
-    <!--wallet-->
-    <string name="wallet_page">Wallet page</string>
+    <!--budget-->
+    <string name="budget_page">Budget page</string>
     <!--dashboard-->
     <string name="dashboard_page">Dashboard page</string>
     <string name="previous_month">Previous month</string>
@@ -80,10 +80,20 @@
     <string name="amount">Amount</string>
     <string name="amount_hint">0</string>
     <string name="category">Category</string>
-    <string name="select_category">Select Category</string>
+    <string name="select_category">Select category</string>
+    <string name="category_food">Food</string>
+    <string name="category_shopping">Shopping</string>
+    <string name="category_transport">Transport</string>
+    <string name="edit_category">Edit Category</string>
+    <string name="add_new_category">Add New Category</string>
+    <string name="select_subcategory">Select sub category</string>
+    <string name="budget">Budget</string>
     <string name="wallet">Wallet</string>
     <string name="select_wallet">Select Wallet</string>
     <string name="cash">Cash</string>
+    <string name="subcategory_text">Daily</string>
+    <string name="subcategory_add">Add</string>
+    <string name="add_new_subcategory">Add new subcategory</string>
     <string name="note">Note</string>
     <string name="note_hint">Add note</string>
     <string name="date">Date</string>
@@ -93,4 +103,8 @@
     <string name="error_amount_required">Please enter amount</string>
     <string name="error_amount_invalid">Amount must be greater than 0</string>
     <string name="transaction_saved">Transaction saved: %1$s - %2$s VND - %3$s</string>
+    <!--Map-->
+    <string name="map_title">Expense Map</string>
+    <string name="map_description">View your expenses based on location. See where you spend the most and track your spending patterns on the map.</string>
+    <string name="map_preview_placeholder">Map preview</string>
 </resources>

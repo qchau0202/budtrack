@@ -23,11 +23,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/calendar_fragment_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:name="vn.edu.tdtu.lhqc.budtrack.fragments.CalendarFragment"/>
+            <include
+                layout="@layout/view_dashboard_map_card"/>
+
+            <include
+                layout="@layout/view_dashboard_pie_chart_section"/>
+
+
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
