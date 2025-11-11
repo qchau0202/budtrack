@@ -17,4 +17,9 @@
     <!-- gradient colors (light) -->
     <color name="gradient_top_tint">#E5F4DC</color>
     <color name="gradient_base">#f5f5f5</color>
+    
+    <!-- category tab background colors (light) -->
+    <color name="category_tab_green">#E5F4DC</color>
+    <color name="category_tab_yellow">#FFF4E5</color>
+    <color name="category_tab_red">#FFE5E5</color>
 </resources>

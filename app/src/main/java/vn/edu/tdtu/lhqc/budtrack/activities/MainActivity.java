@@ -17,7 +17,7 @@ import vn.edu.tdtu.lhqc.budtrack.fragments.DashboardFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.HomeFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.ProfileFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.WalletFragment;
-import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionFragment;
+import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionFragmentCreate;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
@@ -112,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
         navDashboard.setOnClickListener(v -> setNavSelected(R.id.nav_dashboard));
         navProfile.setOnClickListener(v -> setNavSelected(R.id.nav_profile));
         fabAdd.setOnClickListener(v -> {
-            TransactionFragment transactionFragment = new TransactionFragment();
-            transactionFragment.show(getSupportFragmentManager(), TransactionFragment.TAG);
+            TransactionFragmentCreate transactionFragmentCreate = new TransactionFragmentCreate();
+            transactionFragmentCreate.show(getSupportFragmentManager(), TransactionFragmentCreate.TAG);
         });
     }
 

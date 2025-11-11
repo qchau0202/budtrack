@@ -46,10 +46,14 @@
     <string name="total_spent">Tổng đã chi</string>
     <string name="this_month_total_spend">Tổng chi tháng này</string>
     <string name="sample_date">01 Thg 01 2025</string>
+    <!--budget-->
+    <string name="budget_page">Trang ngân sách</string>
     <!--wallet-->
     <string name="wallet_page">Trang ví</string>
     <!--dashboard-->
     <string name="dashboard_page">Trang thông tin</string>
+    <string name="previous_month">Tháng trước</string>
+    <string name="next_month">Tháng sau</string>
     <!--profile-->
     <string name="profile_page">Trang hồ sơ</string>
     <string name="profile_header">Thông tin cá nhân </string>
@@ -80,9 +84,19 @@
     <string name="amount_hint">0</string>
     <string name="category">Nhóm</string>
     <string name="select_category">Chọn nhóm</string>
+    <string name="category_food">Thức ăn</string>
+    <string name="category_shopping">Mua sắm</string>
+    <string name="category_transport">Di chuyển</string>
+    <string name="edit_category">Chỉnh sửa danh mục</string>
+    <string name="add_new_category">Thêm danh mục mới</string>
+    <string name="select_subcategory">Chọn danh mục con</string>
+    <string name="budget">Ngân sách</string>
     <string name="wallet">Ví</string>
     <string name="select_wallet">Chọn ví tiền</string>
     <string name="cash">Tiền mặt</string>
+    <string name="subcategory_text">Hàng ngày</string>
+    <string name="subcategory_add">Thêm</string>
+    <string name="add_new_subcategory">Thêm danh mục con mới</string>
     <string name="note">Ghi chú</string>
     <string name="note_hint">Thêm ghi chú</string>
     <string name="date">Ngày</string>
@@ -92,5 +106,9 @@
     <string name="error_amount_required">Vui lòng nhập số tiền</string>
     <string name="error_amount_invalid">Số tiền phải lớn hơn 0</string>
     <string name="transaction_saved">Đã thêm giao dịch %1$s: %2$s VND - %3$s</string>
+    <!--Map-->
+    <string name="map_title">Bản đồ chi tiêu</string>
+    <string name="map_description">Xem chi tiêu của bạn dựa trên vị trí. Xem nơi bạn chi tiêu nhiều nhất và theo dõi các mẫu chi tiêu của bạn trên bản đồ.</string>
+    <string name="map_preview_placeholder">Xem trước bản đồ</string>
 </resources>
 
