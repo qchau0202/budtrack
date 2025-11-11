@@ -49,6 +49,8 @@
     <string name="wallet_page">Wallet page</string>
     <!--dashboard-->
     <string name="dashboard_page">Dashboard page</string>
+    <string name="previous_month">Previous month</string>
+    <string name="next_month">Next month</string>
     <!--profile-->
     <string name="profile_page">Profile page</string>
     <string name="profile_header">Personal info</string>
