@@ -48,8 +48,6 @@
     <string name="sample_date">01 Thg 01 2025</string>
     <!--budget-->
     <string name="budget_page">Trang ngân sách</string>
-    <!--wallet-->
-    <string name="wallet_page">Trang ví</string>
     <!--dashboard-->
     <string name="dashboard_page">Trang thông tin</string>
     <string name="previous_month">Tháng trước</string>
