@@ -104,7 +104,10 @@
     <string name="error_amount_invalid">Amount must be greater than 0</string>
     <string name="transaction_saved">Transaction saved: %1$s - %2$s VND - %3$s</string>
     <!--Map-->
-    <string name="map_title">Expense Map</string>
+    <string name="map_title">Budtrack expense map</string>
     <string name="map_description">View your expenses based on location. See where you spend the most and track your spending patterns on the map.</string>
     <string name="map_preview_placeholder">Map preview</string>
+    <string name="location_permission_denied">Location permission is required to show your location on the map</string>
+    <string name="search_location">Search location (coming soon)</string>
+    <string name="feature_coming_soon">This feature is coming soon</string>
 </resources>
