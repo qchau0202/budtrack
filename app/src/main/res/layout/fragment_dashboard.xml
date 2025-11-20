@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".fragments.DashboardFragment">
 
     <androidx.core.widget.NestedScrollView
@@ -23,13 +22,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <include
-                layout="@layout/view_dashboard_map_card"/>
+            <include layout="@layout/view_header" />
+
+            <include layout="@layout/view_dashboard_calendar_week" />
 
             <include
                 layout="@layout/view_dashboard_pie_chart_section"/>
-
-
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

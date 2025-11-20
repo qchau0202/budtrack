@@ -108,5 +108,8 @@
     <string name="map_title">Bản đồ chi tiêu</string>
     <string name="map_description">Xem chi tiêu của bạn dựa trên vị trí. Xem nơi bạn chi tiêu nhiều nhất và theo dõi các mẫu chi tiêu của bạn trên bản đồ.</string>
     <string name="map_preview_placeholder">Xem trước bản đồ</string>
+    <string name="location_permission_denied">Cần quyền vị trí để hiển thị vị trí của bạn trên bản đồ</string>
+    <string name="search_location">Tìm vị trí (sắp ra mắt)</string>
+    <string name="feature_coming_soon">Tính năng này sẽ sớm ra mắt</string>
 </resources>
 

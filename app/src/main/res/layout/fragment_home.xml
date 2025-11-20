@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".fragments.HomeFragment">
 
     <androidx.core.widget.NestedScrollView
@@ -23,75 +22,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-    <!-- Header -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/header_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="8dp">
-
-        <LinearLayout
-            android:id="@+id/app_branding"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btn_search"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <ImageView
-                android:id="@+id/img_app_logo"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/ic_budtrack"
-                android:contentDescription="@string/app_name" />
-
-            <TextView
-                android:id="@+id/tv_app_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/app_name"
-                android:textColor="@color/primary_black"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:fontFamily="@font/quicksand" />
-
-        </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/btn_notifications"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_icon_button"
-            android:padding="12dp"
-            android:scaleType="center"
-            app:tint="@color/primary_grey"
-            android:src="@drawable/ic_notifications_24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <ImageButton
-            android:id="@+id/btn_search"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_icon_button"
-            android:padding="12dp"
-            android:scaleType="center"
-            app:tint="@color/primary_black"
-            android:src="@android:drawable/ic_menu_search"
-            app:layout_constraintEnd_toStartOf="@id/btn_notifications"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginEnd="12dp" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <include layout="@layout/view_header" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/balance_fragment_container"

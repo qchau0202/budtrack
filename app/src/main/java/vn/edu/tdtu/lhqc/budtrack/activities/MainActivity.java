@@ -6,6 +6,9 @@ import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -28,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private View navDashboard;
     private View navProfile;
 	private String currentFragmentTag;
+	private View bottomBarContainer;
 
 	// Cache fragments to avoid re-creating on each tab switch
 	private Fragment homeFragment;
@@ -48,6 +52,16 @@ public class MainActivity extends AppCompatActivity {
 		ThemeManager.applySavedTheme(this);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        bottomBarContainer = findViewById(R.id.bottom_bar_container);
+        
+        // Handle window insets properly for EdgeToEdge
+        View mainLayout = findViewById(R.id.main);
+        ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // Apply padding only to top for status bar
+            v.setPadding(0, systemBars.top, 0, 0);
+            return insets;
+        });
 
         // Initialize navigation views
         navHome = findViewById(R.id.nav_home);
@@ -158,5 +172,11 @@ public class MainActivity extends AppCompatActivity {
 		navWallet.setSelected("WALLET_FRAGMENT".equals(fragmentTag));
 		navDashboard.setSelected("DASHBOARD_FRAGMENT".equals(fragmentTag));
 		navProfile.setSelected("PROFILE_FRAGMENT".equals(fragmentTag));
+	}
+
+    public void setBottomBarVisible(boolean visible) {
+        if (bottomBarContainer != null) {
+            bottomBarContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
 	}
 }
