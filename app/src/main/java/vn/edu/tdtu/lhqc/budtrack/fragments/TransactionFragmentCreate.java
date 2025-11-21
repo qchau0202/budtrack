@@ -6,7 +6,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.RotateAnimation;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,20 +37,19 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
     private static final String TYPE_INCOME = "income";
     private static final String TYPE_OTHERS = "others";
     
-    private MaterialButton tabExpense, tabIncome, tabOthers, btnSave, pillSubCategory, pillSubCategoryAdd;
-    private TextView tvDate, tvCategory, tvCancel, tvTitle;
+    private MaterialButton tabExpense, tabIncome, tabOthers, btnSave;
+    private TextView tvDate, tvCategory, tvCancel, tvTitle, tvSubCategory;
     private EditText editAmount, editNote;
-    private View cardDate, cardCategory, cardWallet;
-    private View containerCategorySelection, categoryFood, categoryShopping, categoryTransport, categoryAdd, categoryEdit;
-    private ImageView ivCategoryArrow, ivCategoryIcon;
+    private View cardDate, cardCategory, cardWallet, cardSubCategory;
+    private ImageView ivCategoryIcon, ivSubCategoryIcon;
 
     private Calendar selectedDate = Calendar.getInstance();
     private String selectedType = TYPE_EXPENSE;
     private String currentAmount = "";
-    private MaterialButton selectedSubCategory = null;
-    private boolean isCategorySelectionVisible = false;
     private String selectedCategory = null;
     private int selectedCategoryIconResId = 0;
+    private String selectedSubCategory = null;
+    private int selectedSubCategoryIconResId = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,34 +97,25 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
         // Text views
         tvDate = view.findViewById(R.id.tvDate);
         tvCategory = view.findViewById(R.id.tvCategory);
+        tvSubCategory = view.findViewById(R.id.tvSubCategory);
         tvCancel = view.findViewById(R.id.tvCancel);
         tvTitle = view.findViewById(R.id.tvTitle);
 
         // Cards
         cardDate = view.findViewById(R.id.cardDate);
         cardCategory = view.findViewById(R.id.cardCategory);
+        cardSubCategory = view.findViewById(R.id.cardSubCategory);
         cardWallet = view.findViewById(R.id.cardWallet);
 
         // Buttons
         btnSave = view.findViewById(R.id.btnSave);
 
         // Category selection
-        containerCategorySelection = view.findViewById(R.id.containerCategorySelection);
-        categoryFood = view.findViewById(R.id.categoryFood);
-        categoryShopping = view.findViewById(R.id.categoryShopping);
-        categoryTransport = view.findViewById(R.id.categoryTransport);
-        categoryAdd = view.findViewById(R.id.categoryAdd);
-        categoryEdit = view.findViewById(R.id.categoryEdit);
-        ivCategoryArrow = view.findViewById(R.id.ivCategoryArrow);
         ivCategoryIcon = view.findViewById(R.id.ivCategoryIcon);
-
-        // Subcategory pills
-        pillSubCategory = view.findViewById(R.id.pillSubCategory);
-        pillSubCategoryAdd = view.findViewById(R.id.pillSubCategoryAdd);
+        ivSubCategoryIcon = view.findViewById(R.id.ivSubCategoryIcon);
 
         updateDateText();
         updateTabSelection(); // Set initial tab selection
-        setupSubCategoryPills(); // Setup subcategory pill selection
     }
 
     private void setupTabs() {
@@ -250,57 +239,11 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
         });
     }
 
-    private void setupSubCategoryPills() {
-        // Subcategory is optional
-        selectedSubCategory = null;
-
-        pillSubCategory.setOnClickListener(v -> selectSubCategory(pillSubCategory));
-        pillSubCategoryAdd.setOnClickListener(v -> {
-            // TODO: Implement add new subcategory functionality
-            Toast.makeText(requireContext(), getString(R.string.add_new_subcategory), Toast.LENGTH_SHORT).show();
-        });
-    }
-
-    private void selectSubCategory(MaterialButton button) {
-        if (selectedSubCategory != null && selectedSubCategory != button) {
-            setSubCategoryUnselected(selectedSubCategory);
-        }
-        setSubCategorySelected(button);
-        selectedSubCategory = button;
-    }
-
-    private void setSubCategorySelected(MaterialButton button) {
-        button.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
-        button.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_white));
-    }
-
-    private void setSubCategoryUnselected(MaterialButton button) {
-        button.setBackgroundTintList(getResources().getColorStateList(R.color.secondary_grey));
-        button.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
-    }
-
     private void setupButtons() {
         tvCancel.setOnClickListener(v -> dismiss());
 
-        cardCategory.setOnClickListener(v -> toggleCategorySelection());
-
-        categoryFood.setOnClickListener(v -> selectCategory(
-                getString(R.string.category_food), 
-                R.drawable.ic_food_24dp));
-        categoryShopping.setOnClickListener(v -> selectCategory(
-                getString(R.string.category_shopping), 
-                R.drawable.ic_shopping_24dp));
-        categoryTransport.setOnClickListener(v -> selectCategory(
-                getString(R.string.category_transport), 
-                R.drawable.ic_transport_24dp));
-        categoryEdit.setOnClickListener(v -> {
-            // TODO: Implement edit category functionality
-            Toast.makeText(requireContext(), getString(R.string.edit_category), Toast.LENGTH_SHORT).show();
-        });
-        categoryAdd.setOnClickListener(v -> {
-            // TODO: Implement add new category functionality
-            Toast.makeText(requireContext(), getString(R.string.add_new_category), Toast.LENGTH_SHORT).show();
-        });
+        cardCategory.setOnClickListener(v -> showCategorySelectionSheet());
+        cardSubCategory.setOnClickListener(v -> showSubCategorySelectionSheet());
 
         cardWallet.setOnClickListener(v -> {
             // TODO: Implement wallet selection dialog
@@ -310,30 +253,20 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
         btnSave.setOnClickListener(v -> saveTransaction());
     }
 
-    private void toggleCategorySelection() {
-        isCategorySelectionVisible = !isCategorySelectionVisible;
-        
-        if (isCategorySelectionVisible) {
-            containerCategorySelection.setVisibility(View.VISIBLE);
-            rotateArrow(0f, 90f);
-        } else {
-            containerCategorySelection.setVisibility(View.GONE);
-            rotateArrow(90f, 0f);
-        }
-    }
+    private void showCategorySelectionSheet() {
+        CategorySelectBottomSheet sheet = CategorySelectBottomSheet.newInstance(R.string.select_category_title);
+        sheet.setOnCategorySelectedListener(new CategorySelectBottomSheet.OnCategorySelectedListener() {
+            @Override
+            public void onCategorySelected(CategorySelectBottomSheet.CategoryOption option) {
+                selectCategory(option.name, option.iconResId);
+            }
 
-    private void rotateArrow(float fromDegrees, float toDegrees) {
-        // Clear any previous animation
-        ivCategoryArrow.clearAnimation();
-        
-        RotateAnimation rotate = new RotateAnimation(
-                fromDegrees, toDegrees,
-                RotateAnimation.RELATIVE_TO_SELF, 0.5f,
-                RotateAnimation.RELATIVE_TO_SELF, 0.5f
-        );
-        rotate.setDuration(200);
-        rotate.setFillAfter(true);
-        ivCategoryArrow.startAnimation(rotate);
+            @Override
+            public void onAddCategoryRequested() {
+                Toast.makeText(requireContext(), getString(R.string.add_new_category), Toast.LENGTH_SHORT).show();
+            }
+        });
+        sheet.show(getParentFragmentManager(), CategorySelectBottomSheet.TAG);
     }
 
     private void selectCategory(String categoryName, int iconResId) {
@@ -347,8 +280,37 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
         // Update category text
         tvCategory.setText(categoryName);
         tvCategory.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
-        
-        toggleCategorySelection(); // Hide the selection after choosing
+    }
+
+    private void showSubCategorySelectionSheet() {
+        CategorySelectBottomSheet sheet = CategorySelectBottomSheet.newInstance(R.string.select_subcategory_title);
+        sheet.setOnCategorySelectedListener(new CategorySelectBottomSheet.OnCategorySelectedListener() {
+            @Override
+            public void onCategorySelected(CategorySelectBottomSheet.CategoryOption option) {
+                selectSubCategory(option.name, option.iconResId);
+            }
+
+            @Override
+            public void onAddCategoryRequested() {
+                Toast.makeText(requireContext(), getString(R.string.add_new_subcategory), Toast.LENGTH_SHORT).show();
+            }
+        });
+        sheet.show(getParentFragmentManager(), CategorySelectBottomSheet.TAG + "_SUB");
+    }
+
+    private void selectSubCategory(String subCategoryName, int iconResId) {
+        selectedSubCategory = subCategoryName;
+        selectedSubCategoryIconResId = iconResId;
+
+        if (iconResId != 0) {
+            ivSubCategoryIcon.setImageResource(iconResId);
+            ivSubCategoryIcon.setVisibility(View.VISIBLE);
+        } else {
+            ivSubCategoryIcon.setVisibility(View.GONE);
+        }
+
+        tvSubCategory.setText(subCategoryName);
+        tvSubCategory.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
     }
     
     private void saveTransaction() {

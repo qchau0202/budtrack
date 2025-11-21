@@ -260,182 +260,6 @@
                         app:tint="@color/primary_grey" />
                 </LinearLayout>
 
-                <!-- Category Selection -->
-                <LinearLayout
-                    android:id="@+id/containerCategorySelection"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone"
-                    android:layout_marginTop="12dp">
-
-                    <!-- Category 1: Food -->
-                    <LinearLayout
-                        android:id="@+id/categoryFood"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:padding="16dp"
-                        android:background="@drawable/bg_card"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:layout_marginBottom="8dp">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_food_24dp"
-                            app:tint="@color/primary_green"
-                            android:scaleType="fitCenter"
-                            android:adjustViewBounds="true" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/category_food"
-                            android:textColor="@color/primary_black"
-                            android:textSize="16sp"
-                            android:layout_marginStart="16dp" />
-                    </LinearLayout>
-
-                    <!-- Category 2: Shopping -->
-                    <LinearLayout
-                        android:id="@+id/categoryShopping"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:padding="16dp"
-                        android:background="@drawable/bg_card"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:layout_marginBottom="8dp">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_shopping_24dp"
-                            app:tint="@color/primary_green"
-                            android:scaleType="fitCenter"
-                            android:adjustViewBounds="true" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/category_shopping"
-                            android:textColor="@color/primary_black"
-                            android:textSize="16sp"
-                            android:layout_marginStart="16dp" />
-                    </LinearLayout>
-
-                    <!-- Category 3: Transport -->
-                    <LinearLayout
-                        android:id="@+id/categoryTransport"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:padding="16dp"
-                        android:background="@drawable/bg_card"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:layout_marginBottom="8dp">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_transport_24dp"
-                            app:tint="@color/primary_green"
-                            android:scaleType="fitCenter"
-                            android:adjustViewBounds="true" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/category_transport"
-                            android:textColor="@color/primary_black"
-                            android:textSize="16sp"
-                            android:layout_marginStart="16dp" />
-                    </LinearLayout>
-
-                    <!-- Edit Category and Add New Category -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <!-- Edit Category -->
-                        <LinearLayout
-                            android:id="@+id/categoryEdit"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:padding="16dp"
-                            android:background="@drawable/bg_card"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:layout_marginEnd="8dp">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="24dp"
-                                android:src="@drawable/ic_edit_square_24dp"
-                                app:tint="@color/primary_grey"
-                                android:scaleType="fitCenter"
-                                android:adjustViewBounds="true" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/edit_category"
-                                android:textColor="@color/primary_grey"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginStart="16dp" />
-                        </LinearLayout>
-
-                        <!-- Add New Category -->
-                        <LinearLayout
-                            android:id="@+id/categoryAdd"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:padding="16dp"
-                            android:background="@drawable/bg_card"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:layout_marginStart="8dp">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="24dp"
-                                android:src="@drawable/ic_add_24dp"
-                                app:tint="@color/primary_grey"
-                                android:scaleType="fitCenter"
-                                android:adjustViewBounds="true" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/add_new_category"
-                                android:textColor="@color/primary_grey"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginStart="16dp" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </LinearLayout>
             </LinearLayout>
 
             <!-- Subcategory Section -->
@@ -453,59 +277,42 @@
                     android:textSize="14sp"
                     android:layout_marginBottom="12dp" />
 
-                <HorizontalScrollView
+                <LinearLayout
+                    android:id="@+id/cardSubCategory"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:scrollbars="none"
-                    android:fadeScrollbars="true">
+                    android:background="@drawable/bg_card"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true">
 
-                    <LinearLayout
-                        android:id="@+id/containerSubCategories"
-                        android:layout_width="wrap_content"
+                    <ImageView
+                        android:id="@+id/ivSubCategoryIcon"
+                        android:layout_width="32dp"
+                        android:layout_height="24dp"
+                        android:visibility="gone"
+                        android:scaleType="fitCenter"
+                        android:adjustViewBounds="true"
+                        app:tint="@color/primary_green" />
+
+                    <TextView
+                        android:id="@+id/tvSubCategory"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:text="@string/select_subcategory"
+                        android:textColor="@color/primary_grey"
+                        android:textSize="16sp" />
 
-                        <!-- Sample subcategory pills - these will be populated dynamically -->
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/pillSubCategory"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:text="@string/subcategory_text"
-                            android:textSize="12sp"
-                            android:textAllCaps="false"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary_black"
-                            app:cornerRadius="20dp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:backgroundTint="@color/secondary_grey"
-                            android:layout_marginEnd="8dp"
-                            android:minWidth="0dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/pillSubCategoryAdd"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:text="@string/subcategory_add"
-                            android:textSize="12sp"
-                            android:textAllCaps="false"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary_grey"
-                            app:icon="@drawable/ic_add_24dp"
-                            app:iconGravity="start"
-                            app:iconTint="@color/primary_grey"
-                            app:iconSize="16dp"
-                            app:cornerRadius="20dp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:backgroundTint="@android:color/transparent"
-                            app:strokeColor="@color/secondary_grey"
-                            app:strokeWidth="1dp"
-                            android:minWidth="0dp" />
-
-                    </LinearLayout>
-                </HorizontalScrollView>
+                    <ImageView
+                        android:id="@+id/ivSubCategoryArrow"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:src="@drawable/ic_arrow_forward_24dp"
+                        app:tint="@color/primary_grey" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Date Card -->
