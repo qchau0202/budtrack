@@ -24,23 +24,16 @@
 
             <include layout="@layout/view_header" />
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/balance_fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:name="vn.edu.tdtu.lhqc.budtrack.fragments.BalanceFragment"/>
+            <include
+                android:id="@+id/card_total_balance"
+                layout="@layout/view_balance" />
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/analytics_fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:name="vn.edu.tdtu.lhqc.budtrack.fragments.AnalyticsFragment"/>
+            <include
+                android:id="@+id/card_weekly_expenses"
+                layout="@layout/view_analytics" />
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/transaction_history_fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:name="vn.edu.tdtu.lhqc.budtrack.fragments.TransactionHistoryFragment"/>
+            <include
+                layout="@layout/view_dashboard_pie_chart_section"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

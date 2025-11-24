@@ -24,10 +24,13 @@
 
             <include layout="@layout/view_header" />
 
-            <include layout="@layout/view_dashboard_calendar_week" />
+            <include layout="@layout/view_calendar" />
 
-            <include
-                layout="@layout/view_dashboard_pie_chart_section"/>
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/transaction_history_fragment_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:name="vn.edu.tdtu.lhqc.budtrack.fragments.TransactionHistoryFragment"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

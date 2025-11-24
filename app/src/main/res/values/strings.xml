@@ -113,6 +113,11 @@
     <string name="map_description">View your expenses based on location. See where you spend the most and track your spending patterns on the map.</string>
     <string name="map_preview_placeholder">Map preview</string>
     <string name="location_permission_denied">Location permission is required to show your location on the map</string>
-    <string name="search_location">Search location (coming soon)</string>
+    <string name="search_location">Search location</string>
     <string name="feature_coming_soon">This feature is coming soon</string>
+    <!--Map Bottom Sheet-->
+    <string name="view_details">View details</string>
+    <string name="expense_address">Address</string>
+    <string name="expense_date">Date</string>
+    <string name="expense_note">Note</string>
 </resources>

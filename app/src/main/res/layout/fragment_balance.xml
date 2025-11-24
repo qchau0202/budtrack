@@ -6,89 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".fragments.BalanceFragment">
 
-    <!-- Total Balance Card container -->
-    <LinearLayout
+    <include
         android:id="@+id/card_total_balance"
-        android:layout_width="match_parent"
+        layout="@layout/view_balance"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_card"
-        android:orientation="vertical"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="16dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_weight="1">
-
-                <TextView
-                    android:id="@+id/tv_total_balance_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/your_balance"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_grey"
-                    android:textSize="14sp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="4dp">
-
-                    <TextView
-                        android:id="@+id/tv_total_balance_amount"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="4.000.000 VND"
-                        android:textColor="@color/primary_black"
-                        android:textStyle="bold"
-                        android:textSize="32sp" />
-
-                    <ImageButton
-                        android:id="@+id/btn_visibility"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="@drawable/bg_icon_button"
-                        android:padding="10dp"
-                        android:scaleType="center"
-                        app:tint="@color/primary_black"
-                        android:src="@drawable/ic_visibility_off_24dp" />
-
-                </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_add_expenses"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:text="@string/add_expenses"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_white"
-                    android:fontFamily="@font/quicksand"
-                    android:layout_marginTop="12dp"
-                    app:cornerRadius="24dp"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:backgroundTint="@color/primary_green" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
