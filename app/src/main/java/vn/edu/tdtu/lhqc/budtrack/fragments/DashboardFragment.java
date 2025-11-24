@@ -16,14 +16,10 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
-import vn.edu.tdtu.lhqc.budtrack.widgets.PieChartView;
 
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -45,8 +41,8 @@ public class DashboardFragment extends Fragment {
 
     // Calendar components
     private TextView tvMonthYear;
-    private ImageButton btnPrevWeek;
-    private ImageButton btnNextWeek;
+    private ImageButton btnPrevMonth;
+    private ImageButton btnNextMonth;
     private LinearLayout datesContainer;
     
     private Calendar currentDate;
@@ -114,35 +110,6 @@ public class DashboardFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
-        // Sample data - can be replaced with dynamic data from database/ViewModel
-        double totalExpense = 4000000.0; // Total expense amount
-        LinkedHashMap<String, CategoryData> categoryData = new LinkedHashMap<>();
-        categoryData.put("Transport", new CategoryData(20f, totalExpense * 0.20));
-        categoryData.put("Food", new CategoryData(50f, totalExpense * 0.50));
-        categoryData.put("Shopping", new CategoryData(30f, totalExpense * 0.30));
-
-        // Initialize pie chart
-        PieChartView pieChart = root.findViewById(R.id.pieChart);
-        if (pieChart != null) {
-            LinkedHashMap<String, Float> pieData = new LinkedHashMap<>();
-            for (String key : categoryData.keySet()) {
-                pieData.put(key, categoryData.get(key).percentage);
-            }
-
-            pieChart.setData(pieData, Arrays.asList(
-                    ContextCompat.getColor(requireContext(), R.color.primary_green),
-                    ContextCompat.getColor(requireContext(), R.color.primary_yellow),
-                    ContextCompat.getColor(requireContext(), R.color.primary_red)
-            ));
-            float density = getResources().getDisplayMetrics().density;
-            pieChart.setRingThicknessPx(12f * density);
-            pieChart.setSegmentGapDegrees(14f);
-            pieChart.setCenterTexts(getString(R.string.expense), formatCurrency(totalExpense));
-        }
-
-        // Update category tabs with amounts and percentages
-        updateCategoryTabs(root, categoryData);
-
         // Initialize calendar
         initializeCalendar(root);
         
@@ -162,14 +129,14 @@ public class DashboardFragment extends Fragment {
         transaction.commit();
     }
 
-    // Initialize the calendar week view
+    // Initialize the calendar month view
     private void initializeCalendar(View root) {
         tvMonthYear = root.findViewById(R.id.tv_month_year);
-        btnPrevWeek = root.findViewById(R.id.btn_prev_week);
-        btnNextWeek = root.findViewById(R.id.btn_next_week);
+        btnPrevMonth = root.findViewById(R.id.btn_prev_week); // Reusing the same ID from layout
+        btnNextMonth = root.findViewById(R.id.btn_next_week); // Reusing the same ID from layout
         datesContainer = root.findViewById(R.id.dates_container);
         
-        if (tvMonthYear != null && btnPrevWeek != null && btnNextWeek != null && datesContainer != null) {
+        if (tvMonthYear != null && btnPrevMonth != null && btnNextMonth != null && datesContainer != null) {
             setupCalendarListeners();
             updateCalendar();
         }
@@ -178,18 +145,18 @@ public class DashboardFragment extends Fragment {
     // Setup calendar navigation listeners
     
     private void setupCalendarListeners() {
-        btnPrevWeek.setOnClickListener(v -> {
-            currentDate.add(Calendar.WEEK_OF_YEAR, -1);
+        btnPrevMonth.setOnClickListener(v -> {
+            currentDate.add(Calendar.MONTH, -1);
             updateCalendar();
         });
         
-        btnNextWeek.setOnClickListener(v -> {
-            currentDate.add(Calendar.WEEK_OF_YEAR, 1);
+        btnNextMonth.setOnClickListener(v -> {
+            currentDate.add(Calendar.MONTH, 1);
             updateCalendar();
         });
     }
 
-    // Update the calendar display with current week
+    // Update the calendar display with current month
     private void updateCalendar() {
         // Update month/year display
         if (tvMonthYear != null) {
@@ -201,62 +168,121 @@ public class DashboardFragment extends Fragment {
             datesContainer.removeAllViews();
             dateCells.clear();
             
-            // Get the current week's dates (starting from Monday)
-            Calendar weekStart = (Calendar) currentDate.clone();
-            int dayOfWeek = weekStart.get(Calendar.DAY_OF_WEEK);
-            int daysFromMonday = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
-            weekStart.add(Calendar.DAY_OF_MONTH, -daysFromMonday);
+            // Set calendar to first day of the month
+            Calendar monthStart = (Calendar) currentDate.clone();
+            monthStart.set(Calendar.DAY_OF_MONTH, 1);
             
-            // Create date cells for the week (7 days)
-            for (int i = 0; i < 7; i++) {
-                Calendar date = (Calendar) weekStart.clone();
-                date.add(Calendar.DAY_OF_MONTH, i);
+            // Get the first day of week for the first day of month
+            int firstDayOfWeek = monthStart.get(Calendar.DAY_OF_WEEK);
+            // Convert to Monday = 0 format (Sunday = 6, Monday = 0, ..., Saturday = 5)
+            int daysFromMonday = (firstDayOfWeek == Calendar.SUNDAY) ? 6 : firstDayOfWeek - Calendar.MONDAY;
+            
+            // Go back to the Monday of the week containing the first day of month
+            monthStart.add(Calendar.DAY_OF_MONTH, -daysFromMonday);
+            
+            // Calculate total cells needed (including leading/trailing days from other months)
+            // We need to show 6 weeks (42 days) to ensure full month display
+            int totalCells = 42;
+            int daysPerWeek = 7;
+            
+            // Create date cells for the month in a grid (6 weeks x 7 days)
+            for (int week = 0; week < 6; week++) {
+                LinearLayout weekRow = new LinearLayout(requireContext());
+                weekRow.setOrientation(LinearLayout.HORIZONTAL);
+                weekRow.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ));
                 
-                View dateCell = createDateCell(date.get(Calendar.DAY_OF_MONTH), date);
-                datesContainer.addView(dateCell);
-                dateCells.add(dateCell);
+                for (int day = 0; day < daysPerWeek; day++) {
+                    int cellIndex = week * daysPerWeek + day;
+                    if (cellIndex >= totalCells) break;
+                    
+                    Calendar date = (Calendar) monthStart.clone();
+                    date.add(Calendar.DAY_OF_MONTH, cellIndex);
+                    
+                    // Check if this date is in the current month
+                    boolean isCurrentMonth = date.get(Calendar.MONTH) == currentDate.get(Calendar.MONTH) &&
+                                           date.get(Calendar.YEAR) == currentDate.get(Calendar.YEAR);
+                    
+                    View dateCell = createDateCell(date.get(Calendar.DAY_OF_MONTH), date, isCurrentMonth);
+                    
+                    // Set layout params for equal width cells
+                    LinearLayout.LayoutParams cellParams = new LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        1.0f
+                    );
+                    dateCell.setLayoutParams(cellParams);
+                    
+                    weekRow.addView(dateCell);
+                    dateCells.add(dateCell);
+                }
+                
+                datesContainer.addView(weekRow);
             }
         }
     }
 
     // Create a date cell view
-    private View createDateCell(int day, Calendar date) {
+    private View createDateCell(int day, Calendar date, boolean isCurrentMonth) {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         LinearLayout cell = (LinearLayout) inflater.inflate(R.layout.item_date_cell, datesContainer, false);
         
         TextView tvDate = cell.findViewById(R.id.tv_date);
         View eventIndicator = cell.findViewById(R.id.event_indicator);
         
-        // Hide the event indicator dot
-        eventIndicator.setVisibility(View.GONE);
-        
         tvDate.setText(String.valueOf(day));
+        
+        // Check if this date has expenses
+        String dateKey = dateKeyFormat.format(date.getTime());
+        boolean hasExpenses = datesWithExpenses.contains(dateKey);
+        
+        // Show event indicator if date has expenses
+        if (hasExpenses && isCurrentMonth) {
+            eventIndicator.setVisibility(View.VISIBLE);
+        } else {
+            eventIndicator.setVisibility(View.GONE);
+        }
         
         // Check if this date is selected or is today
         boolean isSelected = isSameDay(date, selectedDate);
-        boolean isToday = isSameDay(date, todayDate);
+        boolean isToday = isSameDay(date, todayDate) && isCurrentMonth;
         
-        // Update appearance based on selection (selected takes priority over today)
-        if (isSelected) {
+        // Update appearance based on selection and month
+        if (!isCurrentMonth) {
+            // Dates from other months: grey text, no background
+            tvDate.setBackgroundResource(R.drawable.bg_date_cell);
+            tvDate.setTextColor(ContextCompat.getColor(requireContext(), R.color.third_grey));
+            tvDate.setAlpha(0.5f);
+        } else if (isSelected) {
             // Selected date: green background with white text
             tvDate.setBackgroundResource(R.drawable.bg_date_cell_selected);
             tvDate.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_white));
+            tvDate.setAlpha(1.0f);
         } else if (isToday) {
             // Today's date: grey background with black text
             tvDate.setBackgroundResource(R.drawable.bg_date_cell_today);
             tvDate.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
+            tvDate.setAlpha(1.0f);
         } else {
             // Other dates: transparent background with black text
             tvDate.setBackgroundResource(R.drawable.bg_date_cell);
             tvDate.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
+            tvDate.setAlpha(1.0f);
         }
         
-        // Set click listener
-        cell.setOnClickListener(v -> {
-            selectedDate = (Calendar) date.clone();
-            updateCalendar(); // Refresh to show new selection
-            // TODO: Update expense data based on selected date
-        });
+        // Set click listener (only for current month dates)
+        if (isCurrentMonth) {
+            cell.setOnClickListener(v -> {
+                selectedDate = (Calendar) date.clone();
+                updateCalendar(); // Refresh to show new selection
+                // TODO: Update expense data based on selected date
+            });
+        } else {
+            cell.setOnClickListener(null);
+            cell.setClickable(false);
+        }
         
         return cell;
     }
@@ -267,51 +293,4 @@ public class DashboardFragment extends Fragment {
                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
-    // Update category tabs with dynamic data. This method can be called whenever data changes.
-    private void updateCategoryTabs(View root, LinkedHashMap<String, CategoryData> categoryData) {
-        // Transport
-        TextView tvAmountTransport = root.findViewById(R.id.tv_amount_transport);
-        TextView tvPercentTransport = root.findViewById(R.id.tv_percent_transport);
-        if (tvAmountTransport != null && tvPercentTransport != null && categoryData.containsKey("Transport")) {
-            CategoryData transport = categoryData.get("Transport");
-            tvAmountTransport.setText(formatCurrency(transport.amount));
-            tvPercentTransport.setText(String.format(Locale.getDefault(), "%.0f%%", transport.percentage));
-        }
-
-        // Food
-        TextView tvAmountFood = root.findViewById(R.id.tv_amount_food);
-        TextView tvPercentFood = root.findViewById(R.id.tv_percent_food);
-        if (tvAmountFood != null && tvPercentFood != null && categoryData.containsKey("Food")) {
-            CategoryData food = categoryData.get("Food");
-            tvAmountFood.setText(formatCurrency(food.amount));
-            tvPercentFood.setText(String.format(Locale.getDefault(), "%.0f%%", food.percentage));
-        }
-
-        // Shopping
-        TextView tvAmountShopping = root.findViewById(R.id.tv_amount_shopping);
-        TextView tvPercentShopping = root.findViewById(R.id.tv_percent_shopping);
-        if (tvAmountShopping != null && tvPercentShopping != null && categoryData.containsKey("Shopping")) {
-            CategoryData shopping = categoryData.get("Shopping");
-            tvAmountShopping.setText(formatCurrency(shopping.amount));
-            tvPercentShopping.setText(String.format(Locale.getDefault(), "%.0f%%", shopping.percentage));
-        }
-    }
-
-    // Format currency amount with VND format
-    private String formatCurrency(double amount) {
-        NumberFormat formatter = NumberFormat.getNumberInstance(Locale.getDefault());
-        formatter.setGroupingUsed(true);
-        return formatter.format(amount) + " VND";
-    }
-
-    // Data class to hold category information This makes it easy to extend with more fields in the future
-    private static class CategoryData {
-        float percentage;
-        double amount;
-
-        CategoryData(float percentage, double amount) {
-            this.percentage = percentage;
-            this.amount = amount;
-        }
-    }
 }

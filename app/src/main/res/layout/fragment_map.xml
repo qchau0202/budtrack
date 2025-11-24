@@ -16,14 +16,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Header with back and search buttons -->
     <LinearLayout
         android:id="@+id/map_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:background="@drawable/bg_card"
         android:padding="12dp"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -47,7 +51,9 @@
             android:hint="@string/search_location"
             android:textColor="@color/primary_black"
             android:textColorHint="@color/primary_grey"
-            android:singleLine="true" />
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:imeOptions="actionSearch" />
 
         <ImageButton
             android:id="@+id/btn_map_search"
@@ -60,6 +66,17 @@
             app:tint="@color/primary_black" />
 
     </LinearLayout>
+
+    <!-- Bottom sheet for expense details -->
+    <include
+        android:id="@+id/expense_details_panel"
+        layout="@layout/view_expense_details_bottom_sheet"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
