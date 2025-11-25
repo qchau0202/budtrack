@@ -84,11 +84,11 @@ public class HomeFragment extends Fragment {
         // Setup balance view
         setupBalanceView(root);
         
-        // Setup analytics view
-        setupAnalyticsView(root);
-        
         // Initialize pie chart
         setupPieChart(root);
+
+        // Setup analytics tabs inside included view
+        setupAnalyticsTabs(root);
         
         return root;
     }
@@ -109,39 +109,6 @@ public class HomeFragment extends Fragment {
                 tvBalance.setText(BalanceService.formatDisplay(originalBalanceText, nowHidden));
                 btnVisibility.setImageResource(nowHidden ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
             });
-        }
-    }
-    
-    private void setupAnalyticsView(View root) {
-        // Tabs inside analytics card control title only
-        MaterialButton tabIncome = root.findViewById(R.id.tab_income);
-        MaterialButton tabExpenses = root.findViewById(R.id.tab_expenses);
-        TextView weeklyTitle = root.findViewById(R.id.tv_weekly_title);
-
-        if (tabIncome != null && tabExpenses != null) {
-            tabIncome.setOnClickListener(v -> selectAnalyticsTab(true, tabIncome, tabExpenses, weeklyTitle));
-            tabExpenses.setOnClickListener(v -> selectAnalyticsTab(false, tabIncome, tabExpenses, weeklyTitle));
-            // default selection
-            selectAnalyticsTab(true, tabIncome, tabExpenses, weeklyTitle);
-        }
-    }
-    
-    private void selectAnalyticsTab(boolean incomeSelected,
-                                   MaterialButton tabIncome,
-                                   MaterialButton tabExpenses,
-                                   TextView weeklyTitle) {
-        if (incomeSelected) {
-            tabIncome.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
-            tabIncome.setTextColor(getResources().getColor(R.color.primary_white));
-            tabExpenses.setBackgroundTintList(getResources().getColorStateList(R.color.secondary_grey));
-            tabExpenses.setTextColor(getResources().getColor(R.color.primary_black));
-            if (weeklyTitle != null) weeklyTitle.setText(R.string.total_income);
-        } else {
-            tabExpenses.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
-            tabExpenses.setTextColor(getResources().getColor(R.color.primary_white));
-            tabIncome.setBackgroundTintList(getResources().getColorStateList(R.color.secondary_grey));
-            tabIncome.setTextColor(getResources().getColor(R.color.primary_black));
-            if (weeklyTitle != null) weeklyTitle.setText(R.string.total_expenses);
         }
     }
     
@@ -174,6 +141,44 @@ public class HomeFragment extends Fragment {
 
         // Update category tabs with amounts and percentages
         updateCategoryTabs(root, categoryData);
+    }
+
+    private void setupAnalyticsTabs(View root) {
+        View analyticsCard = root.findViewById(R.id.card_weekly_expenses);
+        if (analyticsCard == null) {
+            return;
+        }
+
+        MaterialButton tabIncome = analyticsCard.findViewById(R.id.tab_income);
+        MaterialButton tabExpenses = analyticsCard.findViewById(R.id.tab_expenses);
+        TextView title = analyticsCard.findViewById(R.id.tv_title);
+
+        if (tabIncome == null || tabExpenses == null) {
+            return;
+        }
+
+        tabIncome.setOnClickListener(v -> selectAnalyticsTab(true, tabIncome, tabExpenses, title));
+        tabExpenses.setOnClickListener(v -> selectAnalyticsTab(false, tabIncome, tabExpenses, title));
+        selectAnalyticsTab(false, tabIncome, tabExpenses, title);
+    }
+
+    private void selectAnalyticsTab(boolean incomeSelected,
+                                    MaterialButton tabIncome,
+                                    MaterialButton tabExpenses,
+                                    TextView title) {
+        applyAnalyticsTabStyle(tabIncome, incomeSelected);
+        applyAnalyticsTabStyle(tabExpenses, !incomeSelected);
+        if (title != null) {
+            title.setText(incomeSelected ? R.string.total_income : R.string.total_expenses);
+        }
+    }
+
+    private void applyAnalyticsTabStyle(MaterialButton button, boolean selected) {
+        if (button == null) return;
+        int bgColor = selected ? R.color.primary_green : R.color.secondary_grey;
+        int textColor = selected ? R.color.primary_white : R.color.primary_black;
+        button.setBackgroundTintList(ContextCompat.getColorStateList(button.getContext(), bgColor));
+        button.setTextColor(ContextCompat.getColor(button.getContext(), textColor));
     }
     
     // Update category tabs with dynamic data. This method can be called whenever data changes.

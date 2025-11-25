@@ -37,7 +37,6 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/bg_icon_button"
-            android:padding="10dp"
             android:src="@drawable/ic_arrow_back_24dp"
             app:tint="@color/primary_black" />
 
@@ -59,11 +58,27 @@
             android:id="@+id/btn_map_search"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginStart="12dp"
             android:background="@drawable/bg_icon_button"
-            android:padding="10dp"
+            android:padding="12dp"
+            android:scaleType="center"
+            app:tint="@color/primary_grey"
             android:src="@drawable/ic_search_24dp"
-            app:tint="@color/primary_black" />
+            app:layout_constraintEnd_toStartOf="@id/btn_map"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btn_map_filter"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_icon_button"
+            android:padding="12dp"
+            android:scaleType="center"
+            app:tint="@color/primary_grey"
+            android:src="@drawable/ic_filter_alt_24dp"
+            app:layout_constraintEnd_toStartOf="@id/btn_map"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </LinearLayout>
 

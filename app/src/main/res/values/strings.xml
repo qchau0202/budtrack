@@ -44,7 +44,9 @@
     <string name="tab_expenses">Expenses</string>
     <string name="total_spent">Total Spent</string>
     <string name="this_month_total_spend">This month total spend</string>
-    <string name="sample_date">01 Jan 2025</string>
+    <string name="transactions_in_month">Transactions in %1$s</string>
+    <string name="view_all_transactions">View all transactions</string>
+    <string name="filter_this_month">Month</string>
     <!--budget-->
     <string name="budget_page">Budget page</string>
     <!--dashboard-->
@@ -120,4 +122,7 @@
     <string name="expense_address">Address</string>
     <string name="expense_date">Date</string>
     <string name="expense_note">Note</string>
+    <!--Transaction History-->
+    <string name="transactions">All transactions</string>
+    <string name="total">Total</string>
 </resources>

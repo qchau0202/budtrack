@@ -35,6 +35,9 @@
         <activity
             android:name=".activities.LoginActivity"
             android:exported="false" />
+        <activity
+            android:name=".activities.TransactionHistoryActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

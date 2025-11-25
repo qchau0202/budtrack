@@ -43,7 +43,7 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
     private View cardDate, cardCategory, cardWallet, cardSubCategory;
     private ImageView ivCategoryIcon, ivSubCategoryIcon;
 
-    private Calendar selectedDate = Calendar.getInstance();
+    private final Calendar selectedDate = Calendar.getInstance();
     private String selectedType = TYPE_EXPENSE;
     private String currentAmount = "";
     private String selectedCategory = null;
@@ -161,12 +161,12 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
     }
     
     private void setTabSelected(MaterialButton button) {
-        button.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
+        button.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.primary_green));
         button.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_white));
     }
     
     private void setTabUnselected(MaterialButton button) {
-        button.setBackgroundTintList(getResources().getColorStateList(R.color.secondary_grey));
+        button.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.secondary_grey));
         button.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
     }
 

@@ -32,7 +32,7 @@
             app:cornerRadius="20dp"
             android:insetTop="0dp"
             android:insetBottom="0dp"
-            android:backgroundTint="@color/secondary_grey"/>
+            android:backgroundTint="@color/secondary_grey" />
 
         <Space
             android:layout_width="12dp"
@@ -51,7 +51,7 @@
             app:cornerRadius="20dp"
             android:insetTop="0dp"
             android:insetBottom="0dp"
-            android:backgroundTint="@color/primary_green"/>
+            android:backgroundTint="@color/primary_green" />
 
     </LinearLayout>
 
@@ -69,7 +69,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_weekly_title"
+                android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/total_income"

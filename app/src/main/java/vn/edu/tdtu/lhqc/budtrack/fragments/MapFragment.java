@@ -287,14 +287,14 @@ public class MapFragment extends Fragment {
             myLocationOverlay = new MyLocationNewOverlay(provider, mapView);
             
             // Set custom person icon for current location
-            Drawable personIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_person_24dp);
+            Drawable personIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_nearby_24dp);
             if (personIcon != null) {
                 // Tint the icon with red to differentiate from green expense markers
                 personIcon = personIcon.mutate();
-                personIcon.setTint(ContextCompat.getColor(requireContext(), R.color.primary_red));
+                personIcon.setTint(ContextCompat.getColor(requireContext(), R.color.primary_black));
                 
                 // Scale up the person icon for better visibility (3x size for current location)
-                int personSize = (int) (54 * getResources().getDisplayMetrics().density); // 72dp equivalent
+                int personSize = (int) (48 * getResources().getDisplayMetrics().density); // 72dp equivalent
                 Bitmap personBitmap = drawableToBitmap(personIcon, personSize, personSize);
                 if (personBitmap != null) {
                     myLocationOverlay.setPersonIcon(personBitmap);

@@ -7,10 +7,6 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-
-import com.google.android.material.button.MaterialButton;
-
 import vn.edu.tdtu.lhqc.budtrack.R;
 
 /**
@@ -63,39 +59,6 @@ public class AnalyticsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_analytics, container, false);
-
-        // Tabs inside analytics card control title only
-        MaterialButton tabIncome = root.findViewById(R.id.tab_income);
-        MaterialButton tabExpenses = root.findViewById(R.id.tab_expenses);
-        TextView weeklyTitle = root.findViewById(R.id.tv_weekly_title);
-
-        if (tabIncome != null && tabExpenses != null) {
-            tabIncome.setOnClickListener(v -> selectTab(true, tabIncome, tabExpenses, weeklyTitle));
-            tabExpenses.setOnClickListener(v -> selectTab(false, tabIncome, tabExpenses, weeklyTitle));
-            // default selection
-            selectTab(true, tabIncome, tabExpenses, weeklyTitle);
-        }
-
-        return root;
-    }
-
-    private void selectTab(boolean incomeSelected,
-                           MaterialButton tabIncome,
-                           MaterialButton tabExpenses,
-                           TextView weeklyTitle) {
-        if (incomeSelected) {
-            tabIncome.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
-            tabIncome.setTextColor(getResources().getColor(R.color.primary_white));
-            tabExpenses.setBackgroundTintList(getResources().getColorStateList(R.color.secondary_grey));
-            tabExpenses.setTextColor(getResources().getColor(R.color.primary_black));
-            if (weeklyTitle != null) weeklyTitle.setText(R.string.total_income);
-        } else {
-            tabExpenses.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
-            tabExpenses.setTextColor(getResources().getColor(R.color.primary_white));
-            tabIncome.setBackgroundTintList(getResources().getColorStateList(R.color.secondary_grey));
-            tabIncome.setTextColor(getResources().getColor(R.color.primary_black));
-            if (weeklyTitle != null) weeklyTitle.setText(R.string.total_expenses);
-        }
+        return inflater.inflate(R.layout.fragment_analytics, container, false);
     }
 }
