@@ -44,13 +44,18 @@
     <string name="tab_expenses">Expenses</string>
     <string name="total_spent">Total Spent</string>
     <string name="this_month_total_spend">This month total spend</string>
-    <string name="sample_date">01 Jan 2025</string>
-    <!--wallet-->
-    <string name="wallet_page">Wallet page</string>
+    <string name="transactions_in_month">Transactions in %1$s</string>
+    <string name="view_all_transactions">View all transactions</string>
+    <string name="filter_this_month">Month</string>
+    <!--budget-->
+    <string name="budget_page">Budget page</string>
     <!--dashboard-->
     <string name="dashboard_page">Dashboard page</string>
+    <string name="previous_month">Previous month</string>
+    <string name="next_month">Next month</string>
     <!--profile-->
     <string name="profile_page">Profile page</string>
+    <string name="profile_header">Personal info</string>
     <string name="profile_name">Name</string>
     <string name="profile_email">Email</string>
     <string name="profile_address">Address</string>
@@ -62,4 +67,62 @@
     <string name="currency">Currency</string>
     <string name="language_value">English</string>
     <string name="currency_value">VND</string>
+    <string name="language_dialog_title">Choose language</string>
+    <string name="language_option_vietnamese">Tiếng Việt</string>
+    <string name="language_option_english">English</string>
+    <string name="language_dialog_confirm">Confirm</string>
+    <string name="edit">Edit</string>
+    <string name="signout_text">SIGN OUT</string>
+    <!--Transaction-->
+    <string name="add_transaction">Add Transaction</string>
+    <string name="cancel">Cancel</string>
+    <string name="expense">Expense</string>
+    <string name="income">Income</string>
+    <string name="others">Others</string>
+    <string name="amount">Amount</string>
+    <string name="amount_hint">0</string>
+    <string name="category">Category</string>
+    <string name="select_category">Select category</string>
+    <string name="select_category_title">Select Category</string>
+    <string name="search_categories">Search for categories</string>
+    <string name="all_categories">All categories</string>
+    <string name="select_subcategory_title">Select Subcategory</string>
+    <string name="category_food">Food</string>
+    <string name="category_shopping">Shopping</string>
+    <string name="category_transport">Transport</string>
+    <string name="category_home">Home</string>
+    <string name="edit_category">Edit Category</string>
+    <string name="add_new_category">Add</string>
+    <string name="select_subcategory">Select sub category</string>
+    <string name="budget">Budget</string>
+    <string name="wallet">Wallet</string>
+    <string name="select_wallet">Select Wallet</string>
+    <string name="cash">Cash</string>
+    <string name="subcategory_text">Daily</string>
+    <string name="subcategory_add">Add</string>
+    <string name="add_new_subcategory">Add new subcategory</string>
+    <string name="note">Note</string>
+    <string name="note_hint">Add note</string>
+    <string name="date">Date</string>
+    <string name="add_details">Add Details</string>
+    <string name="save">Save</string>
+    <string name="no_note">No note</string>
+    <string name="error_amount_required">Please enter amount</string>
+    <string name="error_amount_invalid">Amount must be greater than 0</string>
+    <string name="transaction_saved">Transaction saved: %1$s - %2$s VND - %3$s</string>
+    <!--Map-->
+    <string name="map_title">Budtrack expense map</string>
+    <string name="map_description">View your expenses based on location. See where you spend the most and track your spending patterns on the map.</string>
+    <string name="map_preview_placeholder">Map preview</string>
+    <string name="location_permission_denied">Location permission is required to show your location on the map</string>
+    <string name="search_location">Search location</string>
+    <string name="feature_coming_soon">This feature is coming soon</string>
+    <!--Map Bottom Sheet-->
+    <string name="view_details">View details</string>
+    <string name="expense_address">Address</string>
+    <string name="expense_date">Date</string>
+    <string name="expense_note">Note</string>
+    <!--Transaction History-->
+    <string name="transactions">All transactions</string>
+    <string name="total">Total</string>
 </resources>

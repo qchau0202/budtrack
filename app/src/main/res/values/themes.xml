@@ -7,4 +7,46 @@
     </style>
 
     <style name="Theme.Budtrack" parent="Base.Theme.Budtrack" />
+    
+    <!-- Bottom Sheet Dialog Theme -->
+    <style name="BottomSheetDialogTheme" parent="Theme.Material3.DayNight.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
+    </style>
+    
+    <style name="BottomSheetStyle" parent="Widget.Material3.BottomSheet">
+        <item name="shapeAppearance">@style/BottomSheetShapeAppearance</item>
+    </style>
+    
+    <style name="BottomSheetShapeAppearance" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeTopRight">16dp</item>
+    </style>
+
+    <!-- Theme overlay for MaterialDatePicker/Calendar to match app styling -->
+    <style name="ThemeOverlay_Budtrack_DatePicker_Base" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <!-- Primary accent for selected day and confirm button -->
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorOnPrimary">@color/primary_white</item>
+        <!-- Surfaces and text -->
+        <item name="colorSurface">@color/primary_white</item>
+        <item name="colorOnSurface">@color/primary_black</item>
+        <item name="colorOutline">@color/secondary_grey</item>
+        <!-- Header/title text -->
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.Material3.TitleLarge</item>
+        <!-- Calendar specific -->
+        <item name="materialCalendarFullscreenTheme">@style/ThemeOverlay_Budtrack_DatePicker_Calendar</item>
+    </style>
+
+    <style name="ThemeOverlay_Budtrack_DatePicker_Calendar" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <!-- Keep minimal overrides to avoid attr mismatches across library versions -->
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorOnPrimary">@color/primary_white</item>
+        <item name="colorSurface">@color/primary_white</item>
+        <item name="colorOnSurface">@color/primary_black</item>
+        <item name="colorOutline">@color/secondary_grey</item>
+    </style>
+
+    <!-- Alias used from code -->
+    <style name="ThemeOverlay_Budtrack_DatePicker" parent="ThemeOverlay_Budtrack_DatePicker_Base"/>
 </resources>

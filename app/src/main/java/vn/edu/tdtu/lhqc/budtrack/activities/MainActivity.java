@@ -1,10 +1,14 @@
 package vn.edu.tdtu.lhqc.budtrack.activities;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -16,7 +20,9 @@ import vn.edu.tdtu.lhqc.budtrack.fragments.DashboardFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.HomeFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.ProfileFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.WalletFragment;
-import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionFragment;
+import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionFragmentCreate;
+import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
+import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private View navDashboard;
     private View navProfile;
 	private String currentFragmentTag;
+	private View bottomBarContainer;
 
 	// Cache fragments to avoid re-creating on each tab switch
 	private Fragment homeFragment;
@@ -33,12 +40,28 @@ public class MainActivity extends AppCompatActivity {
 	private Fragment profileFragment;
 	private Fragment activeFragment;
 
+	@Override
+	protected void attachBaseContext(Context newBase) {
+		super.attachBaseContext(LanguageManager.wrapContext(newBase));
+	}
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager.applySavedTheme(this);
+		LanguageManager.applySavedLanguage(this);
+		ThemeManager.applySavedTheme(this);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        bottomBarContainer = findViewById(R.id.bottom_bar_container);
+        
+        // Handle window insets properly for EdgeToEdge
+        View mainLayout = findViewById(R.id.main);
+        ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // Apply padding only to top for status bar
+            v.setPadding(0, systemBars.top, 0, 0);
+            return insets;
+        });
 
         // Initialize navigation views
         navHome = findViewById(R.id.nav_home);
@@ -47,11 +70,12 @@ public class MainActivity extends AppCompatActivity {
         navProfile = findViewById(R.id.nav_profile);
         FloatingActionButton fabAdd = findViewById(R.id.fab_add);
 
-
-
         // Set Home as active by default and load HomeFragment
-		if (savedInstanceState == null) {
-			FragmentManager fm = getSupportFragmentManager();
+		FragmentManager fm = getSupportFragmentManager();
+		Fragment existingHome = fm.findFragmentByTag("HOME_FRAGMENT");
+
+		if (savedInstanceState == null && existingHome == null) {
+			// First time creation - create new fragments
 			homeFragment = new HomeFragment();
 			walletFragment = new WalletFragment();
 			dashboardFragment = new DashboardFragment();
@@ -67,7 +91,33 @@ public class MainActivity extends AppCompatActivity {
 
 			activeFragment = homeFragment;
 			currentFragmentTag = "HOME_FRAGMENT";
-			navHome.setSelected(true);
+			highlightNavigation(currentFragmentTag);
+		} else {
+			// Restore fragments from saved state
+			homeFragment = fm.findFragmentByTag("HOME_FRAGMENT");
+			walletFragment = fm.findFragmentByTag("WALLET_FRAGMENT");
+			dashboardFragment = fm.findFragmentByTag("DASHBOARD_FRAGMENT");
+			profileFragment = fm.findFragmentByTag("PROFILE_FRAGMENT");
+
+			// Determine which fragment is currently visible
+			if (homeFragment != null && !homeFragment.isHidden()) {
+				activeFragment = homeFragment;
+				currentFragmentTag = "HOME_FRAGMENT";
+			} else if (walletFragment != null && !walletFragment.isHidden()) {
+				activeFragment = walletFragment;
+				currentFragmentTag = "WALLET_FRAGMENT";
+			} else if (dashboardFragment != null && !dashboardFragment.isHidden()) {
+				activeFragment = dashboardFragment;
+				currentFragmentTag = "DASHBOARD_FRAGMENT";
+			} else if (profileFragment != null && !profileFragment.isHidden()) {
+				activeFragment = profileFragment;
+				currentFragmentTag = "PROFILE_FRAGMENT";
+			} else {
+				// Fallback to home fragment
+				activeFragment = homeFragment;
+				currentFragmentTag = "HOME_FRAGMENT";
+			}
+			highlightNavigation(currentFragmentTag);
 		}
 
         // Set up click listeners
@@ -76,27 +126,12 @@ public class MainActivity extends AppCompatActivity {
         navDashboard.setOnClickListener(v -> setNavSelected(R.id.nav_dashboard));
         navProfile.setOnClickListener(v -> setNavSelected(R.id.nav_profile));
         fabAdd.setOnClickListener(v -> {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, new TransactionFragment(), "TRANSACTION_FRAGMENT")
-                    .addToBackStack("add_transaction")
-                    .commit();
+            TransactionFragmentCreate transactionFragmentCreate = new TransactionFragmentCreate();
+            transactionFragmentCreate.show(getSupportFragmentManager(), TransactionFragmentCreate.TAG);
         });
     }
 
 	private void setNavSelected(int navId) {
-        // Deselect all
-        navHome.setSelected(false);
-        navWallet.setSelected(false);
-        navDashboard.setSelected(false);
-        navProfile.setSelected(false);
-
-        // Select the clicked one
-        View selectedView = findViewById(navId);
-        if (selectedView != null) {
-            selectedView.setSelected(true);
-        }
-
 		// Determine target fragment
 		Fragment target = null;
 		String fragmentTag = null;
@@ -114,6 +149,11 @@ public class MainActivity extends AppCompatActivity {
 			target = profileFragment != null ? profileFragment : getSupportFragmentManager().findFragmentByTag("PROFILE_FRAGMENT");
 		}
 
+		highlightNavigation(fragmentTag);
+		if (fragmentTag != null) {
+			currentFragmentTag = fragmentTag;
+		}
+
 		if (target != null && target != activeFragment) {
 			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 			ft.setReorderingAllowed(true);
@@ -123,19 +163,20 @@ public class MainActivity extends AppCompatActivity {
 			ft.show(target);
 			ft.commit();
 			activeFragment = target;
-			currentFragmentTag = fragmentTag;
 		}
-    }
+	}
 
-	private void loadFragment(Fragment fragment, String tag) {
-		// Deprecated by show/hide pattern; kept for backward compatibility if needed.
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		Fragment existingFragment = fragmentManager.findFragmentByTag(tag);
-		if (existingFragment == null) {
-			FragmentTransaction transaction = fragmentManager.beginTransaction();
-			transaction.setReorderingAllowed(true);
-			transaction.add(R.id.fragment_container, fragment, tag);
-			transaction.commit();
-		}
+
+	private void highlightNavigation(String fragmentTag) {
+		navHome.setSelected("HOME_FRAGMENT".equals(fragmentTag));
+		navWallet.setSelected("WALLET_FRAGMENT".equals(fragmentTag));
+		navDashboard.setSelected("DASHBOARD_FRAGMENT".equals(fragmentTag));
+		navProfile.setSelected("PROFILE_FRAGMENT".equals(fragmentTag));
+	}
+
+    public void setBottomBarVisible(boolean visible) {
+        if (bottomBarContainer != null) {
+            bottomBarContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
 	}
 }

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.MapFragment">
+
+    <org.osmdroid.views.MapView
+        android:id="@+id/osm_map"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/primary_white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Header with back and search buttons -->
+    <LinearLayout
+        android:id="@+id/map_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_card"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/btn_back_map"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_icon_button"
+            android:src="@drawable/ic_arrow_back_24dp"
+            app:tint="@color/primary_black" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/et_map_search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:background="@null"
+            android:hint="@string/search_location"
+            android:textColor="@color/primary_black"
+            android:textColorHint="@color/primary_grey"
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:imeOptions="actionSearch" />
+
+        <ImageButton
+            android:id="@+id/btn_map_search"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_icon_button"
+            android:padding="12dp"
+            android:scaleType="center"
+            app:tint="@color/primary_grey"
+            android:src="@drawable/ic_search_24dp"
+            app:layout_constraintEnd_toStartOf="@id/btn_map"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btn_map_filter"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_icon_button"
+            android:padding="12dp"
+            android:scaleType="center"
+            app:tint="@color/primary_grey"
+            android:src="@drawable/ic_filter_alt_24dp"
+            app:layout_constraintEnd_toStartOf="@id/btn_map"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </LinearLayout>
+
+    <!-- Bottom sheet for expense details -->
+    <include
+        android:id="@+id/expense_details_panel"
+        layout="@layout/view_expense_details_bottom_sheet"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
