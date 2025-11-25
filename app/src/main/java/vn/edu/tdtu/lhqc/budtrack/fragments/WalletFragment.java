@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 
@@ -25,22 +26,28 @@ public class WalletFragment extends Fragment {
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_wallet, container, false);
 
-        // Top bar actions
+        // Close button (back)
         root.findViewById(R.id.btn_close).setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().popBackStack());
 
-        root.findViewById(R.id.btn_edit).setOnClickListener(v ->
-                Toast.makeText(requireContext(), "Chỉnh sửa ví", Toast.LENGTH_SHORT).show());
+        // Edit button → Open WalletEditFragment
+        root.findViewById(R.id.btn_edit).setOnClickListener(v -> {
+            FragmentTransaction transaction = requireActivity()
+                    .getSupportFragmentManager()
+                    .beginTransaction();
 
-        // Add wallet
+            transaction.replace(R.id.fragment_container, WalletEditFragment.newInstance());
+            transaction.addToBackStack(null); // Allows user to press back and return here
+            transaction.commit();
+        });
+
+        // Add wallet button
         root.findViewById(R.id.btn_add_wallet).setOnClickListener(v ->
                 Toast.makeText(requireContext(), "Thêm ví mới", Toast.LENGTH_SHORT).show());
 
-        // Link service
+        // Link service button
         root.findViewById(R.id.btn_link_service).setOnClickListener(v ->
                 Toast.makeText(requireContext(), "Liên kết dịch vụ", Toast.LENGTH_SHORT).show());
-
-        // You can later replace Toasts with navigation to AddWalletFragment, etc.
 
         return root;
     }
