@@ -11,49 +11,6 @@
     android:paddingTop="16dp"
     android:layout_marginBottom="12dp">
 
-    <!-- Tabs -->
-    <LinearLayout
-        android:id="@+id/tabs_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginBottom="12dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/tab_expenses"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:text="@string/tab_expenses"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textColor="@color/primary_black"
-            app:cornerRadius="20dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:backgroundTint="@color/secondary_grey"/>
-
-        <Space
-            android:layout_width="12dp"
-            android:layout_height="match_parent"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/tab_income"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:text="@string/tab_income"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textColor="@color/primary_white"
-            app:cornerRadius="20dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:backgroundTint="@color/primary_green"/>
-
-    </LinearLayout>
-
     <!-- Header row with title and date pill -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -85,26 +42,6 @@
                 android:layout_marginTop="2dp" />
 
         </LinearLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_pick_date"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:minWidth="0dp"
-            android:text="@string/sample_date"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textColor="@color/primary_black"
-            app:iconTint="@color/primary_grey"
-            android:paddingStart="12dp"
-            android:paddingEnd="8dp"
-            app:icon="@drawable/ic_calendar_24dp"
-            app:iconGravity="textEnd"
-            app:iconPadding="8dp"
-            app:cornerRadius="18dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:backgroundTint="@color/secondary_white"/>
 
     </LinearLayout>
 
@@ -239,8 +176,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="12dp"
-        android:visibility="gone">
+        android:layout_marginTop="12dp">
 
         <!-- Row 1 -->
         <LinearLayout
@@ -356,6 +292,21 @@
 
         </LinearLayout>
     </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_view_all_transactions"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="4dp"
+        android:text="@string/view_all_transactions"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textColor="@color/primary_white"
+        android:backgroundTint="@color/primary_green"
+        app:cornerRadius="24dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp" />
 
 </LinearLayout>
 

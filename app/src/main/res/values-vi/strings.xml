@@ -45,14 +45,19 @@
     <string name="tab_expenses">Chi tiêu</string>
     <string name="total_spent">Tổng đã chi</string>
     <string name="this_month_total_spend">Tổng chi tháng này</string>
-    <string name="sample_date">01 Thg 01 2025</string>
-    <!--budget-->
+    <string name="transactions_in_month">Giao dịch trong %1$s</string>
+    <string name="view_all_transactions">Xem các giao dịch</string>
+    <string name="filter_this_month">Tháng</string>
+
+    <!--Budget-->
     <string name="budget_page">Trang ngân sách</string>
-    <!--dashboard-->
+
+    <!--Dashboard-->
     <string name="dashboard_page">Trang thông tin</string>
     <string name="previous_month">Tháng trước</string>
     <string name="next_month">Tháng sau</string>
-    <!--profile-->
+    
+    <!--Profile-->
     <string name="profile_page">Trang hồ sơ</string>
     <string name="profile_header">Thông tin cá nhân </string>
     <string name="profile_name">Tên</string>
@@ -72,7 +77,8 @@
     <string name="language_dialog_confirm">Xác nhận</string>
     <string name="edit">Chỉnh sửa</string>
     <string name="signout_text">ĐĂNG XUẤT</string>
-    <!--Transaction-->
+
+    <!--Transaction History-->
     <string name="add_transaction">Thêm Giao Dịch</string>
     <string name="cancel">Hủy</string>
     <string name="expense">Chi tiêu</string>
@@ -109,6 +115,7 @@
     <string name="error_amount_required">Vui lòng nhập số tiền</string>
     <string name="error_amount_invalid">Số tiền phải lớn hơn 0</string>
     <string name="transaction_saved">Đã thêm giao dịch %1$s: %2$s VND - %3$s</string>
+
     <!--Map-->
     <string name="map_title">Bản đồ chi tiêu</string>
     <string name="map_description">Xem chi tiêu của bạn dựa trên vị trí. Xem nơi bạn chi tiêu nhiều nhất và theo dõi các mẫu chi tiêu của bạn trên bản đồ.</string>
@@ -116,10 +123,15 @@
     <string name="location_permission_denied">Cần quyền vị trí để hiển thị vị trí của bạn trên bản đồ</string>
     <string name="search_location">Tìm vị trí</string>
     <string name="feature_coming_soon">Tính năng này sẽ sớm ra mắt</string>
+
     <!--Map Bottom Sheet-->
     <string name="view_details">Xem chi tiết</string>
     <string name="expense_address">Địa chỉ</string>
     <string name="expense_date">Ngày</string>
     <string name="expense_note">Ghi chú</string>
+
+    <!--Transaction History-->
+    <string name="transactions">Tất cả giao dịch</string>
+    <string name="total">Tổng</string>
 </resources>
 

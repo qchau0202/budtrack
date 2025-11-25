@@ -1,5 +1,6 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.activities.TransactionHistoryActivity;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -66,50 +68,36 @@ public class TransactionHistoryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_transaction_history, container, false);
 
-        MaterialButton tabIncome = root.findViewById(R.id.tab_income);
-        MaterialButton tabExpenses = root.findViewById(R.id.tab_expenses);
-        TextView title = root.findViewById(R.id.tv_card_title);
+        // Get the card container and make it clickable to open fullscreen view
+        LinearLayout cardTransactions = root.findViewById(R.id.card_transactions);
+        if (cardTransactions != null) {
+            cardTransactions.setOnClickListener(v -> {
+                // Only navigate if the click is not on an interactive element (tabs, buttons, etc.)
+                // Child views that handle clicks will consume the event, so this will only fire
+                // when clicking on non-interactive areas of the card
+                Intent intent = new Intent(requireContext(), TransactionHistoryActivity.class);
+                startActivity(intent);
+            });
+            // Make it focusable and clickable
+            cardTransactions.setClickable(true);
+            cardTransactions.setFocusable(true);
+        }
+
+        MaterialButton btnViewAll = root.findViewById(R.id.btn_view_all_transactions);
         LinearLayout listIncome = root.findViewById(R.id.list_income);
         LinearLayout listExpenses = root.findViewById(R.id.list_expenses);
 
-        if (tabIncome != null && tabExpenses != null && title != null && listIncome != null && listExpenses != null) {
-            // Ensure amount colors are applied to initial content
-            colorizeAmounts(listIncome, R.color.secondary_green);
-            colorizeAmounts(listExpenses, R.color.primary_red);
-            tabIncome.setOnClickListener(v -> selectTab(true, tabIncome, tabExpenses, title, listIncome, listExpenses));
-            tabExpenses.setOnClickListener(v -> selectTab(false, tabIncome, tabExpenses, title, listIncome, listExpenses));
-            // default
-            selectTab(false, tabIncome, tabExpenses, title, listIncome, listExpenses);
+        colorizeAmounts(listIncome, R.color.secondary_green);
+        colorizeAmounts(listExpenses, R.color.primary_red);
+
+        if (btnViewAll != null) {
+            btnViewAll.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), TransactionHistoryActivity.class);
+                startActivity(intent);
+            });
         }
 
         return root;
-    }
-
-    private void selectTab(boolean incomeSelected,
-                           MaterialButton tabIncome,
-                           MaterialButton tabExpenses,
-                           TextView title,
-                           LinearLayout listIncome,
-                           LinearLayout listExpenses) {
-        if (incomeSelected) {
-            tabIncome.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
-            tabIncome.setTextColor(getResources().getColor(R.color.primary_white));
-            tabExpenses.setBackgroundTintList(getResources().getColorStateList(R.color.secondary_grey));
-            tabExpenses.setTextColor(getResources().getColor(R.color.primary_black));
-            if (title != null) title.setText(R.string.total_income);
-            listIncome.setVisibility(View.VISIBLE);
-            listExpenses.setVisibility(View.GONE);
-            colorizeAmounts(listIncome, R.color.secondary_green);
-        } else {
-            tabExpenses.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
-            tabExpenses.setTextColor(getResources().getColor(R.color.primary_white));
-            tabIncome.setBackgroundTintList(getResources().getColorStateList(R.color.secondary_grey));
-            tabIncome.setTextColor(getResources().getColor(R.color.primary_black));
-            if (title != null) title.setText(R.string.total_spent);
-            listIncome.setVisibility(View.GONE);
-            listExpenses.setVisibility(View.VISIBLE);
-            colorizeAmounts(listExpenses, R.color.primary_red);
-        }
     }
 
     private void colorizeAmounts(LinearLayout listContainer, int colorResId) {
