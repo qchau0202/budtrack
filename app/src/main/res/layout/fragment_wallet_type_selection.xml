@@ -2,19 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#1A1A1A"
-    android:paddingTop="8dp">
-
-    <!-- Drag Handle -->
-    <View
-        android:layout_width="40dp"
-        android:layout_height="4dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/bottom_sheet_drag_handle"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp" />
+    android:background="@color/primary_white">
 
     <!-- Header with Title and Close -->
     <LinearLayout
@@ -23,35 +13,32 @@
         android:orientation="horizontal"
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
         android:gravity="center_vertical">
 
-        <TextView
+        <ImageButton
             android:id="@+id/tvClose"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Đóng"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:padding="8dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true" />
+            android:contentDescription="Close"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="@color/primary_black" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Thêm Ví"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/primary_black"
             android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center" />
 
         <View
-            android:layout_width="48dp"
-            android:layout_height="48dp" />
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
     </LinearLayout>
 
     <!-- Wallet Type Grid -->
@@ -61,7 +48,7 @@
         android:orientation="vertical"
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
-        android:paddingBottom="32dp">
+        android:paddingBottom="24dp">
 
         <!-- First Row -->
         <LinearLayout
