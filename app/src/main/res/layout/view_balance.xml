@@ -61,10 +61,10 @@
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_add_expenses"
+                android:id="@+id/btn_view_wallet"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:text="@string/add_expenses"
+                android:text="@string/view_wallet"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 android:textColor="@color/primary_white"

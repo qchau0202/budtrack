@@ -37,7 +37,7 @@
     <string name="good_morning">Good morning,</string>
     <string name="welcome_name">Chou</string>
     <string name="your_balance">Your balance</string>
-    <string name="add_expenses">Add income</string>
+    <string name="view_wallet">View wallet</string>
     <string name="total_expenses">Total Expenses</string>
     <string name="total_income">Total Income</string>
     <string name="tab_income">Income</string>
