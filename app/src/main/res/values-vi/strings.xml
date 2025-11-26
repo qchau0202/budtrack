@@ -51,6 +51,14 @@
 
     <!--Budget-->
     <string name="budget_page">Trang ngân sách</string>
+    <string name="budgets">Ngân sách</string>
+    <string name="total_budget">Tổng ngân sách</string>
+    <string name="spent">đã chi</string>
+    <string name="left">còn lại</string>
+    <string name="overspending">vượt quá</string>
+    <string name="budget_daily">Hàng ngày</string>
+    <string name="budget_personal">Cá nhân</string>
+    <string name="budget_others">Khác</string>
 
     <!--Dashboard-->
     <string name="dashboard_page">Trang thông tin</string>
@@ -133,5 +141,30 @@
     <!--Transaction History-->
     <string name="transactions">Tất cả giao dịch</string>
     <string name="total">Tổng</string>
+
+    <!--Notifications-->
+    <string name="notifications">Thông báo</string>
+    <string name="notification_page">Trang thông báo</string>
+    <string name="no_notifications">Chưa có thông báo nào</string>
+    <string name="notification_today">Hôm nay</string>
+    <string name="notification_yesterday">Hôm qua</string>
+    <string name="notification_this_week">Tuần này</string>
+    <string name="notification_expense_reminder_title">Nhắc nhở chi tiêu</string>
+    <string name="notification_expense_reminder_message">Đừng quên nhập chi tiêu hôm nay! Hãy cập nhật theo dõi ngân sách của bạn.</string>
+    <string name="notification_budget_overspending_title">Vượt quá ngân sách</string>
+    <string name="notification_budget_overspending_message">Bạn đã vượt quá ngân sách %1$s %2$s. Xem lại chi tiêu để quay lại đúng hướng.</string>
+    <string name="notification_budget_warning_title">Cảnh báo ngân sách</string>
+    <string name="notification_budget_warning_message">Bạn đã sử dụng %1$d%% ngân sách %2$s. Chỉ còn %3$s.</string>
+    <string name="notification_budget_limit_title">Đạt giới hạn ngân sách</string>
+    <string name="notification_budget_limit_message">Bạn đã đạt %1$d%% ngân sách %2$s. Hãy cân nhắc điều chỉnh chi tiêu.</string>
+    <string name="notification_daily_summary_title">Tóm tắt hôm nay</string>
+    <string name="notification_daily_summary_message">Bạn đã chi %1$s hôm nay với %2$d giao dịch. Hãy ở trong ngân sách hàng ngày!</string>
+    <string name="notification_weekly_summary_title">Tóm tắt tuần</string>
+    <string name="notification_weekly_summary_message">Tuần này bạn đã chi %1$s. Đó là %2$s so với tuần trước.</string>
+    <string name="hours_ago">%1$d giờ trước</string>
+    <string name="minutes_ago">%1$d phút trước</string>
+    <string name="just_now">Vừa xong</string>
+    <string name="transactions_count">%1$d giao dịch</string>
+    <string name="mark_all_read">Đánh dấu đã đọc</string>
 </resources>
 
