@@ -21,6 +21,7 @@ import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.services.BalanceService;
+import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
 import vn.edu.tdtu.lhqc.budtrack.widgets.PieChartView;
 
 /**
@@ -74,13 +75,9 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
-        
-        // Setup map button click listener
-        ImageButton btnMap = root.findViewById(R.id.btn_map);
-        if (btnMap != null) {
-            btnMap.setOnClickListener(v -> showMapFragment());
-        }
-        
+
+        GeneralHeaderController.setup(root, this);
+
         // Setup balance view
         setupBalanceView(root);
         
@@ -235,14 +232,6 @@ public class HomeFragment extends Fragment {
         }
     }
     
-    private void showMapFragment() {
-        MapFragment mapFragment = MapFragment.newInstance();
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, mapFragment, "MAP_FRAGMENT");
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
-
     private void showWalletFragment() {
         WalletFragment walletFragment = WalletFragment.newInstance();
         FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();

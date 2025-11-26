@@ -38,18 +38,16 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
     private static final String TYPE_OTHERS = "others";
     
     private MaterialButton tabExpense, tabIncome, tabOthers, btnSave;
-    private TextView tvDate, tvCategory, tvCancel, tvTitle, tvSubCategory;
+    private TextView tvDate, tvCategory, tvCancel, tvTitle;
     private EditText editAmount, editNote;
-    private View cardDate, cardCategory, cardWallet, cardSubCategory;
-    private ImageView ivCategoryIcon, ivSubCategoryIcon;
+    private View cardDate, cardCategory, cardWallet;
+    private ImageView ivCategoryIcon;
 
     private final Calendar selectedDate = Calendar.getInstance();
     private String selectedType = TYPE_EXPENSE;
     private String currentAmount = "";
     private String selectedCategory = null;
     private int selectedCategoryIconResId = 0;
-    private String selectedSubCategory = null;
-    private int selectedSubCategoryIconResId = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,14 +95,12 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
         // Text views
         tvDate = view.findViewById(R.id.tvDate);
         tvCategory = view.findViewById(R.id.tvCategory);
-        tvSubCategory = view.findViewById(R.id.tvSubCategory);
         tvCancel = view.findViewById(R.id.tvCancel);
         tvTitle = view.findViewById(R.id.tvTitle);
 
         // Cards
         cardDate = view.findViewById(R.id.cardDate);
         cardCategory = view.findViewById(R.id.cardCategory);
-        cardSubCategory = view.findViewById(R.id.cardSubCategory);
         cardWallet = view.findViewById(R.id.cardWallet);
 
         // Buttons
@@ -112,7 +108,6 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
 
         // Category selection
         ivCategoryIcon = view.findViewById(R.id.ivCategoryIcon);
-        ivSubCategoryIcon = view.findViewById(R.id.ivSubCategoryIcon);
 
         updateDateText();
         updateTabSelection(); // Set initial tab selection
@@ -243,7 +238,6 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
         tvCancel.setOnClickListener(v -> dismiss());
 
         cardCategory.setOnClickListener(v -> showCategorySelectionSheet());
-        cardSubCategory.setOnClickListener(v -> showSubCategorySelectionSheet());
 
         cardWallet.setOnClickListener(v -> {
             // TODO: Implement wallet selection dialog
@@ -280,37 +274,6 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
         // Update category text
         tvCategory.setText(categoryName);
         tvCategory.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
-    }
-
-    private void showSubCategorySelectionSheet() {
-        CategorySelectBottomSheet sheet = CategorySelectBottomSheet.newInstance(R.string.select_subcategory_title);
-        sheet.setOnCategorySelectedListener(new CategorySelectBottomSheet.OnCategorySelectedListener() {
-            @Override
-            public void onCategorySelected(CategorySelectBottomSheet.CategoryOption option) {
-                selectSubCategory(option.name, option.iconResId);
-            }
-
-            @Override
-            public void onAddCategoryRequested() {
-                Toast.makeText(requireContext(), getString(R.string.add_new_subcategory), Toast.LENGTH_SHORT).show();
-            }
-        });
-        sheet.show(getParentFragmentManager(), CategorySelectBottomSheet.TAG + "_SUB");
-    }
-
-    private void selectSubCategory(String subCategoryName, int iconResId) {
-        selectedSubCategory = subCategoryName;
-        selectedSubCategoryIconResId = iconResId;
-
-        if (iconResId != 0) {
-            ivSubCategoryIcon.setImageResource(iconResId);
-            ivSubCategoryIcon.setVisibility(View.VISIBLE);
-        } else {
-            ivSubCategoryIcon.setVisibility(View.GONE);
-        }
-
-        tvSubCategory.setText(subCategoryName);
-        tvSubCategory.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
     }
     
     private void saveTransaction() {

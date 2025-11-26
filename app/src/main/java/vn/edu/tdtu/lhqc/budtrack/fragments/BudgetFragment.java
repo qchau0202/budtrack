@@ -22,6 +22,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
 
 /**
  * Budget Fragment - Displays budget information with budgets
@@ -83,6 +84,7 @@ public class BudgetFragment extends Fragment {
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_budget, container, false);
 
+        GeneralHeaderController.setup(root, this);
         setupBudgetData(root);
 
         return root;
