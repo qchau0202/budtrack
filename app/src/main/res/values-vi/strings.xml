@@ -68,7 +68,7 @@
     <string name="settings">Cài đặt</string>
     <string name="dark_mode">Chế độ tối</string>
     <string name="language">Ngôn ngữ</string>
-    <string name="currency">Tiền tệ</string>
+    <string name="currency">Đơn vị</string>
     <string name="language_value">Tiếng Việt</string>
     <string name="currency_value">VND</string>
     <string name="language_dialog_title">Chọn ngôn ngữ</string>
