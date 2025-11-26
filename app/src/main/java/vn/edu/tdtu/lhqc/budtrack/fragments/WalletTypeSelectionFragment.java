@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
@@ -31,28 +30,21 @@ public class WalletTypeSelectionFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().popBackStack());
 
         // Basic wallet card
-        CardView cardBasic = root.findViewById(R.id.card_basic_wallet);
+        View cardBasic = root.findViewById(R.id.card_basic_wallet);
         cardBasic.setOnClickListener(v -> {
             Toast.makeText(requireContext(), "Tạo ví cơ bản", Toast.LENGTH_SHORT).show();
             // TODO: Navigate to wallet creation form with type = BASIC
         });
 
-        // Linked wallet card
-        CardView cardLinked = root.findViewById(R.id.card_linked_wallet);
-        cardLinked.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Tạo ví liên kết", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to wallet creation form with type = LINKED
-        });
-
-        // Credit wallet card
-        CardView cardCredit = root.findViewById(R.id.card_credit_wallet);
-        cardCredit.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Tạo ví tín dụng", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to wallet creation form with type = CREDIT
+        // Investment wallet card
+        View cardInvestment = root.findViewById(R.id.card_investment_wallet);
+        cardInvestment.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "Tạo ví đầu tư", Toast.LENGTH_SHORT).show();
+            // TODO: Navigate to wallet creation form with type = INVESTMENT
         });
 
         // Savings wallet card
-        CardView cardSavings = root.findViewById(R.id.card_savings_wallet);
+        View cardSavings = root.findViewById(R.id.card_savings_wallet);
         cardSavings.setOnClickListener(v -> {
             Toast.makeText(requireContext(), "Tạo ví tiết kiệm", Toast.LENGTH_SHORT).show();
             // TODO: Navigate to wallet creation form with type = SAVINGS
