@@ -4,70 +4,77 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#121212">
+    android:background="@color/primary_white">
 
     <!-- Top bar -->
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="#1E1E1E">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:gravity="center_vertical">
 
         <ImageButton
             android:id="@+id/btn_close"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Close"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="#FFFFFF" />
+            app:tint="@color/primary_black" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_weight="1"
             android:text="Ví Của Tôi"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textColor="@color/primary_black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center" />
 
         <TextView
             android:id="@+id/btn_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="16dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
             android:text="Sửa"
-            android:textColor="#4CAF50"
-            android:textSize="16sp" />
-    </RelativeLayout>
+            android:textColor="@color/primary_green"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
 
     <!-- Total balance -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
         android:padding="24dp"
-        android:background="#1E1E1E">
+        android:background="@drawable/bg_card">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Tổng cộng"
-            android:textColor="#888888"
+            android:textColor="@color/primary_grey"
             android:textSize="14sp" />
 
         <TextView
             android:id="@+id/tv_total_balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:text="-1.200.050.000 đ"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/primary_black"
             android:textSize="32sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -77,11 +84,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="24dp"
-        android:paddingTop="32dp"
         android:paddingEnd="24dp"
         android:paddingBottom="12dp"
         android:text="TÍNH VÀO TỔNG"
-        android:textColor="#888888"
+        android:textColor="@color/primary_grey"
         android:textSize="12sp"
         android:textStyle="bold" />
 
@@ -92,16 +98,17 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:background="#2D2D2D"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_card"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="12dp"
         android:gravity="center_vertical">
 
         <ImageView
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/ic_wallet_cash"
-            app:tint="#FF9800" />
+            app:tint="@color/primary_green" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -114,17 +121,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tiền mặt"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textColor="@color/primary_grey"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tv_cash_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="-1.200.050.000 đ"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textColor="@color/primary_black"
+                android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
@@ -136,26 +143,26 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:background="#2D2D2D"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_card"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="12dp"
         android:gravity="center_vertical"
         android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground">
+        android:focusable="true">
 
         <ImageView
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@android:drawable/ic_menu_add"
-            app:tint="#4CAF50" />
+            app:tint="@color/primary_green" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:text="Thêm ví"
-            android:textColor="#4CAF50"
+            android:textColor="@color/primary_green"
             android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -167,26 +174,26 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:background="#2D2D2D"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_card"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="12dp"
         android:gravity="center_vertical"
         android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground">
+        android:focusable="true">
 
         <ImageView
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@android:drawable/ic_menu_share"
-            app:tint="#4CAF50" />
+            app:tint="@color/primary_green" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:text="Liên kết dịch vụ"
-            android:textColor="#4CAF50"
+            android:textColor="@color/primary_green"
             android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>

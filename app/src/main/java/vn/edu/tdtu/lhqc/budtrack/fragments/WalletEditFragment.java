@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,9 +23,12 @@ import vn.edu.tdtu.lhqc.budtrack.R;
 public class WalletEditFragment extends Fragment {
 
     private TextView tvWalletName;
+    private EditText editBalance;
     private SwitchCompat switchNotification;
     private SwitchCompat switchExcludeTotal;
     private SwitchCompat switchArchive;
+    private ImageView ivWalletIcon;
+    private ImageView ivIconDropdown;
 
     public WalletEditFragment() {}
 
@@ -43,9 +47,6 @@ public class WalletEditFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Top bar
-        view.findViewById(R.id.btn_close).setOnClickListener(v ->
-                requireActivity().getSupportFragmentManager().popBackStack());
-
         view.findViewById(R.id.btn_done).setOnClickListener(v -> {
             saveWalletChanges();
             Toast.makeText(requireContext(), "Đã lưu thay đổi", Toast.LENGTH_SHORT).show();
@@ -54,48 +55,71 @@ public class WalletEditFragment extends Fragment {
 
         // Views
         tvWalletName = view.findViewById(R.id.tv_wallet_name);
+        editBalance = view.findViewById(R.id.edit_balance);
+        ivWalletIcon = view.findViewById(R.id.iv_wallet_icon);
+        ivIconDropdown = view.findViewById(R.id.iv_icon_dropdown);
         switchNotification = view.findViewById(R.id.switch_notification);
         switchExcludeTotal = view.findViewById(R.id.switch_exclude_total);
         switchArchive = view.findViewById(R.id.switch_archive);
 
+        // Wallet icon selector
+        view.findViewById(R.id.layout_wallet_info).setOnClickListener(v -> showIconSelectionDialog());
+
         // Action buttons
         view.findViewById(R.id.btn_transfer).setOnClickListener(v ->
                 Toast.makeText(requireContext(), "Chuyển tiền đến ví khác", Toast.LENGTH_SHORT).show());
-
-        view.findViewById(R.id.btn_edit_balance).setOnClickListener(v -> showEditBalanceDialog());
 
         view.findViewById(R.id.btn_delete).setOnClickListener(v -> showDeleteConfirmationDialog());
     }
 
     private void saveWalletChanges() {
         String walletName = tvWalletName.getText().toString().trim();
+        String balanceText = editBalance.getText().toString().trim();
         boolean notify = switchNotification.isChecked();
         boolean excludeFromTotal = switchExcludeTotal.isChecked();
         boolean archived = switchArchive.isChecked();
 
+        // Save balance if entered
+        if (!balanceText.isEmpty()) {
+            try {
+                long newBalance = Long.parseLong(balanceText);
+                updateWalletBalance(newBalance);
+            } catch (NumberFormatException e) {
+                Toast.makeText(requireContext(), "Số dư không hợp lệ", Toast.LENGTH_SHORT).show();
+            }
+        }
+
         // TODO: Save to Room / ViewModel
     }
 
-    private void showEditBalanceDialog() {
-        EditText input = new EditText(requireContext());
-        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
-        input.setHint("Nhập số dư mới (ví dụ: 5000000 hoặc -1200050000)");
-        input.setTextSize(18);
-        input.setPadding(50, 40, 50, 40);
+    private void showIconSelectionDialog() {
+        // Icon options
+        String[] iconNames = {
+            "Tiền mặt",
+            "Thẻ ngân hàng",
+            "Ví điện tử",
+            "Tiết kiệm",
+            "Đầu tư",
+            "Khác"
+        };
+
+        int[] iconResources = {
+            R.drawable.ic_wallet_cash,
+            R.drawable.ic_wallet_cash,
+            R.drawable.ic_wallet_cash,
+            R.drawable.ic_wallet_cash,
+            R.drawable.ic_wallet_cash,
+            R.drawable.ic_wallet_cash
+        };
 
         new AlertDialog.Builder(requireContext())
-                .setTitle("Điều chỉnh số dư")
-                .setView(input)
-                .setPositiveButton("Cập nhật", (dialog, which) -> {
-                    String text = input.getText().toString().trim();
-                    if (!text.isEmpty()) {
-                        try {
-                            long newBalance = Long.parseLong(text);
-                            updateWalletBalance(newBalance);
-                        } catch (NumberFormatException e) {
-                            Toast.makeText(requireContext(), "Số không hợp lệ", Toast.LENGTH_SHORT).show();
-                        }
-                    }
+                .setTitle("Chọn biểu tượng ví")
+                .setItems(iconNames, (dialog, which) -> {
+                    ivWalletIcon.setImageResource(iconResources[which]);
+                    tvWalletName.setText(iconNames[which]);
+                    Toast.makeText(requireContext(), 
+                        "Đã chọn: " + iconNames[which], 
+                        Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
