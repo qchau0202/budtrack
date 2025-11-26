@@ -96,6 +96,7 @@ public class HomeFragment extends Fragment {
     private void setupBalanceView(View root) {
         TextView tvBalance = root.findViewById(R.id.tv_total_balance_amount);
         ImageButton btnVisibility = root.findViewById(R.id.btn_visibility);
+        MaterialButton btnViewWallet = root.findViewById(R.id.btn_view_wallet);
 
         if (tvBalance != null && btnVisibility != null) {
             // Preserve the original unmasked balance text
@@ -109,6 +110,11 @@ public class HomeFragment extends Fragment {
                 tvBalance.setText(BalanceService.formatDisplay(originalBalanceText, nowHidden));
                 btnVisibility.setImageResource(nowHidden ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
             });
+        }
+
+        // Setup view wallet button click listener
+        if (btnViewWallet != null) {
+            btnViewWallet.setOnClickListener(v -> showWalletFragment());
         }
     }
     
@@ -233,6 +239,14 @@ public class HomeFragment extends Fragment {
         MapFragment mapFragment = MapFragment.newInstance();
         FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, mapFragment, "MAP_FRAGMENT");
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    private void showWalletFragment() {
+        WalletFragment walletFragment = WalletFragment.newInstance();
+        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, walletFragment, "WALLET_FRAGMENT");
         transaction.addToBackStack(null);
         transaction.commit();
     }

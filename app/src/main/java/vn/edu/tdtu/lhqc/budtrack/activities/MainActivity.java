@@ -19,7 +19,7 @@ import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.fragments.DashboardFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.HomeFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.ProfileFragment;
-import vn.edu.tdtu.lhqc.budtrack.fragments.WalletFragment;
+import vn.edu.tdtu.lhqc.budtrack.fragments.BudgetFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionFragmentCreate;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
@@ -27,7 +27,7 @@ import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 public class MainActivity extends AppCompatActivity {
 
     private View navHome;
-    private View navWallet;
+    private View navBudget;
     private View navDashboard;
     private View navProfile;
 	private String currentFragmentTag;
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
 	// Cache fragments to avoid re-creating on each tab switch
 	private Fragment homeFragment;
-	private Fragment walletFragment;
+	private Fragment budgetFragment;
 	private Fragment dashboardFragment;
 	private Fragment profileFragment;
 	private Fragment activeFragment;
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize navigation views
         navHome = findViewById(R.id.nav_home);
-        navWallet = findViewById(R.id.nav_wallet);
+        navBudget = findViewById(R.id.nav_budget);
         navDashboard = findViewById(R.id.nav_dashboard);
         navProfile = findViewById(R.id.nav_profile);
         FloatingActionButton fabAdd = findViewById(R.id.fab_add);
@@ -77,14 +77,14 @@ public class MainActivity extends AppCompatActivity {
 		if (savedInstanceState == null && existingHome == null) {
 			// First time creation - create new fragments
 			homeFragment = new HomeFragment();
-			walletFragment = new WalletFragment();
+			budgetFragment = new BudgetFragment();
 			dashboardFragment = new DashboardFragment();
 			profileFragment = new ProfileFragment();
 
 			FragmentTransaction ft = fm.beginTransaction();
 			ft.setReorderingAllowed(true);
 			ft.add(R.id.fragment_container, homeFragment, "HOME_FRAGMENT");
-			ft.add(R.id.fragment_container, walletFragment, "WALLET_FRAGMENT").hide(walletFragment);
+			ft.add(R.id.fragment_container, budgetFragment, "BUDGET_FRAGMENT").hide(budgetFragment);
 			ft.add(R.id.fragment_container, dashboardFragment, "DASHBOARD_FRAGMENT").hide(dashboardFragment);
 			ft.add(R.id.fragment_container, profileFragment, "PROFILE_FRAGMENT").hide(profileFragment);
 			ft.commit();
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 		} else {
 			// Restore fragments from saved state
 			homeFragment = fm.findFragmentByTag("HOME_FRAGMENT");
-			walletFragment = fm.findFragmentByTag("WALLET_FRAGMENT");
+			budgetFragment = fm.findFragmentByTag("BUDGET_FRAGMENT");
 			dashboardFragment = fm.findFragmentByTag("DASHBOARD_FRAGMENT");
 			profileFragment = fm.findFragmentByTag("PROFILE_FRAGMENT");
 
@@ -103,9 +103,9 @@ public class MainActivity extends AppCompatActivity {
 			if (homeFragment != null && !homeFragment.isHidden()) {
 				activeFragment = homeFragment;
 				currentFragmentTag = "HOME_FRAGMENT";
-			} else if (walletFragment != null && !walletFragment.isHidden()) {
-				activeFragment = walletFragment;
-				currentFragmentTag = "WALLET_FRAGMENT";
+			} else if (budgetFragment != null && !budgetFragment.isHidden()) {
+				activeFragment = budgetFragment;
+				currentFragmentTag = "BUDGET_FRAGMENT";
 			} else if (dashboardFragment != null && !dashboardFragment.isHidden()) {
 				activeFragment = dashboardFragment;
 				currentFragmentTag = "DASHBOARD_FRAGMENT";
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up click listeners
         navHome.setOnClickListener(v -> setNavSelected(R.id.nav_home));
-        navWallet.setOnClickListener(v -> setNavSelected(R.id.nav_wallet));
+        navBudget.setOnClickListener(v -> setNavSelected(R.id.nav_budget));
         navDashboard.setOnClickListener(v -> setNavSelected(R.id.nav_dashboard));
         navProfile.setOnClickListener(v -> setNavSelected(R.id.nav_profile));
         fabAdd.setOnClickListener(v -> {
@@ -138,9 +138,9 @@ public class MainActivity extends AppCompatActivity {
 		if (navId == R.id.nav_home) {
 			fragmentTag = "HOME_FRAGMENT";
 			target = homeFragment != null ? homeFragment : getSupportFragmentManager().findFragmentByTag("HOME_FRAGMENT");
-		} else if (navId == R.id.nav_wallet) {
-			fragmentTag = "WALLET_FRAGMENT";
-			target = walletFragment != null ? walletFragment : getSupportFragmentManager().findFragmentByTag("WALLET_FRAGMENT");
+		} else if (navId == R.id.nav_budget) {
+			fragmentTag = "BUDGET_FRAGMENT";
+			target = budgetFragment != null ? budgetFragment : getSupportFragmentManager().findFragmentByTag("BUDGET_FRAGMENT");
 		} else if (navId == R.id.nav_dashboard) {
 			fragmentTag = "DASHBOARD_FRAGMENT";
 			target = dashboardFragment != null ? dashboardFragment : getSupportFragmentManager().findFragmentByTag("DASHBOARD_FRAGMENT");
@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private void highlightNavigation(String fragmentTag) {
 		navHome.setSelected("HOME_FRAGMENT".equals(fragmentTag));
-		navWallet.setSelected("WALLET_FRAGMENT".equals(fragmentTag));
+		navBudget.setSelected("BUDGET_FRAGMENT".equals(fragmentTag));
 		navDashboard.setSelected("DASHBOARD_FRAGMENT".equals(fragmentTag));
 		navProfile.setSelected("PROFILE_FRAGMENT".equals(fragmentTag));
 	}

@@ -38,7 +38,7 @@
     <string name="good_morning">Chào buổi sáng,</string>
     <string name="welcome_name">Chou</string>
     <string name="your_balance">Số dư của bạn</string>
-    <string name="add_expenses">Thêm thu nhập</string>
+    <string name="view_wallet">Xem ví tiền</string>
     <string name="total_expenses">Tổng chi tiêu</string>
     <string name="total_income">Tổng thu nhập</string>
     <string name="tab_income">Thu nhập</string>
