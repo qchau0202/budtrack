@@ -49,6 +49,14 @@
     <string name="filter_this_month">Month</string>
     <!--budget-->
     <string name="budget_page">Budget page</string>
+    <string name="budgets">Budgets</string>
+    <string name="total_budget">Total Budget</string>
+    <string name="spent">spent</string>
+    <string name="left">left</string>
+    <string name="overspending">overspending</string>
+    <string name="budget_daily">Daily</string>
+    <string name="budget_personal">Personal</string>
+    <string name="budget_others">Others</string>
     <!--dashboard-->
     <string name="dashboard_page">Dashboard page</string>
     <string name="previous_month">Previous month</string>

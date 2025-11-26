@@ -33,7 +33,7 @@
                 layout="@layout/view_analytics" />
 
             <include
-                layout="@layout/view_dashboard_pie_chart_section"/>
+                layout="@layout/view_pie_chart"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
