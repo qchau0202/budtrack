@@ -133,4 +133,28 @@
     <!--Transaction History-->
     <string name="transactions">All transactions</string>
     <string name="total">Total</string>
+    <!--Notifications-->
+    <string name="notifications">Notifications</string>
+    <string name="notification_page">Notification page</string>
+    <string name="no_notifications">No notifications yet</string>
+    <string name="notification_today">Today</string>
+    <string name="notification_yesterday">Yesterday</string>
+    <string name="notification_this_week">This Week</string>
+    <string name="notification_expense_reminder_title">Expense Reminder</string>
+    <string name="notification_expense_reminder_message">Don\'t forget to input your expenses today! Keep your budget tracking up to date.</string>
+    <string name="notification_budget_overspending_title">Budget Overspending</string>
+    <string name="notification_budget_overspending_message">You\'ve exceeded your %1$s budget by %2$s. Review your spending to get back on track.</string>
+    <string name="notification_budget_warning_title">Budget Warning</string>
+    <string name="notification_budget_warning_message">You\'ve used %1$d%% of your %2$s budget. Only %3$s remaining.</string>
+    <string name="notification_budget_limit_title">Budget Limit Reached</string>
+    <string name="notification_budget_limit_message">You\'ve reached %1$d%% of your %2$s budget. Consider adjusting your spending.</string>
+    <string name="notification_daily_summary_title">Daily Summary</string>
+    <string name="notification_daily_summary_message">You spent %1$s today across %2$d transactions. Stay within your daily budget!</string>
+    <string name="notification_weekly_summary_title">Weekly Summary</string>
+    <string name="notification_weekly_summary_message">This week you spent %1$s. That\'s %2$s compared to last week.</string>
+    <string name="hours_ago">%1$d hours ago</string>
+    <string name="minutes_ago">%1$d minutes ago</string>
+    <string name="just_now">Just now</string>
+    <string name="transactions_count">%1$d transaction(s)</string>
+    <string name="mark_all_read">Mark all read</string>
 </resources>

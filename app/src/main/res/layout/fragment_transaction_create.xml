@@ -262,59 +262,6 @@
 
             </LinearLayout>
 
-            <!-- Subcategory Section -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/select_subcategory"
-                    android:textColor="@color/primary_grey"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="12dp" />
-
-                <LinearLayout
-                    android:id="@+id/cardSubCategory"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_card"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center_vertical"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:id="@+id/ivSubCategoryIcon"
-                        android:layout_width="32dp"
-                        android:layout_height="24dp"
-                        android:visibility="gone"
-                        android:scaleType="fitCenter"
-                        android:adjustViewBounds="true"
-                        app:tint="@color/primary_green" />
-
-                    <TextView
-                        android:id="@+id/tvSubCategory"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="@string/select_subcategory"
-                        android:textColor="@color/primary_grey"
-                        android:textSize="16sp" />
-
-                    <ImageView
-                        android:id="@+id/ivSubCategoryArrow"
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:src="@drawable/ic_arrow_forward_24dp"
-                        app:tint="@color/primary_grey" />
-                </LinearLayout>
-            </LinearLayout>
-
             <!-- Date Card -->
             <LinearLayout
                 android:id="@+id/cardDate"

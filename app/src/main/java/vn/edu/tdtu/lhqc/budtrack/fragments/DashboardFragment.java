@@ -13,9 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentTransaction;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -110,23 +110,11 @@ public class DashboardFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
+        GeneralHeaderController.setup(root, this);
+
         // Initialize calendar
         initializeCalendar(root);
-        
-        // Setup map button click listener
-        ImageButton btnMap = root.findViewById(R.id.btn_map);
-        if (btnMap != null) {
-            btnMap.setOnClickListener(v -> showMapFragment());
-        }
         return root;
-    }
-    
-    private void showMapFragment() {
-        MapFragment mapFragment = MapFragment.newInstance();
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, mapFragment, "MAP_FRAGMENT");
-        transaction.addToBackStack(null);
-        transaction.commit();
     }
 
     // Initialize the calendar month view
