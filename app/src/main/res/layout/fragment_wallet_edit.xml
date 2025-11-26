@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
+    android:background="@color/primary_black"
     android:fillViewport="true">
 
     <LinearLayout
@@ -15,7 +15,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="#1E1E1E">
+            android:background="@color/primary_black">
 
             <TextView
                 android:id="@+id/btn_close"
@@ -25,7 +25,7 @@
                 android:layout_centerVertical="true"
                 android:padding="16dp"
                 android:text="Đóng"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/primary_white"
                 android:textSize="16sp" />
 
             <TextView
@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="Tiền mặt"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/primary_white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -45,7 +45,7 @@
                 android:layout_centerVertical="true"
                 android:padding="16dp"
                 android:text="Xong"
-                android:textColor="#4CAF50"
+                android:textColor="@color/primary_green"
                 android:textSize="16sp" />
         </RelativeLayout>
 
@@ -55,9 +55,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:background="#2D2D2D"
+            android:background="@color/primary_black"
             android:clipToPadding="false"
-            android:elevation="4dp"
+            android:elevation="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="20dp">
@@ -67,7 +67,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/ic_wallet_cash"
-                app:tint="#FF9800" />
+                app:tint="@color/primary_yellow" />
 
             <TextView
                 android:id="@+id/tv_wallet_name"
@@ -75,111 +75,18 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Tiền mặt"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/primary_white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Currency -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="8dp"
-            android:background="#2D2D2D"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@android:drawable/ic_lock_lock"
-                app:tint="#888888" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:text="Việt Nam Đồng"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp" />
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_manage"
-                app:tint="#888888" />
-        </LinearLayout>
-
         <!-- Owner Info -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:background="#2D2D2D"
-            android:orientation="vertical"
-            android:padding="20dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Người dùng"
-                android:textColor="#888888"
-                android:textSize="14sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tv_user_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ngthnhung2005"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_user_email"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ngthnhung2005@gmail.com"
-                        android:textColor="#888888"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="#FF9800"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="6dp"
-                    android:text="Chủ sở hữu"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp" />
-            </LinearLayout>
-        </LinearLayout>
-
         <!-- Toggles Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:background="#2D2D2D"
+            android:background="@color/primary_black"
             android:orientation="vertical"
             android:padding="16dp">
 
@@ -191,7 +98,6 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <!-- FIX: Added labelFor to link text to the switch -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -203,14 +109,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Bật thông báo"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/primary_white"
                         android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Nhận thông báo khi ví có giao dịch mới."
-                        android:textColor="#888888"
+                        android:textColor="@color/primary_grey"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -219,7 +125,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:contentDescription="Bật thông báo" />
+                    app:thumbTint="@color/primary_green"
+                    app:trackTint="@color/primary_grey" />
             </LinearLayout>
 
             <!-- Exclude from total -->
@@ -230,7 +137,6 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <!-- FIX: Added labelFor to link text to the switch -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -242,14 +148,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Không tính vào tổng"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/primary_white"
                         android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Bỏ qua ví này và số dư khỏi &quot;Tổng&quot;."
-                        android:textColor="#888888"
+                        android:textColor="@color/primary_grey"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -257,7 +163,8 @@
                     android:id="@+id/switch_exclude_total"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:contentDescription="Không tính vào tổng" />
+                    app:thumbTint="@color/primary_green"
+                    app:trackTint="@color/primary_grey" />
             </LinearLayout>
 
             <!-- Archive -->
@@ -267,7 +174,6 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <!-- FIX: Added labelFor to link text to the switch -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -279,14 +185,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Lưu trữ"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/primary_white"
                         android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Đóng băng ví này và ngừng tạo ra giao dịch định kỳ &amp; hóa đơn."
-                        android:textColor="#888888"
+                        android:textColor="@color/primary_grey"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -294,7 +200,8 @@
                     android:id="@+id/switch_archive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:contentDescription="Lưu trữ" />
+                    app:thumbTint="@color/primary_green"
+                    app:trackTint="@color/primary_grey" />
             </LinearLayout>
         </LinearLayout>
 
@@ -304,14 +211,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:background="#2D2D2D"
+            android:background="@color/primary_black"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:padding="18dp"
             android:text="Chuyển tiền đến ví khác"
-            android:textColor="#4CAF50"
+            android:textColor="@color/primary_green"
             android:textSize="16sp" />
 
         <TextView
@@ -321,14 +228,14 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
-            android:background="#2D2D2D"
+            android:background="@color/primary_black"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:padding="18dp"
             android:text="Điều chỉnh số dư"
-            android:textColor="#4CAF50"
+            android:textColor="@color/primary_green"
             android:textSize="16sp" />
 
         <TextView
@@ -336,17 +243,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:background="#2D2D2D"
+            android:background="@color/primary_black"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:padding="18dp"
             android:text="Xóa"
-            android:textColor="#F44336"
+            android:textColor="@color/primary_red"
             android:textSize="16sp" />
 
-        <!-- Extra space at bottom -->
         <View
             android:layout_width="match_parent"
             android:layout_height="32dp" />
