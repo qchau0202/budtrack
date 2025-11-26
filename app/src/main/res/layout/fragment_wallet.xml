@@ -167,35 +167,4 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Optional: Link services -->
-    <LinearLayout
-        android:id="@+id/btn_link_service"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="@drawable/bg_card"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="12dp"
-        android:gravity="center_vertical"
-        android:clickable="true"
-        android:focusable="true">
-
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@android:drawable/ic_menu_share"
-            app:tint="@color/primary_green" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Liên kết dịch vụ"
-            android:textColor="@color/primary_green"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
 </LinearLayout>
