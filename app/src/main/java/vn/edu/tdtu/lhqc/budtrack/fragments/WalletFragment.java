@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -41,13 +40,16 @@ public class WalletFragment extends Fragment {
             transaction.commit();
         });
 
-        // Add wallet button
-        root.findViewById(R.id.btn_add_wallet).setOnClickListener(v ->
-                Toast.makeText(requireContext(), "Thêm ví mới", Toast.LENGTH_SHORT).show());
+        // Add wallet button → Open WalletTypeSelectionFragment
+        root.findViewById(R.id.btn_add_wallet).setOnClickListener(v -> {
+            FragmentTransaction transaction = requireActivity()
+                    .getSupportFragmentManager()
+                    .beginTransaction();
 
-        // Link service button
-        root.findViewById(R.id.btn_link_service).setOnClickListener(v ->
-                Toast.makeText(requireContext(), "Liên kết dịch vụ", Toast.LENGTH_SHORT).show());
+            transaction.replace(R.id.fragment_container, WalletTypeSelectionFragment.newInstance());
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
 
         return root;
     }
