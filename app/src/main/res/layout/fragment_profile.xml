@@ -317,6 +317,58 @@
 
             <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/secondary_grey" android:layout_marginTop="12dp"/>
 
+            <!-- Reminder row -->
+            <LinearLayout
+                android:id="@+id/row_reminder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="12dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="16dp">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_notifications_24dp"
+                        app:tint="@color/primary_grey" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/reminder"
+                        android:textColor="@color/primary_black"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv_reminder_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/reminder_off"
+                        android:textColor="@color/primary_grey" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_arrow_forward_24dp"
+                    app:tint="@color/primary_grey" />
+
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/secondary_grey" android:layout_marginTop="12dp"/>
+
             <!-- Currency row -->
             <LinearLayout
                 android:layout_width="match_parent"

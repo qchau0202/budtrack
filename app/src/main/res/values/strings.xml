@@ -81,6 +81,36 @@
     <string name="language_dialog_confirm">Confirm</string>
     <string name="edit">Edit</string>
     <string name="signout_text">SIGN OUT</string>
+    <!-- Reminder Settings -->
+    <string name="reminder">Reminder</string>
+    <string name="reminder_off">Off</string>
+    <string name="reminder_on">On</string>
+    <string name="reminder_settings_title">Reminder Settings</string>
+    <string name="reminder_enable">Enable Reminder</string>
+    <string name="reminder_enable_description">Get daily reminders to enter your expenses</string>
+    <string name="reminder_frequency">Frequency</string>
+    <string name="reminder_daily">Daily</string>
+    <string name="reminder_time">Time</string>
+    <string name="reminder_time_default">8:00 PM</string>
+    <string name="time_hour">Hour</string>
+    <string name="time_minute">Minute</string>
+    <string name="time_period">Period</string>
+    <string name="time_increase">Increase</string>
+    <string name="time_decrease">Decrease</string>
+    <!-- Notification Permission -->
+    <string name="notification_permission_title">Enable Notifications</string>
+    <string name="notification_permission_message">To receive daily expense reminders, please allow notification permissions.</string>
+    <string name="notification_permission_allow">Allow</string>
+    <string name="notification_permission_granted">Notification permission granted</string>
+    <string name="notification_permission_denied">Notification permission is required for reminders</string>
+    <!-- Disable Reminder -->
+    <string name="disable_reminder_title">Disable Reminder</string>
+    <string name="disable_reminder_message">Are you sure you want to disable daily expense reminders?</string>
+    <string name="disable_reminder_confirm">Disable</string>
+    <!-- Reminder Toasts -->
+    <string name="reminder_enabled">Reminder enabled</string>
+    <string name="reminder_disabled">Reminder disabled</string>
+    <string name="reminder_time_updated">Reminder time updated</string>
     <!--Transaction-->
     <string name="add_transaction">Add Transaction</string>
     <string name="cancel">Cancel</string>
@@ -93,7 +123,20 @@
     <string name="select_category">Select category</string>
     <string name="select_category_title">Select Category</string>
     <string name="search_categories">Search for categories</string>
+    <string name="search_hint">Search transactions, categories, budgets…</string>
+    <string name="search_empty_state">Enter keywords to search</string>
+    <string name="search_no_results">No results found for "%1$s"</string>
     <string name="all_categories">All categories</string>
+    <!-- Add Record Bottom Sheets -->
+    <string name="add_record">Add Record</string>
+    <string name="manual_input">Manual Input</string>
+    <string name="manual_input_description">Type expenses manually</string>
+    <string name="ocr_scan">Scan Receipt</string>
+    <string name="ocr_scan_description">Scan receipt with OCR</string>
+    <string name="add_income">Add Income</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="current_balance">Current Balance $250,560.0</string>
+    <string name="remaining_budget">Remaining Budget $9,512.50</string>
     <string name="select_subcategory_title">Select Subcategory</string>
     <string name="category_food">Food</string>
     <string name="category_shopping">Shopping</string>
@@ -157,4 +200,55 @@
     <string name="just_now">Just now</string>
     <string name="transactions_count">%1$d transaction(s)</string>
     <string name="mark_all_read">Mark all read</string>
+    <!--Wallet Fragment-->
+    <string name="wallet_title">My Wallets</string>
+    <string name="wallet_edit_button">Edit</string>
+    <string name="wallet_total_balance_label">Total Balance</string>
+    <string name="wallet_current_wallet_label">Current Wallet</string>
+    <string name="wallet_other_wallets_label">Other Wallets</string>
+    <string name="wallet_add_wallet">Add Wallet</string>
+    <!--Wallet Edit Fragment-->
+    <string name="wallet_edit_title">Edit Wallet</string>
+    <string name="wallet_edit_done">Done</string>
+    <string name="wallet_edit_close">Close</string>
+    <string name="wallet_balance_label">Balance</string>
+    <string name="wallet_balance_hint">Enter new balance</string>
+    <string name="wallet_notification_enable">Enable Notifications</string>
+    <string name="wallet_notification_description">Receive notifications when this wallet has new transactions.</string>
+    <string name="wallet_exclude_from_total">Exclude from Total</string>
+    <string name="wallet_exclude_from_total_description">Skip this wallet and balance from "Total".</string>
+    <string name="wallet_archive">Archive</string>
+    <string name="wallet_archive_description">Freeze this wallet and stop generating recurring transactions &amp; bills.</string>
+    <string name="wallet_transfer_button">Transfer to Another Wallet</string>
+    <string name="wallet_delete_button">Delete</string>
+    <string name="wallet_icon_selection_title">Select Wallet Icon</string>
+    <string name="wallet_icon_cash">Cash</string>
+    <string name="wallet_icon_bank_card">Bank Card</string>
+    <string name="wallet_icon_e_wallet">E-Wallet</string>
+    <string name="wallet_icon_savings">Savings</string>
+    <string name="wallet_icon_investment">Investment</string>
+    <string name="wallet_icon_other">Other</string>
+    <string name="wallet_changes_saved">Changes saved</string>
+    <string name="wallet_balance_updated">Balance updated: %1$s VND</string>
+    <string name="wallet_balance_invalid">Invalid balance</string>
+    <string name="wallet_balance_cannot_be_negative">Balance cannot be negative</string>
+    <string name="wallet_icon_selected">Selected: %1$s</string>
+    <string name="wallet_delete_title">Delete Wallet</string>
+    <string name="wallet_delete_message">Are you sure you want to delete wallet "%1$s"?\nThis action cannot be undone.</string>
+    <string name="wallet_deleted">Wallet "%1$s" deleted</string>
+    <!--Wallet Type Selection-->
+    <string name="wallet_type_selection_title">Add Wallet</string>
+    <string name="wallet_type_selection_description">Choose a wallet type that suits you</string>
+    <string name="wallet_type_selection_section_title">Select wallet type</string>
+    <string name="wallet_type_basic">Basic Wallet</string>
+    <string name="wallet_type_investment">Investment Wallet</string>
+    <string name="wallet_type_savings">Savings Wallet</string>
+    <!--Wallet Create Fragment-->
+    <string name="wallet_create_title">Create Wallet</string>
+    <string name="wallet_type_label">Wallet Type</string>
+    <string name="wallet_name_label">Wallet Name</string>
+    <string name="wallet_name_hint">Enter wallet name</string>
+    <string name="wallet_balance_initial_hint">Enter initial balance</string>
+    <string name="wallet_name_required">Wallet name is required</string>
+    <string name="wallet_created">Wallet created successfully</string>
 </resources>

@@ -1,4 +1,4 @@
-package vn.edu.tdtu.lhqc.budtrack.services;
+package vn.edu.tdtu.lhqc.budtrack.services.wallet;
 
 import android.content.Context;
 import android.content.SharedPreferences;

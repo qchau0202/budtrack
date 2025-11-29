@@ -3,6 +3,7 @@ package vn.edu.tdtu.lhqc.budtrack.activities;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
 import vn.edu.tdtu.lhqc.budtrack.adapters.TransactionHistoryAdapter;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
@@ -73,6 +75,9 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         // Setup RecyclerView with sample data
         RecyclerView recyclerView = findViewById(R.id.recycler_transactions);
         if (recyclerView != null) {
+            // Enable nested scrolling for proper scrolling in activity context
+            // (it's disabled by default in the reusable view for NestedScrollView compatibility)
+            recyclerView.setNestedScrollingEnabled(true);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             
             // Create sample data
@@ -98,6 +103,21 @@ public class TransactionHistoryActivity extends AppCompatActivity {
 
             TransactionHistoryAdapter adapter = getTransactionHistoryAdapter(transactions);
             recyclerView.setAdapter(adapter);
+            
+            // Set max height for RecyclerView to enable scrolling in activity context
+            recyclerView.post(() -> {
+                View rootView = findViewById(R.id.main);
+                View filtersContainer = findViewById(R.id.filters_container);
+                if (rootView != null && filtersContainer != null) {
+                    int screenHeight = rootView.getHeight();
+                    int filtersHeight = filtersContainer.getHeight();
+                    int headerHeight = findViewById(R.id.header_bar).getHeight();
+                    int maxHeight = screenHeight - headerHeight - filtersHeight - (int) (48 * getResources().getDisplayMetrics().density); // 48dp padding
+                    ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
+                    params.height = Math.max(maxHeight, 400); // Minimum 400dp for scrolling
+                    recyclerView.setLayoutParams(params);
+                }
+            });
         }
     }
 
@@ -172,16 +192,11 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     private void selectTab(boolean incomeSelected,
                            MaterialButton tabIncome,
                            MaterialButton tabExpenses) {
-        applyTabStyle(tabIncome, incomeSelected);
-        applyTabStyle(tabExpenses, !incomeSelected);
-    }
-
-    private void applyTabStyle(MaterialButton button, boolean selected) {
-        if (button == null) return;
-        int bgColor = selected ? R.color.primary_green : R.color.secondary_grey;
-        int textColor = selected ? R.color.primary_white : R.color.primary_black;
-        button.setBackgroundTintList(ContextCompat.getColorStateList(this, bgColor));
-        button.setTextColor(ContextCompat.getColor(this, textColor));
+        if (incomeSelected) {
+            TabStyleUtils.selectTab(this, tabIncome, tabExpenses);
+        } else {
+            TabStyleUtils.selectTab(this, tabExpenses, tabIncome);
+        }
     }
 }
 

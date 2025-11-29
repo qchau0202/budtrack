@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <!-- Transaction Icon -->
+    <ImageView
+        android:id="@+id/iv_transaction_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_icon_button"
+        android:padding="8dp"
+        android:src="@drawable/ic_wallet_cash"
+        app:tint="@color/primary_black" />
+
+    <!-- Transaction Details -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="12dp">
+
+        <TextView
+            android:id="@+id/tv_transaction_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Transaction Name"
+            android:textColor="@color/primary_black"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_transaction_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="09:00 AM"
+            android:textColor="@color/primary_grey"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <!-- Amount -->
+    <TextView
+        android:id="@+id/tv_transaction_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-$12.00"
+        android:textColor="@color/primary_black"
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+</LinearLayout>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/secondary_grey"
+        android:visibility="gone" />
+
+</LinearLayout>

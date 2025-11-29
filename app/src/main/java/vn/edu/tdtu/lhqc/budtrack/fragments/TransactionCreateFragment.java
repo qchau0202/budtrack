@@ -1,8 +1,6 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +25,11 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
+import vn.edu.tdtu.lhqc.budtrack.utils.NumberInputFormatter;
+import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
 
-public class TransactionFragmentCreate extends BottomSheetDialogFragment {
+public class TransactionCreateFragment extends BottomSheetDialogFragment {
 
     public static final String TAG = "TransactionFragment";
     
@@ -45,14 +46,28 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
 
     private final Calendar selectedDate = Calendar.getInstance();
     private String selectedType = TYPE_EXPENSE;
-    private String currentAmount = "";
     private String selectedCategory = null;
     private int selectedCategoryIconResId = 0;
+    private boolean isOCR = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(BottomSheetDialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogTheme);
+        
+        // Read transaction type from arguments
+        Bundle args = getArguments();
+        if (args != null) {
+            String type = args.getString("transaction_type", TYPE_EXPENSE);
+            if (TYPE_INCOME.equals(type)) {
+                selectedType = TYPE_INCOME;
+            } else if (TYPE_EXPENSE.equals(type)) {
+                selectedType = TYPE_EXPENSE;
+            } else {
+                selectedType = TYPE_EXPENSE; // Default
+            }
+            isOCR = args.getBoolean("is_ocr", false);
+        }
     }
 
     @Override
@@ -132,9 +147,9 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
 
     private void updateTabSelection() {
         // Reset all tabs to unselected state
-        setTabUnselected(tabExpense);
-        setTabUnselected(tabIncome);
-        setTabUnselected(tabOthers);
+        TabStyleUtils.applyUnselectedStyle(requireContext(), tabExpense);
+        TabStyleUtils.applyUnselectedStyle(requireContext(), tabIncome);
+        TabStyleUtils.applyUnselectedStyle(requireContext(), tabOthers);
 
         // Set selected tab based on type
         MaterialButton selectedTab = null;
@@ -151,19 +166,10 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
         }
         
         if (selectedTab != null) {
-            setTabSelected(selectedTab);
+            TabStyleUtils.applySelectedStyle(requireContext(), selectedTab);
         }
     }
     
-    private void setTabSelected(MaterialButton button) {
-        button.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.primary_green));
-        button.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_white));
-    }
-    
-    private void setTabUnselected(MaterialButton button) {
-        button.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.secondary_grey));
-        button.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
-    }
 
     private void setupDatePicker() {
         cardDate.setOnClickListener(v -> showDatePicker());
@@ -198,40 +204,8 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
     }
 
     private void setupAmountFormatter() {
-        editAmount.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!s.toString().equals(currentAmount)) {
-                    editAmount.removeTextChangedListener(this);
-
-                    String cleanString = s.toString().replaceAll("[.,\\s]", "");
-
-                    if (!cleanString.isEmpty()) {
-                        try {
-                            double parsed = Double.parseDouble(cleanString);
-                            String formatted = NumberFormat.getNumberInstance(Locale.US).format(parsed);
-                            currentAmount = formatted;
-                            editAmount.setText(formatted);
-                            editAmount.setSelection(formatted.length());
-                        } catch (NumberFormatException e) {
-                            // Invalid number format, keep current value
-                            currentAmount = s.toString();
-                        }
-                    } else {
-                        currentAmount = "";
-                        editAmount.setText("");
-                    }
-
-                    editAmount.addTextChangedListener(this);
-                }
-            }
-        });
+        // Use utility class for formatting number inputs with commas
+        NumberInputFormatter.attach(editAmount, null);
     }
 
     private void setupButtons() {
@@ -277,17 +251,17 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
     }
     
     private void saveTransaction() {
-        String amountStr = editAmount.getText().toString().replaceAll("[.,\\s]", "");
+        String amountText = editAmount.getText().toString().trim();
         String note = editNote.getText().toString().trim();
 
-        if (amountStr.isEmpty()) {
+        if (amountText.isEmpty()) {
             Toast.makeText(requireContext(), getString(R.string.error_amount_required), Toast.LENGTH_SHORT).show();
             editAmount.requestFocus();
             return;
         }
 
         try {
-            double amount = Double.parseDouble(amountStr);
+            double amount = CurrencyUtils.parseFormattedNumber(amountText);
             if (amount <= 0) {
                 Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
                 editAmount.requestFocus();
@@ -308,7 +282,7 @@ public class TransactionFragmentCreate extends BottomSheetDialogFragment {
         // This should connect to your database or ViewModel
 
         String typeText = getTransactionTypeText();
-        String formattedAmount = NumberFormat.getNumberInstance(Locale.US).format(amount);
+        String formattedAmount = CurrencyUtils.formatNumberUS(amount);
         String noteText = note.isEmpty() ? getString(R.string.no_note) : note;
 
         String message = getString(R.string.transaction_saved, typeText, formattedAmount, noteText);
