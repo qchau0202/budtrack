@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentActivity;
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.fragments.MapFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.NotificationFragment;
+import vn.edu.tdtu.lhqc.budtrack.fragments.SearchFragment;
 
 /**
  * Simple helper that wires up the shared header view with default behaviours.
@@ -38,7 +39,7 @@ public final class GeneralHeaderController {
 
         bindButton(header, R.id.btn_search, () -> {
             if (!safeCallbacks.onSearchClick(fragment)) {
-                showPlaceholder(fragment);
+                openSearch(fragment);
             }
         });
 
@@ -62,13 +63,19 @@ public final class GeneralHeaderController {
         }
     }
 
-    private static void showPlaceholder(Fragment fragment) {
+    private static void openSearch(Fragment fragment) {
         if (!fragment.isAdded()) {
             return;
         }
-        Toast.makeText(fragment.requireContext(),
-                R.string.feature_coming_soon,
-                Toast.LENGTH_SHORT).show();
+        FragmentActivity activity = fragment.getActivity();
+        if (activity == null) {
+            return;
+        }
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, SearchFragment.newInstance(), "SEARCH_FRAGMENT")
+                .addToBackStack(null)
+                .commit();
     }
 
     private static void openMap(Fragment fragment) {

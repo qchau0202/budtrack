@@ -8,23 +8,20 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
-import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionFragmentCreate;
 
 public class NotificationFragment extends Fragment {
 
@@ -133,7 +130,7 @@ public class NotificationFragment extends Fragment {
             NotificationType.BUDGET_OVERSPENDING,
             getString(R.string.notification_budget_overspending_title),
             getString(R.string.notification_budget_overspending_message, 
-                getString(R.string.budget_personal), formatCurrency(1150000)),
+                getString(R.string.budget_personal), CurrencyUtils.formatCurrency(1150000)),
             "10:00 AM",
             R.drawable.ic_notifications_24dp,
             R.color.category_tab_red,
@@ -146,7 +143,7 @@ public class NotificationFragment extends Fragment {
             NotificationType.BUDGET_WARNING,
             getString(R.string.notification_budget_warning_title),
             getString(R.string.notification_budget_warning_message,
-                85, getString(R.string.budget_daily), formatCurrency(1500000)),
+                85, getString(R.string.budget_daily), CurrencyUtils.formatCurrency(1500000)),
             "10:50 AM",
             R.drawable.ic_account_balance_wallet_24dp,
             R.color.category_tab_yellow,
@@ -171,7 +168,7 @@ public class NotificationFragment extends Fragment {
             NotificationType.DAILY_SUMMARY,
             getString(R.string.notification_daily_summary_title),
             getString(R.string.notification_daily_summary_message,
-                formatCurrency(450000), 3),
+                CurrencyUtils.formatCurrency(450000), 3),
             "2:30 PM",
             R.drawable.ic_analytics_24dp,
             R.color.category_tab_green,
@@ -202,7 +199,7 @@ public class NotificationFragment extends Fragment {
             NotificationType.WEEKLY_SUMMARY,
             getString(R.string.notification_weekly_summary_title),
             getString(R.string.notification_weekly_summary_message,
-                formatCurrency(12500000), formatCurrency(2500000) + " more"),
+                CurrencyUtils.formatCurrency(12500000), CurrencyUtils.formatCurrency(2500000) + " more"),
             "Yesterday",
             R.drawable.ic_analytics_24dp,
             R.color.category_tab_green,
@@ -290,7 +287,7 @@ public class NotificationFragment extends Fragment {
         // Set unread badge
         if (unreadBadge != null) {
             unreadBadge.setVisibility(notification.isUnread ? View.VISIBLE : View.GONE);
-        }
+    }
 
         // Set title
         if (titleView != null) {
@@ -339,8 +336,8 @@ public class NotificationFragment extends Fragment {
     }
 
     private void navigateToAddTransaction() {
-        TransactionFragmentCreate transactionFragmentCreate = new TransactionFragmentCreate();
-        transactionFragmentCreate.show(requireActivity().getSupportFragmentManager(), TransactionFragmentCreate.TAG);
+        TransactionCreateFragment transactionCreateFragment = new TransactionCreateFragment();
+        transactionCreateFragment.show(requireActivity().getSupportFragmentManager(), TransactionCreateFragment.TAG);
     }
 
     private void navigateToBudget() {
@@ -354,9 +351,4 @@ public class NotificationFragment extends Fragment {
         // TODO: Navigate to dashboard if needed
     }
 
-    private String formatCurrency(double amount) {
-        NumberFormat formatter = NumberFormat.getNumberInstance(Locale.getDefault());
-        formatter.setGroupingUsed(true);
-        return formatter.format(amount) + " VND";
-    }
 }

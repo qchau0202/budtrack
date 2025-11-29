@@ -11,7 +11,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
-import vn.edu.tdtu.lhqc.budtrack.services.BalanceService;
+import vn.edu.tdtu.lhqc.budtrack.services.wallet.BalanceService;
 
 /**
  * A simple {@link Fragment} subclass.

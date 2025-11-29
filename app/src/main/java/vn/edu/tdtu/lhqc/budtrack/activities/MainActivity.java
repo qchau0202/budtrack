@@ -13,6 +13,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.view.LayoutInflater;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
@@ -20,7 +24,7 @@ import vn.edu.tdtu.lhqc.budtrack.fragments.DashboardFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.HomeFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.ProfileFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.BudgetFragment;
-import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionFragmentCreate;
+import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionCreateFragment;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
@@ -125,28 +129,57 @@ public class MainActivity extends AppCompatActivity {
         navBudget.setOnClickListener(v -> setNavSelected(R.id.nav_budget));
         navDashboard.setOnClickListener(v -> setNavSelected(R.id.nav_dashboard));
         navProfile.setOnClickListener(v -> setNavSelected(R.id.nav_profile));
-        fabAdd.setOnClickListener(v -> {
-            TransactionFragmentCreate transactionFragmentCreate = new TransactionFragmentCreate();
-            transactionFragmentCreate.show(getSupportFragmentManager(), TransactionFragmentCreate.TAG);
-        });
+        fabAdd.setOnClickListener(v -> showInputMethodSelectionBottomSheet());
     }
 
 	private void setNavSelected(int navId) {
+		// First, check if there's a fragment on top that's not one of our main fragments
+		// (like NotificationFragment, MapFragment, SearchFragment) and pop it if needed
+		FragmentManager fm = getSupportFragmentManager();
+		Fragment currentTopFragment = fm.findFragmentById(R.id.fragment_container);
+		
+		// If the current top fragment is not one of our main bottom nav fragments, pop back stack
+		if (currentTopFragment != null && 
+		    currentTopFragment != homeFragment && 
+		    currentTopFragment != budgetFragment && 
+		    currentTopFragment != dashboardFragment && 
+		    currentTopFragment != profileFragment) {
+			// Pop the back stack to remove overlay fragments like NotificationFragment/MapFragment/SearchFragment
+		if (fm.getBackStackEntryCount() > 0) {
+				fm.popBackStackImmediate();
+			}
+		}
+
 		// Determine target fragment
 		Fragment target = null;
 		String fragmentTag = null;
 		if (navId == R.id.nav_home) {
 			fragmentTag = "HOME_FRAGMENT";
-			target = homeFragment != null ? homeFragment : getSupportFragmentManager().findFragmentByTag("HOME_FRAGMENT");
+			target = homeFragment != null ? homeFragment : fm.findFragmentByTag("HOME_FRAGMENT");
 		} else if (navId == R.id.nav_budget) {
 			fragmentTag = "BUDGET_FRAGMENT";
-			target = budgetFragment != null ? budgetFragment : getSupportFragmentManager().findFragmentByTag("BUDGET_FRAGMENT");
+			target = budgetFragment != null ? budgetFragment : fm.findFragmentByTag("BUDGET_FRAGMENT");
 		} else if (navId == R.id.nav_dashboard) {
 			fragmentTag = "DASHBOARD_FRAGMENT";
-			target = dashboardFragment != null ? dashboardFragment : getSupportFragmentManager().findFragmentByTag("DASHBOARD_FRAGMENT");
+			target = dashboardFragment != null ? dashboardFragment : fm.findFragmentByTag("DASHBOARD_FRAGMENT");
 		} else if (navId == R.id.nav_profile) {
 			fragmentTag = "PROFILE_FRAGMENT";
-			target = profileFragment != null ? profileFragment : getSupportFragmentManager().findFragmentByTag("PROFILE_FRAGMENT");
+			target = profileFragment != null ? profileFragment : fm.findFragmentByTag("PROFILE_FRAGMENT");
+		}
+
+		// If target is null or already active and visible, do nothing
+		if (target == null) {
+			return;
+		}
+
+		// Check if target is already the active fragment and not hidden
+		if (target == activeFragment && target.isAdded() && !target.isHidden()) {
+			// Already showing this fragment, just update navigation highlight
+			highlightNavigation(fragmentTag);
+			if (fragmentTag != null) {
+				currentFragmentTag = fragmentTag;
+			}
+			return;
 		}
 
 		highlightNavigation(fragmentTag);
@@ -154,16 +187,30 @@ public class MainActivity extends AppCompatActivity {
 			currentFragmentTag = fragmentTag;
 		}
 
-		if (target != null && target != activeFragment) {
-			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+		FragmentTransaction ft = fm.beginTransaction();
 			ft.setReorderingAllowed(true);
-			if (activeFragment != null) {
-				ft.hide(activeFragment);
+		
+		// Hide all main fragments except the target
+		if (homeFragment != null && homeFragment != target && !homeFragment.isHidden()) {
+			ft.hide(homeFragment);
+		}
+		if (budgetFragment != null && budgetFragment != target && !budgetFragment.isHidden()) {
+			ft.hide(budgetFragment);
+		}
+		if (dashboardFragment != null && dashboardFragment != target && !dashboardFragment.isHidden()) {
+			ft.hide(dashboardFragment);
 			}
+		if (profileFragment != null && profileFragment != target && !profileFragment.isHidden()) {
+			ft.hide(profileFragment);
+		}
+		
+		// Show the target fragment if it's hidden
+		if (target.isHidden() || !target.isAdded()) {
 			ft.show(target);
+		}
+		
 			ft.commit();
 			activeFragment = target;
-		}
 	}
 
 
@@ -178,5 +225,81 @@ public class MainActivity extends AppCompatActivity {
         if (bottomBarContainer != null) {
             bottomBarContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
+	}
+
+	private void showInputMethodSelectionBottomSheet() {
+		BottomSheetDialog dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+		View view = LayoutInflater.from(this).inflate(R.layout.view_bottom_sheet_input_method, null);
+		dialog.setContentView(view);
+
+		// Configure bottom sheet to expand fully
+		View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+		if (bottomSheet != null) {
+			BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
+			behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+			behavior.setSkipCollapsed(true);
+		}
+
+		// Close button
+		view.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());
+
+		// Manual input button
+		view.findViewById(R.id.card_manual_input).setOnClickListener(v -> {
+			dialog.dismiss();
+			showTransactionTypeSelectionBottomSheet(false); // false = manual input
+		});
+
+		// OCR scan button
+		view.findViewById(R.id.card_ocr_scan).setOnClickListener(v -> {
+			dialog.dismiss();
+			showTransactionTypeSelectionBottomSheet(true); // true = OCR scan
+		});
+
+		dialog.show();
+	}
+
+	private void showTransactionTypeSelectionBottomSheet(boolean isOCR) {
+		BottomSheetDialog dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+		View view = LayoutInflater.from(this).inflate(R.layout.view_bottom_sheet_transaction_type, null);
+		dialog.setContentView(view);
+
+		// Configure bottom sheet to expand fully
+		View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+		if (bottomSheet != null) {
+			BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
+			behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+			behavior.setSkipCollapsed(true);
+		}
+
+		// Close button
+		view.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());
+
+		// Add Income button
+		view.findViewById(R.id.card_add_income).setOnClickListener(v -> {
+			dialog.dismiss();
+			openTransactionCreate("income", isOCR);
+		});
+
+		// Add Expense button
+		view.findViewById(R.id.card_add_expense).setOnClickListener(v -> {
+			dialog.dismiss();
+			openTransactionCreate("expense", isOCR);
+		});
+
+		dialog.show();
+	}
+
+	private void openTransactionCreate(String transactionType, boolean isOCR) {
+		// TODO: If OCR, handle OCR flow separately
+		// For now, just open TransactionFragmentCreate with the selected type
+		TransactionCreateFragment transactionCreateFragment = new TransactionCreateFragment();
+		
+		// Pass transaction type via bundle
+		Bundle args = new Bundle();
+		args.putString("transaction_type", transactionType);
+		args.putBoolean("is_ocr", isOCR);
+		transactionCreateFragment.setArguments(args);
+		
+		transactionCreateFragment.show(getSupportFragmentManager(), TransactionCreateFragment.TAG);
 	}
 }

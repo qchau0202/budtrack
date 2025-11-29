@@ -34,10 +34,11 @@
             android:gravity="center_vertical">
 
             <TextView
+                android:id="@+id/tv_edit_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Tiền mặt"
+                android:text="@string/wallet_edit_title"
                 android:textColor="@color/primary_black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -51,24 +52,34 @@
                 android:focusable="true"
                 android:minHeight="48dp"
                 android:padding="8dp"
-                android:text="Đóng"
-                android:textColor="@color/primary_black"
+                android:text="@string/wallet_edit_done"
+                android:textColor="@color/primary_green"
                 android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Wallet Icon + Name -->
+        <!-- Wallet Type Display -->
         <LinearLayout
-            android:id="@+id/layout_wallet_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
             android:background="@drawable/bg_card"
-            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/wallet_type_label"
+                android:textColor="@color/primary_grey"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="16dp"
-            android:clickable="true"
-            android:focusable="true">
+                android:gravity="center_vertical">
 
             <ImageView
                 android:id="@+id/iv_wallet_icon"
@@ -78,22 +89,47 @@
                 app:tint="@color/primary_green" />
 
             <TextView
-                android:id="@+id/tv_wallet_name"
+                    android:id="@+id/tv_wallet_type"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:text="Tiền mặt"
+                    android:text="Basic Wallet"
+                    android:textColor="@color/primary_black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Wallet Name Input -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/wallet_name_label"
+                android:textColor="@color/primary_grey"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/edit_wallet_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="@string/wallet_name_hint"
+                android:inputType="text"
+                android:minHeight="48dp"
+                android:padding="0dp"
                 android:textColor="@color/primary_black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/iv_icon_dropdown"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_arrow_down_24dp"
-                app:tint="@color/primary_grey" />
         </LinearLayout>
 
         <!-- Balance Edit Section -->
@@ -108,7 +144,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Số dư"
+                android:text="@string/wallet_balance_label"
                 android:textColor="@color/primary_grey"
                 android:textSize="14sp"
                 android:layout_marginBottom="8dp" />
@@ -118,8 +154,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:hint="Nhập số dư mới"
-                android:inputType="numberSigned"
+                android:inputType="number"
                 android:minHeight="48dp"
                 android:padding="0dp"
                 android:textColor="@color/primary_black"
@@ -129,7 +164,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="VND"
+                android:text="@string/currency_value"
                 android:textColor="@color/primary_grey"
                 android:textSize="14sp"
                 android:layout_marginTop="8dp" />
@@ -162,14 +197,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Bật thông báo"
+                        android:text="@string/wallet_notification_enable"
                         android:textColor="@color/primary_black"
                         android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Nhận thông báo khi ví có giao dịch mới."
+                        android:text="@string/wallet_notification_description"
                         android:textColor="@color/primary_grey"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -201,14 +236,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Không tính vào tổng"
+                        android:text="@string/wallet_exclude_from_total"
                         android:textColor="@color/primary_black"
                         android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Bỏ qua ví này và số dư khỏi &quot;Tổng&quot;."
+                        android:text="@string/wallet_exclude_from_total_description"
                         android:textColor="@color/primary_grey"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -238,14 +273,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Lưu trữ"
+                        android:text="@string/wallet_archive"
                         android:textColor="@color/primary_black"
                         android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Đóng băng ví này và ngừng tạo ra giao dịch định kỳ &amp; hóa đơn."
+                        android:text="@string/wallet_archive_description"
                         android:textColor="@color/primary_grey"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -261,25 +296,10 @@
 
         <!-- Action Buttons -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_transfer"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginBottom="12dp"
-            android:text="Chuyển tiền đến ví khác"
-            android:textColor="@color/primary_white"
-            android:backgroundTint="@color/primary_green"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:cornerRadius="8dp"
-            android:textAllCaps="false"
-            app:elevation="0dp"
-            app:strokeWidth="0dp" />
-
-        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_delete"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="Xóa"
+            android:text="@string/wallet_delete_button"
             android:textColor="@color/primary_white"
             android:backgroundTint="@color/primary_red"
             android:textSize="16sp"

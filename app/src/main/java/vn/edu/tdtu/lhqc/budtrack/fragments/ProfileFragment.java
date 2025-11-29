@@ -1,19 +1,28 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -21,6 +30,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.services.notifications.ReminderNotificationService;
+import vn.edu.tdtu.lhqc.budtrack.services.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
@@ -39,6 +50,9 @@ public class ProfileFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    // Permission launcher for notification permission
+    private ActivityResultLauncher<String> notificationPermissionLauncher;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -69,6 +83,28 @@ public class ProfileFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        // Initialize permission launcher
+        notificationPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        Toast.makeText(requireContext(), R.string.notification_permission_granted, Toast.LENGTH_SHORT).show();
+                        // Create notification channel
+                        ReminderNotificationService.createNotificationChannel(requireContext());
+                        // Show reminder dialog after permission is granted
+                        View root = getView();
+                        if (root != null) {
+                            TextView tvReminderValue = root.findViewById(R.id.tv_reminder_value);
+                            if (tvReminderValue != null) {
+                                showReminderDialog(tvReminderValue);
+                            }
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), R.string.notification_permission_denied, Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
     }
 
     @Override
@@ -99,6 +135,20 @@ public class ProfileFragment extends Fragment {
         if (languageRow != null && tvLanguageValue != null) {
             updateLanguageValue(tvLanguageValue);
             languageRow.setOnClickListener(v -> showLanguageDialog(tvLanguageValue));
+        }
+
+        TextView tvReminderValue = root.findViewById(R.id.tv_reminder_value);
+        View reminderRow = root.findViewById(R.id.row_reminder);
+        if (reminderRow != null && tvReminderValue != null) {
+            updateReminderValue(tvReminderValue);
+            reminderRow.setOnClickListener(v -> {
+                // Check notification permission first
+                if (!SettingsHandler.isNotificationPermissionGranted(getContext())) {
+                    requestNotificationPermission();
+                } else {
+                    showReminderDialog(tvReminderValue);
+                }
+            });
         }
 
         return root;
@@ -182,5 +232,248 @@ public class ProfileFragment extends Fragment {
 
         cardView.setStrokeColor(strokeColor);
         checkIcon.setVisibility(selected ? View.VISIBLE : View.GONE);
+    }
+
+    private void updateReminderValue(TextView textView) {
+        if (getContext() == null) return;
+        boolean isEnabled = SettingsHandler.isReminderEnabled(getContext());
+        if (isEnabled) {
+            String time = SettingsHandler.formatReminderTime(getContext());
+            textView.setText(time);
+        } else {
+            textView.setText(R.string.reminder_off);
+        }
+    }
+
+    private void showReminderDialog(TextView tvReminderValue) {
+        if (getContext() == null) return;
+
+        final boolean[] pendingEnabled = {SettingsHandler.isReminderEnabled(getContext())};
+        final int[] pendingHour = {SettingsHandler.getReminderHour(getContext())};
+        final int[] pendingMinute = {SettingsHandler.getReminderMinute(getContext())};
+
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_reminder_settings, null, false);
+
+        SwitchMaterial swReminderEnabled = dialogView.findViewById(R.id.sw_reminder_enabled);
+        View containerReminderOptions = dialogView.findViewById(R.id.container_reminder_options);
+        MaterialCardView cardTimePicker = dialogView.findViewById(R.id.card_time_picker);
+        TextView tvReminderTimeValue = dialogView.findViewById(R.id.tv_reminder_time_value);
+        MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        MaterialButton btnSave = dialogView.findViewById(R.id.btn_save);
+
+        // Initialize UI state
+        swReminderEnabled.setChecked(pendingEnabled[0]);
+        containerReminderOptions.setVisibility(pendingEnabled[0] ? View.VISIBLE : View.GONE);
+        tvReminderTimeValue.setText(SettingsHandler.formatReminderTime(getContext()));
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        // Toggle switch listener
+        swReminderEnabled.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!isChecked && pendingEnabled[0]) {
+                // User is trying to disable - show confirmation dialog
+                buttonView.setChecked(true); // Revert the switch
+                showDisableReminderConfirmationDialog(dialog, swReminderEnabled, containerReminderOptions, pendingEnabled);
+            } else {
+                pendingEnabled[0] = isChecked;
+                containerReminderOptions.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            }
+        });
+
+        // Time picker click listener
+        cardTimePicker.setOnClickListener(v -> showTimePickerDialog(pendingHour, pendingMinute, tvReminderTimeValue));
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnSave.setOnClickListener(v -> {
+            boolean wasEnabled = SettingsHandler.isReminderEnabled(getContext());
+            SettingsHandler.setReminderEnabled(getContext(), pendingEnabled[0]);
+            if (pendingEnabled[0]) {
+                SettingsHandler.setReminderTime(getContext(), pendingHour[0], pendingMinute[0]);
+                // Schedule reminder notification
+                ReminderNotificationService.createNotificationChannel(getContext());
+                ReminderNotificationService.scheduleReminder(getContext());
+                if (!wasEnabled) {
+                    Toast.makeText(getContext(), R.string.reminder_enabled, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), R.string.reminder_time_updated, Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                // Cancel reminder
+                ReminderNotificationService.cancelReminder(getContext());
+                Toast.makeText(getContext(), R.string.reminder_disabled, Toast.LENGTH_SHORT).show();
+            }
+            updateReminderValue(tvReminderValue);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    private void showTimePickerDialog(int[] pendingHour, int[] pendingMinute, TextView tvReminderTimeValue) {
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View timePickerView = inflater.inflate(R.layout.dialog_time_picker, null, false);
+
+        EditText etHour = timePickerView.findViewById(R.id.et_hour);
+        EditText etMinute = timePickerView.findViewById(R.id.et_minute);
+        MaterialButton btnCancel = timePickerView.findViewById(R.id.btn_cancel);
+        MaterialButton btnConfirm = timePickerView.findViewById(R.id.btn_confirm);
+
+        // Initialize time values (24-hour format)
+        int currentHour = pendingHour[0];
+        int currentMinute = pendingMinute[0];
+
+        etHour.setText(String.valueOf(currentHour));
+        etMinute.setText(String.format("%02d", currentMinute));
+
+        // Validate hour input (0-23)
+        etHour.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0) {
+                    try {
+                        int hour = Integer.parseInt(s.toString());
+                        if (hour > 23) {
+                            s.replace(0, s.length(), "23");
+                        } else if (hour < 0) {
+                            s.replace(0, s.length(), "0");
+                        }
+                    } catch (NumberFormatException e) {
+                        // Ignore
+                    }
+                }
+            }
+        });
+
+        // Validate minute input (0-59)
+        etMinute.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0) {
+                    try {
+                        int minute = Integer.parseInt(s.toString());
+                        if (minute > 59) {
+                            s.replace(0, s.length(), "59");
+                        } else if (minute < 0) {
+                            s.replace(0, s.length(), "0");
+                        }
+                    } catch (NumberFormatException e) {
+                        // Ignore
+                    }
+                }
+            }
+        });
+
+        AlertDialog timeDialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(timePickerView)
+                .create();
+
+        btnCancel.setOnClickListener(v -> timeDialog.dismiss());
+        btnConfirm.setOnClickListener(v -> {
+            try {
+                int hour = etHour.getText().toString().isEmpty() ? 0 : Integer.parseInt(etHour.getText().toString());
+                int minute = etMinute.getText().toString().isEmpty() ? 0 : Integer.parseInt(etMinute.getText().toString());
+
+                // Validate ranges
+                if (hour < 0) hour = 0;
+                if (hour > 23) hour = 23;
+                if (minute < 0) minute = 0;
+                if (minute > 59) minute = 59;
+
+                pendingHour[0] = hour;
+                pendingMinute[0] = minute;
+
+                // Update display time in 24-hour format
+                tvReminderTimeValue.setText(String.format("%02d:%02d", hour, minute));
+                Toast.makeText(requireContext(), R.string.reminder_time_updated, Toast.LENGTH_SHORT).show();
+                timeDialog.dismiss();
+            } catch (NumberFormatException e) {
+                // If invalid input, use default values
+                pendingHour[0] = 20;
+                pendingMinute[0] = 0;
+                tvReminderTimeValue.setText("20:00");
+                timeDialog.dismiss();
+            }
+        });
+
+        timeDialog.show();
+        if (timeDialog.getWindow() != null) {
+            timeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            } else {
+                // Already granted
+                ReminderNotificationService.createNotificationChannel(requireContext());
+                View root = getView();
+                if (root != null) {
+                    TextView tvReminderValue = root.findViewById(R.id.tv_reminder_value);
+                    if (tvReminderValue != null) {
+                        showReminderDialog(tvReminderValue);
+                    }
+                }
+            }
+        } else {
+            // For older versions, permission is granted by default
+            ReminderNotificationService.createNotificationChannel(requireContext());
+            View root = getView();
+            if (root != null) {
+                TextView tvReminderValue = root.findViewById(R.id.tv_reminder_value);
+                if (tvReminderValue != null) {
+                    showReminderDialog(tvReminderValue);
+                }
+            }
+        }
+    }
+
+    private void showDisableReminderConfirmationDialog(AlertDialog parentDialog, SwitchMaterial switchMaterial,
+                                                       View containerReminderOptions, boolean[] pendingEnabled) {
+        if (getContext() == null) return;
+
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_disable_reminder, null, false);
+
+        MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        MaterialButton btnDisable = dialogView.findViewById(R.id.btn_disable);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnDisable.setOnClickListener(v -> {
+            // Disable reminder
+            pendingEnabled[0] = false;
+            switchMaterial.setChecked(false);
+            containerReminderOptions.setVisibility(View.GONE);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
     }
 }

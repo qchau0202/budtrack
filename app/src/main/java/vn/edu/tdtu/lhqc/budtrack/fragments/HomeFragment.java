@@ -14,14 +14,20 @@ import android.widget.TextView;
 
 import com.google.android.material.button.MaterialButton;
 
-import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
-import vn.edu.tdtu.lhqc.budtrack.services.BalanceService;
+import vn.edu.tdtu.lhqc.budtrack.mockdata.BudgetDisplayData;
+import vn.edu.tdtu.lhqc.budtrack.mockdata.MockBudgetData;
+import vn.edu.tdtu.lhqc.budtrack.mockdata.MockBudgetHelper;
+import vn.edu.tdtu.lhqc.budtrack.models.Budget;
+import vn.edu.tdtu.lhqc.budtrack.services.wallet.BalanceService;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
+import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
+import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
 import vn.edu.tdtu.lhqc.budtrack.widgets.PieChartView;
 
 /**
@@ -116,19 +122,28 @@ public class HomeFragment extends Fragment {
     }
     
     private void setupPieChart(View root) {
-        // Sample data - can be replaced with dynamic data from database/ViewModel
-        double totalExpense = 4000000.0; // Total expense amount
-        LinkedHashMap<String, CategoryData> categoryData = new LinkedHashMap<>();
-        categoryData.put("Transport", new CategoryData(20f, totalExpense * 0.20));
-        categoryData.put("Food", new CategoryData(50f, totalExpense * 0.50));
-        categoryData.put("Shopping", new CategoryData(30f, totalExpense * 0.30));
+        // Load budgets from mockdata
+        List<Budget> budgets = MockBudgetData.getSampleBudgets();
+        
+        // Create BudgetDisplayData with spent amounts
+        LinkedHashMap<String, BudgetDisplayData> budgetData = new LinkedHashMap<>();
+        long totalSpent = 0;
+        
+        for (vn.edu.tdtu.lhqc.budtrack.models.Budget budget : budgets) {
+            long spentAmount = MockBudgetHelper.getMockSpentAmount(budget);
+            BudgetDisplayData displayData = new BudgetDisplayData(budget, spentAmount);
+            budgetData.put(budget.getName(), displayData);
+            totalSpent += spentAmount;
+        }
 
         // Initialize pie chart
         PieChartView pieChart = root.findViewById(R.id.pieChart);
-        if (pieChart != null) {
+        if (pieChart != null && totalSpent > 0) {
             LinkedHashMap<String, Float> pieData = new LinkedHashMap<>();
-            for (String key : categoryData.keySet()) {
-                pieData.put(key, categoryData.get(key).percentage);
+            for (String key : budgetData.keySet()) {
+                BudgetDisplayData budget = budgetData.get(key);
+                float percentage = totalSpent > 0 ? (float) ((budget.getSpentAmount() / (double) totalSpent) * 100) : 0;
+                pieData.put(key, percentage);
             }
 
             pieChart.setData(pieData, Arrays.asList(
@@ -139,11 +154,15 @@ public class HomeFragment extends Fragment {
             float density = getResources().getDisplayMetrics().density;
             pieChart.setRingThicknessPx(12f * density);
             pieChart.setSegmentGapDegrees(14f);
-            pieChart.setCenterTexts(getString(R.string.expense), formatCurrency(totalExpense));
+            pieChart.setCenterTexts(getString(R.string.expense), CurrencyUtils.formatCurrency(totalSpent));
+        } else if (pieChart != null) {
+            // If no spending, show empty chart
+            pieChart.setData(new LinkedHashMap<>(), Arrays.asList());
+            pieChart.setCenterTexts(getString(R.string.expense), CurrencyUtils.formatCurrency(0));
         }
 
-        // Update category tabs with amounts and percentages
-        updateCategoryTabs(root, categoryData);
+        // Update budget tabs with amounts and percentages
+        updateBudgetTabs(root, budgetData, totalSpent);
     }
 
     private void setupAnalyticsTabs(View root) {
@@ -177,60 +196,67 @@ public class HomeFragment extends Fragment {
     }
 
     private void applyAnalyticsTabStyle(MaterialButton button, boolean selected) {
-        if (button == null) return;
-        int bgColor = selected ? R.color.primary_green : R.color.secondary_grey;
-        int textColor = selected ? R.color.primary_white : R.color.primary_black;
-        button.setBackgroundTintList(ContextCompat.getColorStateList(button.getContext(), bgColor));
-        button.setTextColor(ContextCompat.getColor(button.getContext(), textColor));
+        TabStyleUtils.applyStyle(button.getContext(), button, selected);
     }
     
-    // Update category tabs with dynamic data. This method can be called whenever data changes.
-    private void updateCategoryTabs(View root, LinkedHashMap<String, CategoryData> categoryData) {
-        // Transport
+    // Update budget tabs with dynamic data. This method can be called whenever data changes.
+    private void updateBudgetTabs(View root, LinkedHashMap<String, BudgetDisplayData> budgetData, long totalSpent) {
+        // Daily Budget (maps to Transport tab in layout)
+        TextView tvCategoryTransport = root.findViewById(R.id.tv_category_transport);
         TextView tvAmountTransport = root.findViewById(R.id.tv_amount_transport);
         TextView tvPercentTransport = root.findViewById(R.id.tv_percent_transport);
-        if (tvAmountTransport != null && tvPercentTransport != null && categoryData.containsKey("Transport")) {
-            CategoryData transport = categoryData.get("Transport");
-            tvAmountTransport.setText(formatCurrency(transport.amount));
-            tvPercentTransport.setText(String.format(Locale.getDefault(), "%.0f%%", transport.percentage));
+        if (budgetData.containsKey("Daily")) {
+            BudgetDisplayData daily = budgetData.get("Daily");
+            if (tvCategoryTransport != null) {
+                tvCategoryTransport.setText(daily.getName());
+            }
+            if (tvAmountTransport != null) {
+                tvAmountTransport.setText(CurrencyUtils.formatCurrency(daily.getSpentAmount()));
+            }
+            if (tvPercentTransport != null && totalSpent > 0) {
+                float percentage = (float) ((daily.getSpentAmount() / (double) totalSpent) * 100);
+                tvPercentTransport.setText(String.format(Locale.getDefault(), "%.0f%%", percentage));
+            }
         }
 
-        // Food
+        // Personal Budget (maps to Food tab in layout)
+        TextView tvCategoryFood = root.findViewById(R.id.tv_category_food);
         TextView tvAmountFood = root.findViewById(R.id.tv_amount_food);
         TextView tvPercentFood = root.findViewById(R.id.tv_percent_food);
-        if (tvAmountFood != null && tvPercentFood != null && categoryData.containsKey("Food")) {
-            CategoryData food = categoryData.get("Food");
-            tvAmountFood.setText(formatCurrency(food.amount));
-            tvPercentFood.setText(String.format(Locale.getDefault(), "%.0f%%", food.percentage));
+        if (budgetData.containsKey("Personal")) {
+            BudgetDisplayData personal = budgetData.get("Personal");
+            if (tvCategoryFood != null) {
+                tvCategoryFood.setText(personal.getName());
+            }
+            if (tvAmountFood != null) {
+                tvAmountFood.setText(CurrencyUtils.formatCurrency(personal.getSpentAmount()));
+            }
+            if (tvPercentFood != null && totalSpent > 0) {
+                float percentage = (float) ((personal.getSpentAmount() / (double) totalSpent) * 100);
+                tvPercentFood.setText(String.format(Locale.getDefault(), "%.0f%%", percentage));
+            }
         }
 
-        // Shopping
+        // Others Budget (maps to Shopping tab in layout)
+        TextView tvCategoryShopping = root.findViewById(R.id.tv_category_shopping);
         TextView tvAmountShopping = root.findViewById(R.id.tv_amount_shopping);
         TextView tvPercentShopping = root.findViewById(R.id.tv_percent_shopping);
-        if (tvAmountShopping != null && tvPercentShopping != null && categoryData.containsKey("Shopping")) {
-            CategoryData shopping = categoryData.get("Shopping");
-            tvAmountShopping.setText(formatCurrency(shopping.amount));
-            tvPercentShopping.setText(String.format(Locale.getDefault(), "%.0f%%", shopping.percentage));
+        if (budgetData.containsKey("Others")) {
+            BudgetDisplayData others = budgetData.get("Others");
+            if (tvCategoryShopping != null) {
+                tvCategoryShopping.setText(others.getName());
+            }
+            if (tvAmountShopping != null) {
+                tvAmountShopping.setText(CurrencyUtils.formatCurrency(others.getSpentAmount()));
+            }
+            if (tvPercentShopping != null && totalSpent > 0) {
+                float percentage = (float) ((others.getSpentAmount() / (double) totalSpent) * 100);
+                tvPercentShopping.setText(String.format(Locale.getDefault(), "%.0f%%", percentage));
+            }
         }
     }
 
-    // Format currency amount with VND format
-    private String formatCurrency(double amount) {
-        NumberFormat formatter = NumberFormat.getNumberInstance(Locale.getDefault());
-        formatter.setGroupingUsed(true);
-        return formatter.format(amount) + " VND";
-    }
 
-    // Data class to hold category information This makes it easy to extend with more fields in the future
-    private static class CategoryData {
-        float percentage;
-        double amount;
-
-        CategoryData(float percentage, double amount) {
-            this.percentage = percentage;
-            this.amount = amount;
-        }
-    }
     
     private void showWalletFragment() {
         WalletFragment walletFragment = WalletFragment.newInstance();

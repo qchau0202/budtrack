@@ -85,6 +85,36 @@
     <string name="language_dialog_confirm">Xác nhận</string>
     <string name="edit">Chỉnh sửa</string>
     <string name="signout_text">ĐĂNG XUẤT</string>
+    <!-- Reminder Settings -->
+    <string name="reminder">Nhắc nhở</string>
+    <string name="reminder_off">Tắt</string>
+    <string name="reminder_on">Bật</string>
+    <string name="reminder_settings_title">Cài đặt nhắc nhở</string>
+    <string name="reminder_enable">Bật nhắc nhở</string>
+    <string name="reminder_enable_description">Nhận nhắc nhở hàng ngày để nhập chi tiêu của bạn</string>
+    <string name="reminder_frequency">Tần suất</string>
+    <string name="reminder_daily">Hàng ngày</string>
+    <string name="reminder_time">Thời gian</string>
+    <string name="reminder_time_default">8:00 PM</string>
+    <string name="time_hour">Giờ</string>
+    <string name="time_minute">Phút</string>
+    <string name="time_period">Buổi</string>
+    <string name="time_increase">Tăng</string>
+    <string name="time_decrease">Giảm</string>
+    <!-- Notification Permission -->
+    <string name="notification_permission_title">Bật thông báo</string>
+    <string name="notification_permission_message">Để nhận nhắc nhở chi tiêu hàng ngày, vui lòng cho phép quyền thông báo.</string>
+    <string name="notification_permission_allow">Cho phép</string>
+    <string name="notification_permission_granted">Đã cấp quyền thông báo</string>
+    <string name="notification_permission_denied">Cần quyền thông báo để nhắc nhở</string>
+    <!-- Disable Reminder -->
+    <string name="disable_reminder_title">Tắt nhắc nhở</string>
+    <string name="disable_reminder_message">Bạn có chắc chắn muốn tắt nhắc nhở chi tiêu hàng ngày?</string>
+    <string name="disable_reminder_confirm">Tắt</string>
+    <!-- Reminder Toasts -->
+    <string name="reminder_enabled">Đã bật nhắc nhở</string>
+    <string name="reminder_disabled">Đã tắt nhắc nhở</string>
+    <string name="reminder_time_updated">Đã cập nhật thời gian nhắc nhở</string>
 
     <!--Transaction History-->
     <string name="add_transaction">Thêm Giao Dịch</string>
@@ -98,6 +128,9 @@
     <string name="select_category">Chọn nhóm</string>
     <string name="select_category_title">Chọn nhóm</string>
     <string name="search_categories">Tìm kiếm nhóm</string>
+    <string name="search_hint">Tìm kiếm giao dịch, nhóm, ngân sách…</string>
+    <string name="search_empty_state">Nhập từ khóa để tìm kiếm</string>
+    <string name="search_no_results">Không tìm thấy kết quả cho "%1$s"</string>
     <string name="all_categories">Tất cả mục</string>
     <string name="select_subcategory_title">Chọn nhóm phụ</string>
     <string name="category_food">Thức ăn</string>
@@ -166,5 +199,69 @@
     <string name="just_now">Vừa xong</string>
     <string name="transactions_count">%1$d giao dịch</string>
     <string name="mark_all_read">Đánh dấu đã đọc</string>
+    
+    <!--Wallet Fragment-->
+    <string name="wallet_title">Ví của tôi</string>
+    <string name="wallet_edit_button">Sửa</string>
+    <string name="wallet_total_balance_label">Tổng số dư</string>
+    <string name="wallet_current_wallet_label">Ví hiện tại</string>
+    <string name="wallet_other_wallets_label">Các ví khác</string>
+    <string name="wallet_add_wallet">Thêm ví</string>
+    <!--Wallet Edit Fragment-->
+    <string name="wallet_edit_title">Chỉnh sửa ví</string>
+    <string name="wallet_edit_done">Xong</string>
+    <string name="wallet_edit_close">Đóng</string>
+    <string name="wallet_balance_label">Số dư</string>
+    <string name="wallet_balance_hint">Nhập số dư mới</string>
+    <string name="wallet_notification_enable">Bật thông báo</string>
+    <string name="wallet_notification_description">Nhận thông báo khi ví có giao dịch mới.</string>
+    <string name="wallet_exclude_from_total">Không tính vào tổng</string>
+    <string name="wallet_exclude_from_total_description">Bỏ qua ví này và số dư khỏi "Tổng".</string>
+    <string name="wallet_archive">Lưu trữ</string>
+    <string name="wallet_archive_description">Đóng băng ví này và ngừng tạo ra giao dịch định kỳ &amp; hóa đơn.</string>
+    <string name="wallet_transfer_button">Chuyển tiền đến ví khác</string>
+    <string name="wallet_delete_button">Xóa</string>
+    <string name="wallet_icon_selection_title">Chọn biểu tượng ví</string>
+    <string name="wallet_icon_cash">Tiền mặt</string>
+    <string name="wallet_icon_bank_card">Thẻ ngân hàng</string>
+    <string name="wallet_icon_e_wallet">Ví điện tử</string>
+    <string name="wallet_icon_savings">Tiết kiệm</string>
+    <string name="wallet_icon_investment">Đầu tư</string>
+    <string name="wallet_icon_other">Khác</string>
+    <string name="wallet_changes_saved">Đã lưu thay đổi</string>
+    <string name="wallet_balance_updated">Số dư đã cập nhật: %1$s VND</string>
+    <string name="wallet_balance_invalid">Số dư không hợp lệ</string>
+    <string name="wallet_balance_cannot_be_negative">Số dư không thể là số âm</string>
+    <string name="wallet_icon_selected">Đã chọn: %1$s</string>
+    <string name="wallet_delete_title">Xóa ví</string>
+    <string name="wallet_delete_message">Bạn có chắc chắn muốn xóa ví "%1$s"?\nHành động này không thể hoàn tác.</string>
+    <string name="wallet_deleted">Đã xóa ví "%1$s"</string>
+    <!--Wallet Type Selection-->
+    <string name="wallet_type_selection_title">Thêm Ví</string>
+    <string name="wallet_type_selection_description">Chọn loại ví phù hợp với bạn</string>
+    <string name="wallet_type_selection_section_title">Chọn loại ví</string>
+    <string name="wallet_type_basic">Ví cơ bản</string>
+    <string name="wallet_type_investment">Ví đầu tư</string>
+    <string name="wallet_type_savings">Ví tiết kiệm</string>
+    <!--Wallet Create Fragment-->
+    <string name="wallet_create_title">Tạo ví</string>
+    <string name="wallet_type_label">Loại ví</string>
+    <string name="wallet_name_label">Tên ví</string>
+    <string name="wallet_name_hint">Nhập tên ví</string>
+    <string name="wallet_balance_initial_hint">Nhập số dư ban đầu</string>
+    <string name="wallet_name_required">Tên ví là bắt buộc</string>
+    <string name="wallet_created">Đã tạo ví thành công</string>
+    <!-- Add Record Bottom Sheets -->
+    <string name="add_record">Thêm Ghi Chép</string>
+    <string name="manual_input">Nhập Thủ Công</string>
+    <string name="manual_input_description">Nhập chi tiêu thủ công</string>
+    <string name="ocr_scan">Quét Hóa Đơn</string>
+    <string name="ocr_scan_description">Quét hóa đơn bằng OCR</string>
+    <string name="add_income">Thêm Thu Nhập</string>
+    <string name="add_expense">Thêm Chi Tiêu</string>
+    <string name="current_balance">Số dư hiện tại 250.560.000 VND</string>
+    <string name="remaining_budget">Ngân sách còn lại 9.512.500 VND</string>
 </resources>
+
+
 

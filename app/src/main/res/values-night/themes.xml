@@ -5,4 +5,19 @@
          <item name="colorPrimary">@color/primary_black</item>
         <item name="android:fontFamily">@font/quicksand</item>
     </style>
+
+    <!-- Theme overlay for TimePickerDialog to match app styling (dark mode) -->
+    <style name="ThemeOverlay_Budtrack_TimePicker" parent="Theme.Material3.DayNight.Dialog">
+        <!-- Primary accent for buttons -->
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorOnPrimary">@color/primary_white</item>
+        <!-- Dialog background and text -->
+        <item name="colorSurface">@color/primary_white</item>
+        <item name="colorOnSurface">@color/primary_black</item>
+        <!-- Button colors -->
+        <item name="colorControlNormal">@color/primary_grey</item>
+        <!-- Dialog title text -->
+        <item name="android:textColorPrimary">@color/primary_black</item>
+        <item name="android:textColorSecondary">@color/primary_grey</item>
+    </style>
 </resources>
