@@ -90,6 +90,10 @@ public class TransactionHistoryFragment extends Fragment {
         colorizeAmounts(listIncome, R.color.secondary_green);
         colorizeAmounts(listExpenses, R.color.primary_red);
 
+        // Make transaction rows clickable
+        setupTransactionClickListeners(listIncome);
+        setupTransactionClickListeners(listExpenses);
+
         if (btnViewAll != null) {
             btnViewAll.setOnClickListener(v -> {
                 Intent intent = new Intent(requireContext(), TransactionHistoryActivity.class);
@@ -98,6 +102,77 @@ public class TransactionHistoryFragment extends Fragment {
         }
 
         return root;
+    }
+
+    private void setupTransactionClickListeners(LinearLayout listContainer) {
+        if (listContainer == null) return;
+        
+        for (int i = 0; i < listContainer.getChildCount(); i++) {
+            View child = listContainer.getChildAt(i);
+            // Skip dividers
+            if (child instanceof LinearLayout) {
+                LinearLayout row = (LinearLayout) child;
+                setupRowClickListener(row);
+            }
+        }
+    }
+
+    private void setupRowClickListener(LinearLayout row) {
+        // Find TextViews in the row structure
+        String merchantName = null;
+        String amount = null;
+        String date = null;
+        
+        for (int i = 0; i < row.getChildCount(); i++) {
+            View child = row.getChildAt(i);
+            if (child instanceof LinearLayout) {
+                LinearLayout innerLayout = (LinearLayout) child;
+                for (int j = 0; j < innerLayout.getChildCount(); j++) {
+                    View innerChild = innerLayout.getChildAt(j);
+                    if (innerChild instanceof TextView) {
+                        TextView tv = (TextView) innerChild;
+                        String text = tv.getText().toString();
+                        
+                        // Merchant name: bold text that doesn't start with + or -
+                        if (merchantName == null && tv.getTypeface() != null && 
+                            tv.getTypeface().isBold() && !text.startsWith("+") && !text.startsWith("-") &&
+                            !text.matches(".*\\d{2}.*\\d{4}.*")) {
+                            merchantName = text;
+                        }
+                        // Amount: starts with + or - or is bold with numbers
+                        else if (amount == null && (text.startsWith("+") || text.startsWith("-") ||
+                            (tv.getTypeface() != null && tv.getTypeface().isBold() && text.matches(".*\\d.*")))) {
+                            amount = text;
+                        }
+                        // Date: contains month name or date pattern
+                        else if (date == null && (text.contains("Jan") || text.contains("Feb") || 
+                            text.contains("Mar") || text.contains("Apr") || text.contains("May") ||
+                            text.contains("Jun") || text.contains("Jul") || text.contains("Aug") ||
+                            text.contains("Sep") || text.contains("Oct") || text.contains("Nov") ||
+                            text.contains("Dec") || text.matches(".*\\d{2}.*\\d{4}.*"))) {
+                            date = text;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (merchantName != null && amount != null) {
+            final String finalMerchantName = merchantName;
+            final String finalAmount = amount;
+            final String finalDate = date != null ? date : "";
+            
+            row.setOnClickListener(v -> {
+                TransactionDetailBottomSheet bottomSheet = TransactionDetailBottomSheet.newInstance(
+                        finalMerchantName,
+                        finalDate,
+                        finalAmount
+                );
+                bottomSheet.show(getParentFragmentManager(), TransactionDetailBottomSheet.TAG);
+            });
+            row.setClickable(true);
+            row.setFocusable(true);
+        }
     }
 
     private void colorizeAmounts(LinearLayout listContainer, int colorResId) {

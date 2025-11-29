@@ -1,4 +1,4 @@
-package vn.edu.tdtu.lhqc.budtrack.services.notifications;
+package vn.edu.tdtu.lhqc.budtrack.controllers.notifications;
 
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
@@ -15,13 +15,13 @@ import java.util.Calendar;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.activities.MainActivity;
-import vn.edu.tdtu.lhqc.budtrack.services.settings.SettingsHandler;
+import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 
 /**
  * Service for managing reminder notifications.
  * Handles scheduling and canceling daily expense reminder notifications.
  */
-public class ReminderNotificationService {
+public class ReminderNotificationController {
 
     private static final String CHANNEL_ID = "reminder_notification_channel";
     private static final String CHANNEL_NAME = "Expense Reminders";

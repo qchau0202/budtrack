@@ -1,4 +1,4 @@
-package vn.edu.tdtu.lhqc.budtrack.services.wallet;
+package vn.edu.tdtu.lhqc.budtrack.controllers.wallet;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,12 +8,12 @@ import android.content.SharedPreferences;
  * - Persists hidden/visible preference
  * - Formats balance for display (masked vs visible)
  */
-public final class BalanceService {
+public final class BalanceController {
 
     private static final String PREFS_NAME = "balance_prefs";
     private static final String KEY_HIDDEN = "hidden";
 
-    private BalanceService() { }
+    private BalanceController() { }
 
     public static boolean isHidden(Context context) {
         return getPrefs(context).getBoolean(KEY_HIDDEN, false);

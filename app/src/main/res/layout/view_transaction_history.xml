@@ -45,7 +45,7 @@
 
     </LinearLayout>
 
-    <!-- Income list (sample rows) -->
+    <!-- Income list (sample rows) - only 1 item -->
     <LinearLayout
         android:id="@+id/list_income"
         android:layout_width="match_parent"
@@ -109,68 +109,9 @@
 
         </LinearLayout>
 
-        <!-- Divider -->
-        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/secondary_grey" />
-
-        <!-- Row 2 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_icon_button"
-                android:padding="8dp"
-                android:src="@drawable/ic_account_box_24dp"
-                app:tint="@color/primary_black" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="12dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Freelance"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Side project"
-                    android:textColor="@color/primary_grey"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="end">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="+800.00"
-                    android:textStyle="bold"
-                    android:textColor="@color/secondary_green"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="03 Jan 2025"
-                    android:textColor="@color/primary_grey"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
     </LinearLayout>
 
-    <!-- Expenses list (sample rows) -->
+    <!-- Expenses list (sample rows) - only 2 items -->
     <LinearLayout
         android:id="@+id/list_expenses"
         android:layout_width="match_parent"
@@ -204,13 +145,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sport Shoes"
+                    android:text="Starbucks Coffee"
                     android:textStyle="bold"
                     android:textColor="@color/primary_black"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Weekly Shopping"
+                    android:text="Morning coffee"
                     android:textColor="@color/primary_grey"/>
             </LinearLayout>
 
@@ -222,13 +163,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="-50.00"
+                    android:text="-12.00"
                     android:textStyle="bold"
                     android:textColor="@color/primary_black"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="06 Jan 2025"
+                    android:text="17 Oct 2025"
                     android:textColor="@color/primary_grey"/>
             </LinearLayout>
 
@@ -262,13 +203,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mountain"
+                    android:text="Amazon"
                     android:textStyle="bold"
                     android:textColor="@color/primary_black"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mountain tracking fee"
+                    android:text="Online shopping"
                     android:textColor="@color/primary_grey"/>
             </LinearLayout>
 
@@ -280,13 +221,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="-45.99"
+                    android:text="-123.00"
                     android:textStyle="bold"
                     android:textColor="@color/primary_black"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="10 Jan 2025"
+                    android:text="17 Oct 2025"
                     android:textColor="@color/primary_grey"/>
             </LinearLayout>
 

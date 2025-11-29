@@ -10,6 +10,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SwitchCompat;
@@ -17,6 +20,8 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -377,18 +382,36 @@ public class WalletFragment extends Fragment {
     }
 
     private void showDeleteConfirmationDialog(BottomSheetDialog parentDialog, String walletName) {
-        new AlertDialog.Builder(requireContext())
-                .setTitle(getString(R.string.wallet_delete_title))
-                .setMessage(getString(R.string.wallet_delete_message, walletName))
-                .setPositiveButton(getString(R.string.wallet_delete_button), (dialog, which) -> {
+        View dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_wallet_delete_confirmation, null);
+
+        TextView dialogTitle = dialogView.findViewById(R.id.dialog_title);
+        TextView dialogMessage = dialogView.findViewById(R.id.dialog_message);
+        MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        MaterialButton btnDelete = dialogView.findViewById(R.id.btn_delete);
+
+        // Set message with wallet name
+        dialogMessage.setText(getString(R.string.wallet_delete_message, walletName));
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnDelete.setOnClickListener(v -> {
                     // TODO: Delete wallet from database
                     Toast.makeText(requireContext(), 
                         getString(R.string.wallet_deleted, walletName), 
                         Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
                     parentDialog.dismiss();
-                })
-                .setNegativeButton(getString(R.string.cancel), null)
-                .show();
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
     }
 
 }
