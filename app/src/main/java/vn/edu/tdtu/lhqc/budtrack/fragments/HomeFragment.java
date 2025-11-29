@@ -24,7 +24,7 @@ import vn.edu.tdtu.lhqc.budtrack.mockdata.BudgetDisplayData;
 import vn.edu.tdtu.lhqc.budtrack.mockdata.MockBudgetData;
 import vn.edu.tdtu.lhqc.budtrack.mockdata.MockBudgetHelper;
 import vn.edu.tdtu.lhqc.budtrack.models.Budget;
-import vn.edu.tdtu.lhqc.budtrack.services.wallet.BalanceService;
+import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.BalanceController;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
@@ -104,13 +104,13 @@ public class HomeFragment extends Fragment {
         if (tvBalance != null && btnVisibility != null) {
             // Preserve the original unmasked balance text
             final String originalBalanceText = tvBalance.getText() != null ? tvBalance.getText().toString() : "";
-            boolean hidden = BalanceService.isHidden(requireContext());
-            tvBalance.setText(BalanceService.formatDisplay(originalBalanceText, hidden));
+            boolean hidden = BalanceController.isHidden(requireContext());
+            tvBalance.setText(BalanceController.formatDisplay(originalBalanceText, hidden));
             btnVisibility.setImageResource(hidden ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
 
             btnVisibility.setOnClickListener(v -> {
-                boolean nowHidden = BalanceService.toggleHidden(requireContext());
-                tvBalance.setText(BalanceService.formatDisplay(originalBalanceText, nowHidden));
+                boolean nowHidden = BalanceController.toggleHidden(requireContext());
+                tvBalance.setText(BalanceController.formatDisplay(originalBalanceText, nowHidden));
                 btnVisibility.setImageResource(nowHidden ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
             });
         }

@@ -19,9 +19,18 @@ import vn.edu.tdtu.lhqc.budtrack.R;
 public class TransactionHistoryAdapter extends RecyclerView.Adapter<TransactionHistoryAdapter.DailyGroupViewHolder> {
 
     private List<DailyTransactionGroup> dailyGroups;
+    private OnTransactionClickListener onTransactionClickListener;
+
+    public interface OnTransactionClickListener {
+        void onTransactionClick(Transaction transaction);
+    }
 
     public TransactionHistoryAdapter(List<DailyTransactionGroup> dailyGroups) {
         this.dailyGroups = dailyGroups;
+    }
+
+    public void setOnTransactionClickListener(OnTransactionClickListener listener) {
+        this.onTransactionClickListener = listener;
     }
 
     @NonNull
@@ -43,7 +52,7 @@ public class TransactionHistoryAdapter extends RecyclerView.Adapter<TransactionH
         return dailyGroups != null ? dailyGroups.size() : 0;
     }
 
-    static class DailyGroupViewHolder extends RecyclerView.ViewHolder {
+    class DailyGroupViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvMonth;
         private final TextView tvDate;
         private final TextView tvDailyTotal;
@@ -91,6 +100,15 @@ public class TransactionHistoryAdapter extends RecyclerView.Adapter<TransactionH
                 if (divider != null) {
                     divider.setVisibility(index < transactions.size() - 1 ? View.VISIBLE : View.GONE);
                 }
+
+                // Make transaction row clickable
+                transactionView.setOnClickListener(v -> {
+                    if (onTransactionClickListener != null) {
+                        onTransactionClickListener.onTransactionClick(transaction);
+                    }
+                });
+                transactionView.setClickable(true);
+                transactionView.setFocusable(true);
 
                 transactionsContainer.addView(transactionView);
             }

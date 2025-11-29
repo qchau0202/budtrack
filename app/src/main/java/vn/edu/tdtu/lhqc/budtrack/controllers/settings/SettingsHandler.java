@@ -1,4 +1,4 @@
-package vn.edu.tdtu.lhqc.budtrack.services.settings;
+package vn.edu.tdtu.lhqc.budtrack.controllers.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;

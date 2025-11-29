@@ -30,8 +30,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
-import vn.edu.tdtu.lhqc.budtrack.services.notifications.ReminderNotificationService;
-import vn.edu.tdtu.lhqc.budtrack.services.settings.SettingsHandler;
+import vn.edu.tdtu.lhqc.budtrack.controllers.notifications.ReminderNotificationController;
+import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
@@ -91,7 +91,7 @@ public class ProfileFragment extends Fragment {
                     if (isGranted) {
                         Toast.makeText(requireContext(), R.string.notification_permission_granted, Toast.LENGTH_SHORT).show();
                         // Create notification channel
-                        ReminderNotificationService.createNotificationChannel(requireContext());
+                        ReminderNotificationController.createNotificationChannel(requireContext());
                         // Show reminder dialog after permission is granted
                         View root = getView();
                         if (root != null) {
@@ -293,8 +293,8 @@ public class ProfileFragment extends Fragment {
             if (pendingEnabled[0]) {
                 SettingsHandler.setReminderTime(getContext(), pendingHour[0], pendingMinute[0]);
                 // Schedule reminder notification
-                ReminderNotificationService.createNotificationChannel(getContext());
-                ReminderNotificationService.scheduleReminder(getContext());
+                ReminderNotificationController.createNotificationChannel(getContext());
+                ReminderNotificationController.scheduleReminder(getContext());
                 if (!wasEnabled) {
                     Toast.makeText(getContext(), R.string.reminder_enabled, Toast.LENGTH_SHORT).show();
                 } else {
@@ -302,7 +302,7 @@ public class ProfileFragment extends Fragment {
                 }
             } else {
                 // Cancel reminder
-                ReminderNotificationService.cancelReminder(getContext());
+                ReminderNotificationController.cancelReminder(getContext());
                 Toast.makeText(getContext(), R.string.reminder_disabled, Toast.LENGTH_SHORT).show();
             }
             updateReminderValue(tvReminderValue);
@@ -426,7 +426,7 @@ public class ProfileFragment extends Fragment {
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             } else {
                 // Already granted
-                ReminderNotificationService.createNotificationChannel(requireContext());
+                ReminderNotificationController.createNotificationChannel(requireContext());
                 View root = getView();
                 if (root != null) {
                     TextView tvReminderValue = root.findViewById(R.id.tv_reminder_value);
@@ -437,7 +437,7 @@ public class ProfileFragment extends Fragment {
             }
         } else {
             // For older versions, permission is granted by default
-            ReminderNotificationService.createNotificationChannel(requireContext());
+            ReminderNotificationController.createNotificationChannel(requireContext());
             View root = getView();
             if (root != null) {
                 TextView tvReminderValue = root.findViewById(R.id.tv_reminder_value);

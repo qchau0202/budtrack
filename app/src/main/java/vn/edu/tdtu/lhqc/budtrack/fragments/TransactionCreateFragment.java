@@ -1,6 +1,10 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -18,6 +23,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -25,6 +31,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.models.Wallet;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.NumberInputFormatter;
 import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
@@ -39,15 +46,17 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
     private static final String TYPE_OTHERS = "others";
     
     private MaterialButton tabExpense, tabIncome, tabOthers, btnSave;
-    private TextView tvDate, tvCategory, tvCancel, tvTitle;
-    private EditText editAmount, editNote;
-    private View cardDate, cardCategory, cardWallet;
+    private TextView tvDate, tvCategory, tvCancel, tvTitle, tvWallet, tvTime;
+    private EditText editAmount, editNote, editLocation;
+    private View cardDate, cardCategory, cardWallet, cardTime;
     private ImageView ivCategoryIcon;
 
     private final Calendar selectedDate = Calendar.getInstance();
+    private final Calendar selectedTime = Calendar.getInstance();
     private String selectedType = TYPE_EXPENSE;
     private String selectedCategory = null;
     private int selectedCategoryIconResId = 0;
+    private Wallet selectedWallet = null;
     private boolean isOCR = false;
 
     @Override
@@ -92,6 +101,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         initViews(view);
         setupTabs();
         setupDatePicker();
+        setupTimePicker();
         setupAmountFormatter();
         setupButtons();
         return view;
@@ -106,17 +116,21 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         // Input fields
         editAmount = view.findViewById(R.id.editAmount);
         editNote = view.findViewById(R.id.editNote);
+        editLocation = view.findViewById(R.id.editLocation);
 
         // Text views
         tvDate = view.findViewById(R.id.tvDate);
         tvCategory = view.findViewById(R.id.tvCategory);
         tvCancel = view.findViewById(R.id.tvCancel);
         tvTitle = view.findViewById(R.id.tvTitle);
+        tvWallet = view.findViewById(R.id.tvWallet);
+        tvTime = view.findViewById(R.id.tvTime);
 
         // Cards
         cardDate = view.findViewById(R.id.cardDate);
         cardCategory = view.findViewById(R.id.cardCategory);
         cardWallet = view.findViewById(R.id.cardWallet);
+        cardTime = view.findViewById(R.id.cardTime);
 
         // Buttons
         btnSave = view.findViewById(R.id.btnSave);
@@ -125,6 +139,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         ivCategoryIcon = view.findViewById(R.id.ivCategoryIcon);
 
         updateDateText();
+        updateTimeText(); // Initialize with current time
         updateTabSelection(); // Set initial tab selection
     }
 
@@ -176,6 +191,10 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         updateDateText();
     }
 
+    private void setupTimePicker() {
+        cardTime.setOnClickListener(v -> showTimePicker());
+    }
+
     private void showDatePicker() {
         // Use MaterialDatePicker with our theme overlay to apply app styling/colors
         MaterialDatePicker<Long> picker = MaterialDatePicker.Builder
@@ -203,6 +222,112 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         tvDate.setText(dateText);
     }
 
+    private void updateTimeText() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
+        String timeText = sdf.format(selectedTime.getTime());
+        tvTime.setText(timeText);
+    }
+
+    private void showTimePicker() {
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View timePickerView = inflater.inflate(R.layout.dialog_time_picker, null, false);
+
+        EditText etHour = timePickerView.findViewById(R.id.et_hour);
+        EditText etMinute = timePickerView.findViewById(R.id.et_minute);
+        MaterialButton btnCancel = timePickerView.findViewById(R.id.btn_cancel);
+        MaterialButton btnConfirm = timePickerView.findViewById(R.id.btn_confirm);
+
+        // Initialize with current selected time
+        int currentHour = selectedTime.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = selectedTime.get(Calendar.MINUTE);
+
+        etHour.setText(String.valueOf(currentHour));
+        etMinute.setText(String.format("%02d", currentMinute));
+
+        // Validate hour input (0-23)
+        etHour.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0) {
+                    try {
+                        int hour = Integer.parseInt(s.toString());
+                        if (hour > 23) {
+                            s.replace(0, s.length(), "23");
+                        } else if (hour < 0) {
+                            s.replace(0, s.length(), "0");
+                        }
+                    } catch (NumberFormatException e) {
+                        // Ignore
+                    }
+                }
+            }
+        });
+
+        // Validate minute input (0-59)
+        etMinute.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0) {
+                    try {
+                        int minute = Integer.parseInt(s.toString());
+                        if (minute > 59) {
+                            s.replace(0, s.length(), "59");
+                        } else if (minute < 0) {
+                            s.replace(0, s.length(), "0");
+                        }
+                    } catch (NumberFormatException e) {
+                        // Ignore
+                    }
+                }
+            }
+        });
+
+        AlertDialog timeDialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(timePickerView)
+                .create();
+
+        btnCancel.setOnClickListener(v -> timeDialog.dismiss());
+
+        btnConfirm.setOnClickListener(v -> {
+            try {
+                int hour = etHour.getText().toString().isEmpty() ? currentHour : Integer.parseInt(etHour.getText().toString());
+                int minute = etMinute.getText().toString().isEmpty() ? currentMinute : Integer.parseInt(etMinute.getText().toString());
+
+                // Validate ranges
+                if (hour < 0) hour = 0;
+                if (hour > 23) hour = 23;
+                if (minute < 0) minute = 0;
+                if (minute > 59) minute = 59;
+
+                selectedTime.set(Calendar.HOUR_OF_DAY, hour);
+                selectedTime.set(Calendar.MINUTE, minute);
+                updateTimeText();
+                timeDialog.dismiss();
+            } catch (NumberFormatException e) {
+                // If invalid input, keep current time
+                updateTimeText();
+                timeDialog.dismiss();
+            }
+        });
+
+        timeDialog.show();
+        if (timeDialog.getWindow() != null) {
+            timeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
     private void setupAmountFormatter() {
         // Use utility class for formatting number inputs with commas
         NumberInputFormatter.attach(editAmount, null);
@@ -213,10 +338,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
 
         cardCategory.setOnClickListener(v -> showCategorySelectionSheet());
 
-        cardWallet.setOnClickListener(v -> {
-            // TODO: Implement wallet selection dialog
-            Toast.makeText(requireContext(), getString(R.string.select_wallet), Toast.LENGTH_SHORT).show();
-        });
+        cardWallet.setOnClickListener(v -> showWalletSelectionSheet());
 
         btnSave.setOnClickListener(v -> saveTransaction());
     }
@@ -249,10 +371,39 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         tvCategory.setText(categoryName);
         tvCategory.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
     }
+
+    private void showWalletSelectionSheet() {
+        WalletSelectBottomSheet sheet = WalletSelectBottomSheet.newInstance(selectedWallet);
+        sheet.setOnWalletSelectedListener(new WalletSelectBottomSheet.OnWalletSelectedListener() {
+            @Override
+            public void onWalletSelected(Wallet wallet) {
+                selectWallet(wallet);
+            }
+
+            @Override
+            public void onNoneSelected() {
+                selectWallet(null);
+            }
+        });
+        sheet.show(getParentFragmentManager(), WalletSelectBottomSheet.TAG);
+    }
+
+    private void selectWallet(Wallet wallet) {
+        selectedWallet = wallet;
+        
+        // Update wallet text
+        if (wallet != null) {
+            tvWallet.setText(wallet.getName());
+        } else {
+            tvWallet.setText(getString(R.string.none));
+        }
+        tvWallet.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
+    }
     
     private void saveTransaction() {
         String amountText = editAmount.getText().toString().trim();
         String note = editNote.getText().toString().trim();
+        String location = editLocation != null ? editLocation.getText().toString().trim() : "";
 
         if (amountText.isEmpty()) {
             Toast.makeText(requireContext(), getString(R.string.error_amount_required), Toast.LENGTH_SHORT).show();
@@ -269,7 +420,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             }
 
             // TODO: Save transaction to database
-            saveTransactionToDatabase(amount, note);
+            saveTransactionToDatabase(amount, note, location);
 
         } catch (NumberFormatException e) {
             Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
@@ -277,9 +428,18 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         }
     }
 
-    private void saveTransactionToDatabase(double amount, String note) {
+    private void saveTransactionToDatabase(double amount, String note, String location) {
         // TODO: Implement transaction saving logic
         // This should connect to your database or ViewModel
+        // Combine date and time for the transaction timestamp
+        Calendar transactionDateTime = Calendar.getInstance();
+        transactionDateTime.set(Calendar.YEAR, selectedDate.get(Calendar.YEAR));
+        transactionDateTime.set(Calendar.MONTH, selectedDate.get(Calendar.MONTH));
+        transactionDateTime.set(Calendar.DAY_OF_MONTH, selectedDate.get(Calendar.DAY_OF_MONTH));
+        transactionDateTime.set(Calendar.HOUR_OF_DAY, selectedTime.get(Calendar.HOUR_OF_DAY));
+        transactionDateTime.set(Calendar.MINUTE, selectedTime.get(Calendar.MINUTE));
+        transactionDateTime.set(Calendar.SECOND, 0);
+        transactionDateTime.set(Calendar.MILLISECOND, 0);
 
         String typeText = getTransactionTypeText();
         String formattedAmount = CurrencyUtils.formatNumberUS(amount);

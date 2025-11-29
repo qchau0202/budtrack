@@ -11,7 +11,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
-import vn.edu.tdtu.lhqc.budtrack.services.wallet.BalanceService;
+import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.BalanceController;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -70,13 +70,13 @@ public class BalanceFragment extends Fragment {
         if (tvBalance != null && btnVisibility != null) {
             // Preserve the original unmasked balance text
             final String originalBalanceText = tvBalance.getText() != null ? tvBalance.getText().toString() : "";
-            boolean hidden = BalanceService.isHidden(requireContext());
-            tvBalance.setText(BalanceService.formatDisplay(originalBalanceText, hidden));
+            boolean hidden = BalanceController.isHidden(requireContext());
+            tvBalance.setText(BalanceController.formatDisplay(originalBalanceText, hidden));
             btnVisibility.setImageResource(hidden ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
 
             btnVisibility.setOnClickListener(v -> {
-                boolean nowHidden = BalanceService.toggleHidden(requireContext());
-                tvBalance.setText(BalanceService.formatDisplay(originalBalanceText, nowHidden));
+                boolean nowHidden = BalanceController.toggleHidden(requireContext());
+                tvBalance.setText(BalanceController.formatDisplay(originalBalanceText, nowHidden));
                 btnVisibility.setImageResource(nowHidden ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
             });
         }

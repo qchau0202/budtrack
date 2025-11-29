@@ -45,7 +45,7 @@
         
         <!-- Reminder Notification Receiver -->
         <receiver
-            android:name=".services.notifications.ReminderNotificationService$ReminderNotificationReceiver"
+            android:name=".controllers.notifications.ReminderNotificationController$ReminderNotificationReceiver"
             android:exported="false"
             android:enabled="true" />
     </application>

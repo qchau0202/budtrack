@@ -28,6 +28,7 @@ import java.util.Locale;
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
 import vn.edu.tdtu.lhqc.budtrack.adapters.TransactionHistoryAdapter;
+import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionDetailBottomSheet;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
@@ -80,7 +81,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             recyclerView.setNestedScrollingEnabled(true);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             
-            // Create sample data
+            // Create sample data - only 3 transactions
             List<TransactionHistoryAdapter.Transaction> transactions = new ArrayList<>();
             transactions.add(new TransactionHistoryAdapter.Transaction(
                     "Starbucks Coffee",
@@ -101,7 +102,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                     R.drawable.ic_wallet_24dp
             ));
 
-            TransactionHistoryAdapter adapter = getTransactionHistoryAdapter(transactions);
+            TransactionHistoryAdapter adapter = getTransactionHistoryAdapter(transactions, this);
             recyclerView.setAdapter(adapter);
             
             // Set max height for RecyclerView to enable scrolling in activity context
@@ -122,36 +123,27 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private static TransactionHistoryAdapter getTransactionHistoryAdapter(List<TransactionHistoryAdapter.Transaction> transactions) {
-        List<TransactionHistoryAdapter.Transaction> novemberTransactions = new ArrayList<>();
-        novemberTransactions.add(new TransactionHistoryAdapter.Transaction(
-                "Uber Ride",
-                "08:15 PM",
-                "-$18.50",
-                R.drawable.ic_wallet_24dp
-        ));
-        novemberTransactions.add(new TransactionHistoryAdapter.Transaction(
-                "Whole Foods",
-                "11:30 AM",
-                "-$67.00",
-                R.drawable.ic_wallet_24dp
-        ));
-
+    private static TransactionHistoryAdapter getTransactionHistoryAdapter(
+            List<TransactionHistoryAdapter.Transaction> transactions, 
+            TransactionHistoryActivity activity) {
         List<TransactionHistoryAdapter.DailyTransactionGroup> dailyGroups = new ArrayList<>();
         dailyGroups.add(new TransactionHistoryAdapter.DailyTransactionGroup(
                 "October 2025",
                 "October 17, Thu",
-                "-$278.30",
+                "-$179.80",
                 transactions
         ));
-        dailyGroups.add(new TransactionHistoryAdapter.DailyTransactionGroup(
-                "November 2025",
-                "November 3, Sun",
-                "-$85.50",
-                novemberTransactions
-        ));
 
-        return new TransactionHistoryAdapter(dailyGroups);
+        TransactionHistoryAdapter adapter = new TransactionHistoryAdapter(dailyGroups);
+        adapter.setOnTransactionClickListener(transaction -> {
+            TransactionDetailBottomSheet bottomSheet = TransactionDetailBottomSheet.newInstance(
+                    transaction.getMerchantName(),
+                    transaction.getTime(),
+                    transaction.getAmount()
+            );
+            bottomSheet.show(activity.getSupportFragmentManager(), TransactionDetailBottomSheet.TAG);
+        });
+        return adapter;
     }
 
     private void setupFilters() {
