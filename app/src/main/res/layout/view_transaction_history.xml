@@ -45,194 +45,33 @@
 
     </LinearLayout>
 
-    <!-- Income list (sample rows) - only 1 item -->
+    <!-- Income list (dynamically populated) -->
     <LinearLayout
         android:id="@+id/list_income"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="12dp">
+        android:layout_marginTop="12dp" />
 
-        <!-- Row 1 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_icon_button"
-                android:padding="8dp"
-                android:src="@drawable/ic_wallet_24dp"
-                app:tint="@color/primary_black" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="12dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Salary"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Monthly salary"
-                    android:textColor="@color/primary_grey"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="end">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="+5,000.00"
-                    android:textStyle="bold"
-                    android:textColor="@color/secondary_green"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="01 Jan 2025"
-                    android:textColor="@color/primary_grey"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <!-- Expenses list (sample rows) - only 2 items -->
+    <!-- Expenses list (dynamically populated) -->
     <LinearLayout
         android:id="@+id/list_expenses"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="12dp">
+        android:layout_marginTop="12dp" />
 
-        <!-- Row 1 -->
-        <LinearLayout
+    <!-- Empty State -->
+                <TextView
+        android:id="@+id/tv_empty_state"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_icon_button"
-                android:padding="8dp"
-                android:src="@drawable/ic_credit_card_24dp"
-                app:tint="@color/primary_black" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="12dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Starbucks Coffee"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Morning coffee"
-                    android:textColor="@color/primary_grey"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="end">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="-12.00"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="17 Oct 2025"
-                    android:textColor="@color/primary_grey"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/secondary_grey" />
-
-        <!-- Row 2 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_icon_button"
-                android:padding="8dp"
-                android:src="@drawable/ic_account_balance_wallet_24dp"
-                app:tint="@color/primary_black" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="12dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Amazon"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Online shopping"
-                    android:textColor="@color/primary_grey"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="end">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="-123.00"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary_black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="17 Oct 2025"
-                    android:textColor="@color/primary_grey"/>
-            </LinearLayout>
-
-        </LinearLayout>
-    </LinearLayout>
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="@string/no_transactions"
+        android:textColor="@color/primary_grey"
+        android:textSize="16sp"
+        android:visibility="gone" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_view_all_transactions"

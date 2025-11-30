@@ -20,7 +20,8 @@ import java.util.List;
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.adapters.TransactionHistoryAdapter;
 import vn.edu.tdtu.lhqc.budtrack.mockdata.MockTransactionData;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockWalletData;
+import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager;
+import vn.edu.tdtu.lhqc.budtrack.models.Wallet;
 import vn.edu.tdtu.lhqc.budtrack.mockdata.TransactionAdapterHelper;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
@@ -103,7 +104,9 @@ public class BudgetDetailFragment extends Fragment {
         }
 
         // Load sample transactions from mockdata (using first wallet ID)
-        long walletId = MockWalletData.getSampleWallets().isEmpty() ? 1L : MockWalletData.getSampleWallets().get(0).getId();
+        // Get first available wallet ID, or default to 1
+        List<Wallet> wallets = WalletManager.getWallets(requireContext());
+        long walletId = wallets.isEmpty() ? 1L : wallets.get(0).getId();
         List<Transaction> allTransactions = MockTransactionData.getAllSampleTransactions(walletId);
         
         // Filter income and expense transactions

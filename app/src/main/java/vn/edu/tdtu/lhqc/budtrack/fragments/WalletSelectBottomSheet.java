@@ -19,8 +19,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import java.util.List;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockWalletData;
+import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager;
 import vn.edu.tdtu.lhqc.budtrack.models.Wallet;
+import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 
 public class WalletSelectBottomSheet extends BottomSheetDialogFragment {
 
@@ -60,7 +61,7 @@ public class WalletSelectBottomSheet extends BottomSheetDialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(STYLE_NORMAL, R.style.BottomSheetDialogTheme);
-        wallets = MockWalletData.getSampleWallets();
+        wallets = WalletManager.getWallets(requireContext());
         
         // Get current selected wallet from arguments
         if (getArguments() != null) {
@@ -107,10 +108,12 @@ public class WalletSelectBottomSheet extends BottomSheetDialogFragment {
     private void setupWallets() {
         if (containerWallets == null) return;
 
-        // Add wallet items dynamically
+        // Add wallet items dynamically (exclude archived wallets)
         for (Wallet wallet : wallets) {
+            if (!wallet.isArchived()) {
             View walletView = createWalletItem(wallet);
             containerWallets.addView(walletView);
+            }
         }
 
         updateSelectionUI();
@@ -124,7 +127,10 @@ public class WalletSelectBottomSheet extends BottomSheetDialogFragment {
         TextView tvWalletName = walletCard.findViewById(R.id.tvWalletName);
         ImageView ivWalletCheck = walletCard.findViewById(R.id.ivWalletCheck);
 
-        tvWalletName.setText(wallet.getName());
+        // Display wallet name with balance
+        String walletName = wallet.getName();
+        String balance = CurrencyUtils.formatCurrency(wallet.getBalance());
+        tvWalletName.setText(walletName + " - " + balance);
 
         // Set click listener
         walletCard.setOnClickListener(v -> {

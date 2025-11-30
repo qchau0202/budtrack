@@ -31,6 +31,9 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
+import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
+import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.models.Wallet;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.NumberInputFormatter;
@@ -39,6 +42,7 @@ import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
 public class TransactionCreateFragment extends BottomSheetDialogFragment {
 
     public static final String TAG = "TransactionFragment";
+    public static final String RESULT_KEY_TRANSACTION_CREATED = "transaction_created";
     
     // Transaction types
     private static final String TYPE_EXPENSE = "expense";
@@ -46,10 +50,15 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
     private static final String TYPE_OTHERS = "others";
     
     private MaterialButton tabExpense, tabIncome, tabOthers, btnSave;
-    private TextView tvDate, tvCategory, tvCancel, tvTitle, tvWallet, tvTime;
-    private EditText editAmount, editNote, editLocation;
-    private View cardDate, cardCategory, cardWallet, cardTime;
+    private TextView tvDate, tvCategory, tvCancel, tvTitle, tvWallet, tvTime, tvLocation;
+    private EditText editAmount, editNote, editTitle;
+    private View cardDate, cardCategory, cardWallet, cardTime, cardLocation;
     private ImageView ivCategoryIcon;
+    
+    // Location data
+    private String selectedLocationAddress = null;
+    private Double selectedLocationLat = null;
+    private Double selectedLocationLng = null;
 
     private final Calendar selectedDate = Calendar.getInstance();
     private final Calendar selectedTime = Calendar.getInstance();
@@ -76,6 +85,60 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 selectedType = TYPE_EXPENSE; // Default
             }
             isOCR = args.getBoolean("is_ocr", false);
+        }
+        
+        // Set up Fragment Result listener for location selection using activity's fragment manager
+        // This ensures it works even if the bottom sheet is dismissed
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            MapFragment.RESULT_KEY_LOCATION,
+            this,
+            (requestKey, result) -> {
+                if (MapFragment.RESULT_KEY_LOCATION.equals(requestKey)) {
+                    String address = result.getString(MapFragment.RESULT_LOCATION_ADDRESS);
+                    double lat = result.getDouble(MapFragment.RESULT_LOCATION_LAT);
+                    double lng = result.getDouble(MapFragment.RESULT_LOCATION_LNG);
+                    selectLocation(address, lat, lng);
+                }
+            }
+        );
+    }
+    
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Restore transaction state if reopening after location selection
+        restoreTransactionState();
+        // Check for stored location when view is created
+        checkForStoredLocation();
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Restore transaction state if reopening after location selection
+        restoreTransactionState();
+        // Also check in onResume in case view was already created
+        checkForStoredLocation();
+    }
+    
+    private void checkForStoredLocation() {
+        if (getContext() == null) {
+            return;
+        }
+        
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("location_selection", android.content.Context.MODE_PRIVATE);
+        if (prefs.getBoolean("has_location", false)) {
+            String address = prefs.getString("address", "");
+            float lat = prefs.getFloat("lat", 0f);
+            float lng = prefs.getFloat("lng", 0f);
+            
+            // Clear the stored location
+            prefs.edit().clear().apply();
+            
+            // Apply the location
+            if (!address.isEmpty()) {
+                selectLocation(address, lat, lng);
+            }
         }
     }
 
@@ -116,7 +179,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         // Input fields
         editAmount = view.findViewById(R.id.editAmount);
         editNote = view.findViewById(R.id.editNote);
-        editLocation = view.findViewById(R.id.editLocation);
+        editTitle = view.findViewById(R.id.editTitle);
 
         // Text views
         tvDate = view.findViewById(R.id.tvDate);
@@ -125,12 +188,14 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         tvTitle = view.findViewById(R.id.tvTitle);
         tvWallet = view.findViewById(R.id.tvWallet);
         tvTime = view.findViewById(R.id.tvTime);
+        tvLocation = view.findViewById(R.id.tvLocation);
 
         // Cards
         cardDate = view.findViewById(R.id.cardDate);
         cardCategory = view.findViewById(R.id.cardCategory);
         cardWallet = view.findViewById(R.id.cardWallet);
         cardTime = view.findViewById(R.id.cardTime);
+        cardLocation = view.findViewById(R.id.cardLocation);
 
         // Buttons
         btnSave = view.findViewById(R.id.btnSave);
@@ -141,6 +206,9 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         updateDateText();
         updateTimeText(); // Initialize with current time
         updateTabSelection(); // Set initial tab selection
+        updateWalletText(); // Initialize wallet text to "None"
+        updateCategoryText(); // Initialize category text to "None"
+        updateLocationText(); // Initialize location text to "None"
     }
 
     private void setupTabs() {
@@ -334,11 +402,17 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
     }
 
     private void setupButtons() {
-        tvCancel.setOnClickListener(v -> dismiss());
+        tvCancel.setOnClickListener(v -> {
+            // Clear saved state when user cancels
+            clearTransactionState();
+            dismiss();
+        });
 
         cardCategory.setOnClickListener(v -> showCategorySelectionSheet());
 
         cardWallet.setOnClickListener(v -> showWalletSelectionSheet());
+        
+        cardLocation.setOnClickListener(v -> showLocationSelectionMap());
 
         btnSave.setOnClickListener(v -> saveTransaction());
     }
@@ -362,14 +436,23 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
     private void selectCategory(String categoryName, int iconResId) {
         selectedCategory = categoryName;
         selectedCategoryIconResId = iconResId;
-        
-        // Update category icon
-        ivCategoryIcon.setImageResource(iconResId);
+        updateCategoryText();
+    }
+
+    private void updateCategoryText() {
+        // Update category display
+        if (selectedCategory != null && selectedCategoryIconResId != 0) {
+            // Show category with icon
+            ivCategoryIcon.setImageResource(selectedCategoryIconResId);
         ivCategoryIcon.setVisibility(View.VISIBLE);
-        
-        // Update category text
-        tvCategory.setText(categoryName);
+            tvCategory.setText(selectedCategory);
         tvCategory.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
+        } else {
+            // Show "None" when no category selected
+            ivCategoryIcon.setVisibility(View.GONE);
+            tvCategory.setText(getString(R.string.none));
+            tvCategory.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_grey));
+        }
     }
 
     private void showWalletSelectionSheet() {
@@ -390,20 +473,253 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
 
     private void selectWallet(Wallet wallet) {
         selectedWallet = wallet;
+        updateWalletText();
+    }
         
+    private void updateWalletText() {
         // Update wallet text
-        if (wallet != null) {
-            tvWallet.setText(wallet.getName());
+        if (selectedWallet != null) {
+            tvWallet.setText(selectedWallet.getName());
+            tvWallet.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
         } else {
             tvWallet.setText(getString(R.string.none));
+            tvWallet.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_grey));
         }
-        tvWallet.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
+    }
+
+    private void showLocationSelectionMap() {
+        // Save ALL transaction state before dismissing
+        saveTransactionState();
+        
+        // Dismiss bottom sheet first so map is visible
+        dismiss();
+        
+        // Navigate to MapFragment in location selection mode
+        MapFragment mapFragment = MapFragment.newInstanceForLocationSelection();
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, mapFragment, "MAP_FRAGMENT")
+                .addToBackStack(null)
+                .commit();
+    }
+    
+    private void saveTransactionState() {
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("transaction_state", android.content.Context.MODE_PRIVATE);
+        android.content.SharedPreferences.Editor editor = prefs.edit();
+        
+        // Save transaction type and OCR flag
+        editor.putString("transaction_type", selectedType);
+        editor.putBoolean("is_ocr", isOCR);
+        editor.putBoolean("should_reopen", true);
+        
+        // Save amount
+        if (editAmount != null) {
+            String amountText = editAmount.getText().toString().trim();
+            editor.putString("amount", amountText);
+        }
+        
+        // Save title
+        if (editTitle != null) {
+            String titleText = editTitle.getText().toString().trim();
+            editor.putString("title", titleText);
+        }
+        
+        // Save note
+        if (editNote != null) {
+            String noteText = editNote.getText().toString().trim();
+            editor.putString("note", noteText);
+        }
+        
+        // Save wallet
+        if (selectedWallet != null) {
+            editor.putString("wallet_name", selectedWallet.getName());
+            editor.putLong("wallet_id", selectedWallet.getId());
+        } else {
+            editor.remove("wallet_name");
+            editor.remove("wallet_id");
+        }
+        
+        // Save category
+        if (selectedCategory != null) {
+            editor.putString("category_name", selectedCategory);
+            editor.putInt("category_icon_res_id", selectedCategoryIconResId);
+        } else {
+            editor.remove("category_name");
+            editor.remove("category_icon_res_id");
+        }
+        
+        // Save date
+        editor.putLong("selected_date_millis", selectedDate.getTimeInMillis());
+        
+        // Save time
+        editor.putLong("selected_time_millis", selectedTime.getTimeInMillis());
+        
+        // Save location (if already selected)
+        if (selectedLocationAddress != null) {
+            editor.putString("location_address", selectedLocationAddress);
+        }
+        if (selectedLocationLat != null) {
+            editor.putFloat("location_lat", selectedLocationLat.floatValue());
+        }
+        if (selectedLocationLng != null) {
+            editor.putFloat("location_lng", selectedLocationLng.floatValue());
+        }
+        
+        editor.apply();
+    }
+    
+    private void restoreTransactionState() {
+        if (getContext() == null) {
+            return;
+        }
+        
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("transaction_state", android.content.Context.MODE_PRIVATE);
+        
+        // Check if we should restore state
+        if (!prefs.getBoolean("should_reopen", false)) {
+            return;
+        }
+        
+        // Clear the flag after checking (we'll restore it if needed)
+        // But don't clear all state yet - only clear when transaction is saved or cancelled
+        
+        // Restore transaction type
+        String savedType = prefs.getString("transaction_type", TYPE_EXPENSE);
+        selectedType = savedType;
+        updateTabSelection();
+        
+        // Restore OCR flag
+        isOCR = prefs.getBoolean("is_ocr", false);
+        
+        // Restore amount
+        String savedAmount = prefs.getString("amount", "");
+        if (!savedAmount.isEmpty() && editAmount != null) {
+            editAmount.setText(savedAmount);
+        }
+        
+        // Restore title
+        String savedTitle = prefs.getString("title", "");
+        if (!savedTitle.isEmpty() && editTitle != null) {
+            editTitle.setText(savedTitle);
+        }
+        
+        // Restore note
+        String savedNote = prefs.getString("note", "");
+        if (!savedNote.isEmpty() && editNote != null) {
+            editNote.setText(savedNote);
+        }
+        
+        // Restore wallet
+        String savedWalletName = prefs.getString("wallet_name", null);
+        if (savedWalletName != null) {
+            long savedWalletId = prefs.getLong("wallet_id", -1);
+            if (savedWalletId != -1) {
+                // Try to find the wallet by ID
+                java.util.List<Wallet> wallets = vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager.getWallets(requireContext());
+                for (Wallet wallet : wallets) {
+                    if (wallet.getId() == savedWalletId || wallet.getName().equals(savedWalletName)) {
+                        selectedWallet = wallet;
+                        updateWalletText();
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Restore category
+        String savedCategoryName = prefs.getString("category_name", null);
+        if (savedCategoryName != null) {
+            int savedCategoryIcon = prefs.getInt("category_icon_res_id", 0);
+            if (savedCategoryIcon != 0) {
+                selectedCategory = savedCategoryName;
+                selectedCategoryIconResId = savedCategoryIcon;
+                updateCategoryText();
+            }
+        }
+        
+        // Restore date
+        long savedDateMillis = prefs.getLong("selected_date_millis", -1);
+        if (savedDateMillis != -1) {
+            selectedDate.setTimeInMillis(savedDateMillis);
+            updateDateText();
+        }
+        
+        // Restore time
+        long savedTimeMillis = prefs.getLong("selected_time_millis", -1);
+        if (savedTimeMillis != -1) {
+            selectedTime.setTimeInMillis(savedTimeMillis);
+            updateTimeText();
+        }
+        
+        // Restore location (if not already set from location selection)
+        // First check if location was selected from map (has_location flag)
+        android.content.SharedPreferences locationPrefs = requireContext().getSharedPreferences("location_selection", android.content.Context.MODE_PRIVATE);
+        if (locationPrefs.getBoolean("has_location", false)) {
+            // Location was just selected from map, use that
+            String address = locationPrefs.getString("address", "");
+            float lat = locationPrefs.getFloat("lat", 0f);
+            float lng = locationPrefs.getFloat("lng", 0f);
+            locationPrefs.edit().clear().apply(); // Clear location selection prefs
+            
+            if (!address.isEmpty() && lat != 0f && lng != 0f) {
+                selectedLocationAddress = address;
+                selectedLocationLat = (double) lat;
+                selectedLocationLng = (double) lng;
+                updateLocationText();
+                // Save the new location to transaction state
+                saveTransactionState();
+            }
+        } else if (selectedLocationAddress == null) {
+            // No new location from map, restore from saved state
+            String savedLocationAddress = prefs.getString("location_address", null);
+            if (savedLocationAddress != null) {
+                float savedLat = prefs.getFloat("location_lat", 0f);
+                float savedLng = prefs.getFloat("location_lng", 0f);
+                if (savedLat != 0f && savedLng != 0f) {
+                    selectedLocationAddress = savedLocationAddress;
+                    selectedLocationLat = (double) savedLat;
+                    selectedLocationLng = (double) savedLng;
+                    updateLocationText();
+                }
+            }
+        }
+    }
+    
+    private void clearTransactionState() {
+        if (getContext() == null) {
+            return;
+        }
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("transaction_state", android.content.Context.MODE_PRIVATE);
+        prefs.edit().clear().apply();
+    }
+
+    private void selectLocation(String address, double lat, double lng) {
+        selectedLocationAddress = address;
+        selectedLocationLat = lat;
+        selectedLocationLng = lng;
+        updateLocationText();
+    }
+
+    private void updateLocationText() {
+        // Update location text - check if view is still available
+        if (tvLocation == null) {
+            return;
+        }
+        
+        if (selectedLocationAddress != null && !selectedLocationAddress.isEmpty()) {
+            tvLocation.setText(selectedLocationAddress);
+            tvLocation.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
+        } else {
+            tvLocation.setText(getString(R.string.none));
+            tvLocation.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_grey));
+        }
     }
     
     private void saveTransaction() {
         String amountText = editAmount.getText().toString().trim();
+        String title = editTitle != null ? editTitle.getText().toString().trim() : "";
         String note = editNote.getText().toString().trim();
-        String location = editLocation != null ? editLocation.getText().toString().trim() : "";
+        String location = selectedLocationAddress != null ? selectedLocationAddress : "";
 
         if (amountText.isEmpty()) {
             Toast.makeText(requireContext(), getString(R.string.error_amount_required), Toast.LENGTH_SHORT).show();
@@ -420,7 +736,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             }
 
             // TODO: Save transaction to database
-            saveTransactionToDatabase(amount, note, location);
+            saveTransactionToDatabase(amount, title, note, location);
 
         } catch (NumberFormatException e) {
             Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
@@ -428,9 +744,13 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         }
     }
 
-    private void saveTransactionToDatabase(double amount, String note, String location) {
-        // TODO: Implement transaction saving logic
-        // This should connect to your database or ViewModel
+    private void saveTransactionToDatabase(double amount, String title, String note, String location) {
+        // Validate wallet selection
+        if (selectedWallet == null) {
+            Toast.makeText(requireContext(), "Please select a wallet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // Combine date and time for the transaction timestamp
         Calendar transactionDateTime = Calendar.getInstance();
         transactionDateTime.set(Calendar.YEAR, selectedDate.get(Calendar.YEAR));
@@ -441,12 +761,106 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         transactionDateTime.set(Calendar.SECOND, 0);
         transactionDateTime.set(Calendar.MILLISECOND, 0);
 
+        // Convert transaction type
+        TransactionType transactionType;
+        switch (selectedType) {
+            case TYPE_INCOME:
+                transactionType = TransactionType.INCOME;
+                break;
+            case TYPE_OTHERS:
+                transactionType = TransactionType.OTHERS;
+                break;
+            default:
+                transactionType = TransactionType.EXPENSE;
+                break;
+        }
+
+        // Create transaction
+        Transaction transaction = new Transaction(
+            transactionType,
+            (long) amount,
+            selectedWallet.getId(),
+            transactionDateTime.getTime()
+        );
+
+        // Set title (merchantName)
+        if (title != null && !title.isEmpty()) {
+            transaction.setMerchantName(title);
+        }
+
+        // Set category if selected (only for expenses)
+        // Try to find category ID from name using MockCategoryData
+        if (selectedCategory != null && transactionType == TransactionType.EXPENSE) {
+            try {
+                vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData categoryData = new vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData();
+                java.util.List<vn.edu.tdtu.lhqc.budtrack.models.Category> categories = vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData.getSampleCategories();
+                for (vn.edu.tdtu.lhqc.budtrack.models.Category category : categories) {
+                    if (category.getName().equals(selectedCategory)) {
+                        transaction.setCategoryId(category.getId());
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                // Category ID not found, skip
+            }
+        }
+
+        // Set note
+        if (!note.isEmpty()) {
+            transaction.setNote(note);
+        }
+
+        // Set location
+        String locationText = selectedLocationAddress != null ? selectedLocationAddress : location;
+        if (!locationText.isEmpty()) {
+            transaction.setAddress(locationText);
+            if (selectedLocationLat != null && selectedLocationLng != null) {
+                transaction.setLatitude(selectedLocationLat);
+                transaction.setLongitude(selectedLocationLng);
+            }
+        }
+
+        // Save transaction using TransactionManager
+        TransactionManager.addTransaction(requireContext(), transaction);
+
+        // Update wallet balance
+        if (transactionType == TransactionType.INCOME) {
+            selectedWallet.setBalance(selectedWallet.getBalance() + (long) amount);
+        } else {
+            selectedWallet.setBalance(selectedWallet.getBalance() - (long) amount);
+        }
+        vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager.updateWallet(
+            requireContext(), selectedWallet.getName(), selectedWallet);
+
         String typeText = getTransactionTypeText();
         String formattedAmount = CurrencyUtils.formatNumberUS(amount);
         String noteText = note.isEmpty() ? getString(R.string.no_note) : note;
 
         String message = getString(R.string.transaction_saved, typeText, formattedAmount, noteText);
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+
+        // Clear saved transaction state since transaction is saved
+        clearTransactionState();
+
+        // Directly refresh HomeFragment if it exists (for immediate UI update)
+        // This ensures the UI updates immediately, even if the fragment is hidden
+        androidx.fragment.app.FragmentManager fm = requireActivity().getSupportFragmentManager();
+        HomeFragment homeFragment = (HomeFragment) fm.findFragmentByTag("HOME_FRAGMENT");
+        if (homeFragment != null && homeFragment.isAdded()) {
+            // Post to main thread to ensure UI updates happen on the correct thread
+            // This works even if the fragment is currently hidden
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                if (homeFragment.isAdded() && !homeFragment.isDetached()) {
+                    homeFragment.refreshData();
+                }
+            });
+        }
+
+        // Notify all fragments that a transaction was created (backup mechanism)
+        // Data is already saved synchronously via commit(), so we can notify immediately
+        Bundle result = new Bundle();
+        result.putBoolean("transaction_created", true);
+        requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_TRANSACTION_CREATED, result);
 
         // Close bottom sheet
         dismiss();

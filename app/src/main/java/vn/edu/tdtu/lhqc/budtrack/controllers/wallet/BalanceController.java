@@ -3,10 +3,18 @@ package vn.edu.tdtu.lhqc.budtrack.controllers.wallet;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import android.content.Context;
+
+import java.util.List;
+
+import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager;
+import vn.edu.tdtu.lhqc.budtrack.models.Wallet;
+
 /**
  * BalanceService encapsulates balance-related UI logic and state.
  * - Persists hidden/visible preference
  * - Formats balance for display (masked vs visible)
+ * - Calculates total balance from wallets
  */
 public final class BalanceController {
 
@@ -45,6 +53,23 @@ public final class BalanceController {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Calculates the total balance from all wallets (excluding current wallet and wallets marked as excludeFromTotal).
+     * 
+     * @param context The application context
+     * @return Total balance as a long value in VND
+     */
+    public static long calculateTotalBalance(Context context) {
+        List<Wallet> wallets = WalletManager.getWallets(context);
+        long totalBalance = 0;
+        for (Wallet wallet : wallets) {
+            if (!wallet.isCurrentWallet() && !wallet.isExcludeFromTotal()) {
+                totalBalance += wallet.getBalance();
+            }
+        }
+        return totalBalance;
     }
 
     private static SharedPreferences getPrefs(Context context) {

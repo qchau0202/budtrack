@@ -57,7 +57,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="25,000,000 VND"
+                        android:text="@string/amount_hint"
                         android:textColor="@color/primary_black"
                         android:textStyle="bold"
                         android:textSize="28sp" />
@@ -66,7 +66,7 @@
                         android:id="@+id/tv_total_budget_percent"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="19%"
+                        android:text="@string/amount_hint"
                         android:textColor="@color/primary_black"
                         android:textStyle="bold"
                         android:textSize="16sp" />
@@ -95,7 +95,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="-5,450,300 VND spent"
+                        android:text="@string/amount_hint"
                         android:textColor="@color/primary_black"
                         android:textSize="14sp" />
 
@@ -103,7 +103,7 @@
                         android:id="@+id/tv_total_left"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="4,549,700 VND left"
+                        android:text="@string/amount_hint"
                         android:textColor="@color/primary_black"
                         android:textSize="14sp" />
 
@@ -111,6 +111,59 @@
 
             </LinearLayout>
             <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/secondary_grey" />
+
+            <!-- Add Budget Button -->
+            <LinearLayout
+                android:id="@+id/btn_add_budget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_card"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginTop="16dp"
+                android:padding="20dp"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_add_circle_24dp"
+                    app:tint="@color/primary_green"
+                    android:padding="8dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/add_budget"
+                        android:textColor="@color/primary_black"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/add_budget_description"
+                        android:textColor="@color/primary_grey"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_arrow_forward_24dp"
+                    app:tint="@color/primary_grey" />
+            </LinearLayout>
 
             <!-- Daily Budget Card -->
             <include

@@ -1,13 +1,16 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,11 +18,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import vn.edu.tdtu.lhqc.budtrack.R;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.BudgetDisplayData;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockBudgetData;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockBudgetHelper;
+import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCalculator;
+import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager;
+import vn.edu.tdtu.lhqc.budtrack.models.Budget;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.ProgressBarUtils;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
@@ -49,33 +51,91 @@ public class BudgetFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Listen for transaction creation to refresh budget data immediately
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED,
+            this,
+            (requestKey, result) -> {
+                if (TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED.equals(requestKey)) {
+                    // Refresh budget data when a transaction is created (to update spent amounts)
+                    if (getView() != null) {
+                        setupBudgetData(getView());
+                    }
+                }
+            }
+        );
     }
+
+    private View rootView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_budget, container, false);
+        rootView = inflater.inflate(R.layout.fragment_budget, container, false);
 
-        GeneralHeaderController.setup(root, this);
+        GeneralHeaderController.setup(rootView, this);
+        setupAddBudgetButton(rootView);
+
+        return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Always refresh when fragment becomes visible
+        if (rootView != null) {
+            setupBudgetData(rootView);
+        }
+    }
+    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Clean up Fragment Result listener
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener(
+            TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED);
+    }
+    
+    private void setupAddBudgetButton(View root) {
+        View btnAddBudget = root.findViewById(R.id.btn_add_budget);
+        if (btnAddBudget != null) {
+            btnAddBudget.setOnClickListener(v -> {
+                BudgetCreateFragment budgetCreateFragment = new BudgetCreateFragment();
+                budgetCreateFragment.show(getParentFragmentManager(), BudgetCreateFragment.TAG);
+            });
+        }
+        
+        // Set up Fragment Result listener for budget creation
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            BudgetCreateFragment.RESULT_KEY,
+            this,
+            (requestKey, result) -> {
+                if (BudgetCreateFragment.RESULT_KEY.equals(requestKey)) {
+                    String budgetName = result.getString(BudgetCreateFragment.RESULT_BUDGET_NAME);
+                    long budgetAmount = result.getLong(BudgetCreateFragment.RESULT_BUDGET_AMOUNT);
+                    int colorResId = result.getInt(BudgetCreateFragment.RESULT_BUDGET_COLOR);
+                    String period = result.getString(BudgetCreateFragment.RESULT_BUDGET_PERIOD);
+                    long[] categoryIds = result.getLongArray(BudgetCreateFragment.RESULT_BUDGET_CATEGORIES);
+                    
+                    // Budget is already saved by BudgetCreateFragment
+                    // Just refresh the budget list
         setupBudgetData(root);
-
-        return root;
+                }
+            }
+        );
     }
 
     private void setupBudgetData(View root) {
-        // Load budgets from mockdata
-        List<vn.edu.tdtu.lhqc.budtrack.models.Budget> budgets = MockBudgetData.getSampleBudgets();
+        // Load budgets from BudgetManager
+        List<Budget> budgets = BudgetManager.getBudgets(requireContext());
         
-        // Create BudgetDisplayData with spent amounts
-        List<BudgetDisplayData> budgetDisplayList = new ArrayList<>();
+        // Calculate total budget and spent
         long totalBudget = 0;
         long totalSpent = 0;
         
-        for (vn.edu.tdtu.lhqc.budtrack.models.Budget budget : budgets) {
-            long spentAmount = MockBudgetHelper.getMockSpentAmount(budget);
-            BudgetDisplayData displayData = new BudgetDisplayData(budget, spentAmount);
-            budgetDisplayList.add(displayData);
-            
+        for (Budget budget : budgets) {
+            long spentAmount = BudgetCalculator.calculateSpentAmount(requireContext(), budget);
             totalBudget += budget.getBudgetAmount();
             totalSpent += spentAmount;
         }
@@ -83,21 +143,43 @@ public class BudgetFragment extends Fragment {
         // Setup Total Budget
         setupTotalBudget(root, totalBudget, totalSpent);
 
-        // Setup budget cards - match by name
-        for (BudgetDisplayData displayData : budgetDisplayList) {
-            String budgetName = displayData.getName();
-            int cardId = -1;
+        // Remove old hardcoded budget cards
+        LinearLayout budgetContent = root.findViewById(R.id.budget_content);
+        if (budgetContent != null) {
+            // Remove hardcoded budget cards (they have specific IDs)
+            View cardDaily = root.findViewById(R.id.card_daily_budget);
+            View cardPersonal = root.findViewById(R.id.card_personal_budget);
+            View cardOthers = root.findViewById(R.id.card_others_budget);
             
-            if (budgetName.equals(getString(R.string.budget_daily))) {
-                cardId = R.id.card_daily_budget;
-            } else if (budgetName.equals(getString(R.string.budget_personal))) {
-                cardId = R.id.card_personal_budget;
-            } else if (budgetName.equals(getString(R.string.budget_others))) {
-                cardId = R.id.card_others_budget;
+            if (cardDaily != null && cardDaily.getParent() != null) {
+                ((ViewGroup) cardDaily.getParent()).removeView(cardDaily);
             }
+            if (cardPersonal != null && cardPersonal.getParent() != null) {
+                ((ViewGroup) cardPersonal.getParent()).removeView(cardPersonal);
+            }
+            if (cardOthers != null && cardOthers.getParent() != null) {
+                ((ViewGroup) cardOthers.getParent()).removeView(cardOthers);
+            }
+        }
+
+        // Dynamically create budget cards
+        LinearLayout budgetContainer = root.findViewById(R.id.budget_content);
+        if (budgetContainer != null) {
+            // Find the add budget button to insert cards after it
+            View addBudgetButton = root.findViewById(R.id.btn_add_budget);
+            int insertIndex = budgetContainer.indexOfChild(addBudgetButton);
             
-            if (cardId != -1) {
-                setupBudgetCard(root, displayData, cardId);
+            // Insert budget cards after the add button
+            for (Budget budget : budgets) {
+                long spentAmount = BudgetCalculator.calculateSpentAmount(requireContext(), budget);
+                View budgetCard = createBudgetCard(budget, spentAmount, budgetContainer);
+                if (insertIndex >= 0) {
+                    // Insert after the add button (insertIndex + 1)
+                    budgetContainer.addView(budgetCard, insertIndex + 1);
+                    insertIndex++; // Update index for next card
+                } else {
+                    budgetContainer.addView(budgetCard);
+                }
             }
         }
     }
@@ -140,11 +222,12 @@ public class BudgetFragment extends Fragment {
         }
     }
 
-    private void setupBudgetCard(View root, BudgetDisplayData data, int cardId) {
-        View card = root.findViewById(cardId);
-        if (card == null) return;
+    private View createBudgetCard(Budget budget, long spentAmount, ViewGroup parent) {
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        // Inflate with parent to preserve layout parameters from XML
+        View card = inflater.inflate(R.layout.view_budget_card, parent, false);
 
-        // Find views using generic IDs from view_budget_card.xml
+        // Find views
         TextView tvLabel = card.findViewById(R.id.tv_budget_label);
         TextView tvAmount = card.findViewById(R.id.tv_budget_amount);
         TextView tvPercent = card.findViewById(R.id.tv_budget_percent);
@@ -153,66 +236,87 @@ public class BudgetFragment extends Fragment {
         TextView tvLeft = card.findViewById(R.id.tv_budget_left);
         ImageButton btnMenu = card.findViewById(R.id.btn_budget_menu);
 
+        // Get color (custom or resource)
+        int colorValue = 0;
+        if (budget.getCustomColor() != null) {
+            colorValue = budget.getCustomColor();
+        } else if (budget.getColorResId() != 0) {
+            colorValue = ContextCompat.getColor(requireContext(), budget.getColorResId());
+        }
+
         // Set label text and color
         if (tvLabel != null) {
-            tvLabel.setText(data.getName());
-            tvLabel.setTextColor(getResources().getColor(data.getColorResId(), null));
+            tvLabel.setText(budget.getName());
+            if (colorValue != 0) {
+                tvLabel.setTextColor(colorValue);
+            }
         }
 
         if (tvAmount != null) {
-            tvAmount.setText(CurrencyUtils.formatCurrency(data.getBudgetAmount()));
+            tvAmount.setText(CurrencyUtils.formatCurrency(budget.getBudgetAmount()));
         }
 
-        int percentage = data.getPercentage();
-        boolean overspending = data.isOverspending();
+        long remaining = budget.getBudgetAmount() - spentAmount;
+        int percentage = budget.getBudgetAmount() > 0 
+            ? (int) Math.round(((double) spentAmount / budget.getBudgetAmount()) * 100) 
+            : 0;
+        boolean overspending = spentAmount > budget.getBudgetAmount();
 
         if (tvPercent != null) {
             if (overspending) {
-                tvPercent.setText("-" + percentage + "%");
-                tvPercent.setTextColor(getResources().getColor(R.color.primary_red, null));
+                int overspendPercent = budget.getBudgetAmount() > 0
+                    ? (int) Math.round(((double) (spentAmount - budget.getBudgetAmount()) / budget.getBudgetAmount()) * 100)
+                    : 0;
+                tvPercent.setText("+" + overspendPercent + "%");
+                tvPercent.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_red));
             } else {
                 tvPercent.setText(percentage + "%");
-                tvPercent.setTextColor(getResources().getColor(R.color.primary_black, null));
+                tvPercent.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
             }
         }
 
         if (progressBar != null) {
-            ProgressBarUtils.setProgressBarColor(requireContext(), progressBar, data.getColorResId());
+            if (budget.getCustomColor() != null) {
+                // For custom colors, set tint directly
+                progressBar.getProgressDrawable().setColorFilter(
+                    budget.getCustomColor(), 
+                    android.graphics.PorterDuff.Mode.SRC_IN);
+            } else if (budget.getColorResId() != 0) {
+                ProgressBarUtils.setProgressBarColor(requireContext(), progressBar, budget.getColorResId());
+            }
             progressBar.setMax(100);
-            // For overspending, show 100% filled
             progressBar.setProgress(Math.min(percentage, 100));
         }
 
         if (tvSpent != null) {
-            tvSpent.setText("-" + CurrencyUtils.formatCurrency(data.getSpentAmount()) + " " + getString(R.string.spent));
+            tvSpent.setText("-" + CurrencyUtils.formatCurrency(spentAmount) + " " + getString(R.string.spent));
         }
 
         if (tvLeft != null) {
-            long remaining = data.getRemaining();
             if (remaining >= 0) {
                 tvLeft.setText(CurrencyUtils.formatCurrency(remaining) + " " + getString(R.string.left));
-                tvLeft.setTextColor(getResources().getColor(R.color.primary_black, null));
+                tvLeft.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
             } else {
                 tvLeft.setText(CurrencyUtils.formatCurrency(Math.abs(remaining)) + " " + getString(R.string.overspending));
-                tvLeft.setTextColor(getResources().getColor(R.color.primary_red, null));
+                tvLeft.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_red));
             }
         }
 
         if (btnMenu != null) {
             btnMenu.setOnClickListener(v -> {
-                Toast.makeText(requireContext(), data.getName() + " menu", Toast.LENGTH_SHORT).show();
-                // TODO: Implement budget menu functionality
+                Toast.makeText(requireContext(), budget.getName() + " menu", Toast.LENGTH_SHORT).show();
+                // TODO: Implement budget menu functionality (edit/delete)
             });
         }
 
         // Make the card clickable to navigate to detail
-        if (card != null) {
             card.setOnClickListener(v -> {
+            int colorResId = budget.getCustomColor() != null ? 0 : budget.getColorResId();
                 BudgetDetailFragment detailFragment = BudgetDetailFragment.newInstance(
-                    data.getName(),
-                    data.getBudgetAmount(),
-                    data.getSpentAmount(),
-                    data.getColorResId()
+                budget.getName(),
+                budget.getBudgetAmount(),
+                spentAmount,
+                colorResId
                 );
                 
                 requireActivity().getSupportFragmentManager()
@@ -223,7 +327,8 @@ public class BudgetFragment extends Fragment {
             });
             card.setClickable(true);
             card.setFocusable(true);
-        }
+
+        return card;
     }
 
 }

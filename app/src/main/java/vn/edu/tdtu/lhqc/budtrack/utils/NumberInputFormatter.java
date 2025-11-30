@@ -14,7 +14,7 @@ import java.util.Locale;
  */
 public final class NumberInputFormatter {
 
-    private NumberInputFormatter() {
+    public NumberInputFormatter() {
         // Private constructor to prevent instantiation
     }
 

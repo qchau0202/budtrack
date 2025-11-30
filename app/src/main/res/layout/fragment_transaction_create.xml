@@ -126,6 +126,36 @@
 
             </LinearLayout>
 
+            <!-- Title Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title"
+                    android:textColor="@color/primary_grey"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <EditText
+                    android:id="@+id/editTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:hint="@string/title_hint"
+                    android:textColor="@color/primary_black"
+                    android:textSize="16sp"
+                    android:background="@android:color/transparent"
+                    android:inputType="text"
+                    android:padding="0dp" />
+            </LinearLayout>
+
             <!-- Amount Card -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -198,8 +228,7 @@
                         android:layout_weight="1"
                         android:text="@string/none"
                         android:textColor="@color/primary_black"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textSize="16sp" />
 
                     <ImageView
                         android:layout_width="12dp"
@@ -249,7 +278,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="@string/select_category"
+                        android:text="@string/none"
                         android:textColor="@color/primary_grey"
                         android:textSize="16sp" />
 
@@ -321,13 +350,11 @@
                     app:tint="@color/primary_grey" />
             </LinearLayout>
 
-            <!-- Location Card (Optional) -->
+            <!-- Location Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_card"
                 android:orientation="vertical"
-                android:padding="16dp"
                 android:layout_marginBottom="16dp">
 
                 <TextView
@@ -336,19 +363,34 @@
                     android:text="@string/expense_address"
                     android:textColor="@color/primary_grey"
                     android:textSize="14sp"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="12dp" />
 
-                <EditText
-                    android:id="@+id/editLocation"
+                <LinearLayout
+                    android:id="@+id/cardLocation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text=""
-                    android:hint="@string/search_location"
-                    android:textColor="@color/primary_black"
-                    android:textSize="16sp"
-                    android:background="@android:color/transparent"
-                    android:inputType="text"
-                    android:padding="0dp" />
+                    android:background="@drawable/bg_card"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <TextView
+                        android:id="@+id/tvLocation"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/none"
+                        android:textColor="@color/primary_grey"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:src="@drawable/ic_arrow_forward_24dp"
+                        app:tint="@color/primary_grey" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Note Card -->

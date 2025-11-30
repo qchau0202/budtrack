@@ -179,45 +179,6 @@
             android:padding="16dp"
             android:layout_marginBottom="16dp">
 
-            <!-- Notification -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:labelFor="@+id/switch_notification">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/wallet_notification_enable"
-                        android:textColor="@color/primary_black"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/wallet_notification_description"
-                        android:textColor="@color/primary_grey"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switch_notification"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    app:thumbTint="@color/primary_green"
-                    app:trackTint="@color/primary_grey" />
-            </LinearLayout>
-
             <!-- Exclude from total -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -248,12 +209,12 @@
                         android:textSize="14sp" />
                 </LinearLayout>
 
-                <androidx.appcompat.widget.SwitchCompat
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switch_exclude_total"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:thumbTint="@color/primary_green"
-                    app:trackTint="@color/primary_grey" />
+                    app:thumbTint="@color/switch_thumb_tint"
+                    app:trackTint="@color/switch_track_tint" />
             </LinearLayout>
 
             <!-- Archive -->
@@ -285,12 +246,12 @@
                         android:textSize="14sp" />
                 </LinearLayout>
 
-                <androidx.appcompat.widget.SwitchCompat
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switch_archive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:thumbTint="@color/primary_green"
-                    app:trackTint="@color/primary_grey" />
+                    app:thumbTint="@color/switch_thumb_tint"
+                    app:trackTint="@color/switch_track_tint" />
             </LinearLayout>
         </LinearLayout>
 

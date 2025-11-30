@@ -240,9 +240,6 @@ public class MainActivity extends AppCompatActivity {
 			behavior.setSkipCollapsed(true);
 		}
 
-		// Close button
-		view.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());
-
 		// Manual input button
 		view.findViewById(R.id.card_manual_input).setOnClickListener(v -> {
 			dialog.dismiss();
@@ -270,9 +267,6 @@ public class MainActivity extends AppCompatActivity {
 			behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 			behavior.setSkipCollapsed(true);
 		}
-
-		// Close button
-		view.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());
 
 		// Add Income button
 		view.findViewById(R.id.card_add_income).setOnClickListener(v -> {
