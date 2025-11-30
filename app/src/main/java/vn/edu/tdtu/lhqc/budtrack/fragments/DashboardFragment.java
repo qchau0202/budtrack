@@ -16,12 +16,17 @@ import androidx.core.content.ContextCompat;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
+import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
+import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -51,7 +56,10 @@ public class DashboardFragment extends Fragment {
     private SimpleDateFormat monthYearFormat;
     private SimpleDateFormat dateKeyFormat;
     private List<View> dateCells;
-    private List<String> datesWithExpenses; // Dates that have expenses (format: "yyyy-MM-dd")
+    private Set<String> datesWithTransactions; // Dates that have transactions (format: "yyyy-MM-dd")
+    
+    public static final String RESULT_KEY_DATE_SELECTED = "date_selected";
+    public static final String RESULT_SELECTED_DATE_MILLIS = "selected_date_millis";
 
     public DashboardFragment() {
         // Required empty public constructor
@@ -90,18 +98,55 @@ public class DashboardFragment extends Fragment {
         monthYearFormat = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
         dateKeyFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         dateCells = new ArrayList<>();
-        datesWithExpenses = new ArrayList<>();
+        datesWithTransactions = new HashSet<>();
         
-        // Sample data: dates with expenses (can be replaced with actual data from database)
-        // Format: "yyyy-MM-dd" for unique date identification
-        Calendar today = Calendar.getInstance();
+        // Listen for transaction creation to refresh calendar dots
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED,
+            this,
+            (requestKey, result) -> {
+                if (TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED.equals(requestKey)) {
+                    // Immediately refresh if fragment is visible
+                    refreshCalendar();
+                }
+            }
+        );
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Always refresh when fragment becomes visible
+        refreshCalendar();
+    }
+    
+    private void refreshCalendar() {
+        if (getView() != null && isAdded() && !isDetached()) {
+            loadTransactionDates();
+            updateCalendar();
+        }
+    }
+    
+    private void loadTransactionDates() {
+        if (getContext() == null) {
+            return;
+        }
         
-        // Add some sample dates with expenses (today and a few days before)
-        datesWithExpenses.add(dateKeyFormat.format(today.getTime()));
-        today.add(Calendar.DAY_OF_MONTH, -1);
-        datesWithExpenses.add(dateKeyFormat.format(today.getTime()));
-        today.add(Calendar.DAY_OF_MONTH, -2);
-        datesWithExpenses.add(dateKeyFormat.format(today.getTime()));
+        datesWithTransactions.clear();
+        
+        // Get ALL transactions from TransactionManager (not just current month)
+        // This allows showing transaction indicators for dates in any month
+        List<Transaction> allTransactions = TransactionManager.getTransactions(getContext());
+        
+        // Extract unique dates that have transactions
+        for (Transaction transaction : allTransactions) {
+            if (transaction.getDate() != null) {
+                Calendar transCal = Calendar.getInstance();
+                transCal.setTime(transaction.getDate());
+                String dateKey = dateKeyFormat.format(transCal.getTime());
+                datesWithTransactions.add(dateKey);
+            }
+        }
     }
 
     @Override
@@ -114,6 +159,14 @@ public class DashboardFragment extends Fragment {
 
         // Initialize calendar
         initializeCalendar(root);
+        
+        // Send initial date selection (current date) to TransactionHistoryFragment after view is created
+        root.post(() -> {
+            Bundle result = new Bundle();
+            result.putLong(RESULT_SELECTED_DATE_MILLIS, selectedDate.getTimeInMillis());
+            requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
+        });
+        
         return root;
     }
 
@@ -146,6 +199,9 @@ public class DashboardFragment extends Fragment {
 
     // Update the calendar display with current month
     private void updateCalendar() {
+        // Load transaction dates for the current month
+        loadTransactionDates();
+        
         // Update month/year display
         if (tvMonthYear != null) {
             tvMonthYear.setText(monthYearFormat.format(currentDate.getTime()));
@@ -222,12 +278,12 @@ public class DashboardFragment extends Fragment {
         
         tvDate.setText(String.valueOf(day));
         
-        // Check if this date has expenses
+        // Check if this date has transactions (for any month, not just current)
         String dateKey = dateKeyFormat.format(date.getTime());
-        boolean hasExpenses = datesWithExpenses.contains(dateKey);
+        boolean hasTransactions = datesWithTransactions.contains(dateKey);
         
-        // Show event indicator if date has expenses
-        if (hasExpenses && isCurrentMonth) {
+        // Show event indicator if date has transactions (for any month)
+        if (hasTransactions) {
             eventIndicator.setVisibility(View.VISIBLE);
         } else {
             eventIndicator.setVisibility(View.GONE);
@@ -238,16 +294,16 @@ public class DashboardFragment extends Fragment {
         boolean isToday = isSameDay(date, todayDate) && isCurrentMonth;
         
         // Update appearance based on selection and month
-        if (!isCurrentMonth) {
+        if (isSelected) {
+            // Selected date: green background with white text (works for any month)
+            tvDate.setBackgroundResource(R.drawable.bg_date_cell_selected);
+            tvDate.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_white));
+            tvDate.setAlpha(1.0f);
+        } else if (!isCurrentMonth) {
             // Dates from other months: grey text, no background
             tvDate.setBackgroundResource(R.drawable.bg_date_cell);
             tvDate.setTextColor(ContextCompat.getColor(requireContext(), R.color.third_grey));
             tvDate.setAlpha(0.5f);
-        } else if (isSelected) {
-            // Selected date: green background with white text
-            tvDate.setBackgroundResource(R.drawable.bg_date_cell_selected);
-            tvDate.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_white));
-            tvDate.setAlpha(1.0f);
         } else if (isToday) {
             // Today's date: grey background with black text
             tvDate.setBackgroundResource(R.drawable.bg_date_cell_today);
@@ -260,17 +316,22 @@ public class DashboardFragment extends Fragment {
             tvDate.setAlpha(1.0f);
         }
         
-        // Set click listener (only for current month dates)
-        if (isCurrentMonth) {
-            cell.setOnClickListener(v -> {
-                selectedDate = (Calendar) date.clone();
-                updateCalendar(); // Refresh to show new selection
-                // TODO: Update expense data based on selected date
-            });
-        } else {
-            cell.setOnClickListener(null);
-            cell.setClickable(false);
-        }
+        // Set click listener for all dates (including dates from other months)
+        // This allows users to select dates from previous/next months to view their transactions
+        cell.setOnClickListener(v -> {
+            selectedDate = (Calendar) date.clone();
+            // If clicking a date from a different month, update currentDate to that month
+            if (!isCurrentMonth) {
+                currentDate.set(Calendar.YEAR, date.get(Calendar.YEAR));
+                currentDate.set(Calendar.MONTH, date.get(Calendar.MONTH));
+            }
+            updateCalendar(); // Refresh to show new selection and month
+            
+            // Notify TransactionHistoryFragment about date selection
+            Bundle result = new Bundle();
+            result.putLong(RESULT_SELECTED_DATE_MILLIS, selectedDate.getTimeInMillis());
+            requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
+        });
         
         return cell;
     }
@@ -279,6 +340,14 @@ public class DashboardFragment extends Fragment {
     private boolean isSameDay(Calendar cal1, Calendar cal2) {
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+    }
+    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Clean up Fragment Result listener
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener(
+            TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED);
     }
 
 }

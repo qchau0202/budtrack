@@ -12,6 +12,7 @@ public class Wallet {
     private String walletType; // e.g., "Basic Wallet", "Investment Wallet", "Savings Wallet"
     private boolean isCurrentWallet; // Whether this is the active wallet
     private boolean isArchived; // Whether wallet is archived
+    private boolean excludeFromTotal; // Whether to exclude this wallet from total balance calculation
 
     // Default constructor for database
     public Wallet() {
@@ -25,6 +26,7 @@ public class Wallet {
         this.walletType = walletType;
         this.isCurrentWallet = false;
         this.isArchived = false;
+        this.excludeFromTotal = false;
     }
 
     // Getters and Setters
@@ -82,6 +84,14 @@ public class Wallet {
 
     public void setArchived(boolean archived) {
         isArchived = archived;
+    }
+
+    public boolean isExcludeFromTotal() {
+        return excludeFromTotal;
+    }
+
+    public void setExcludeFromTotal(boolean excludeFromTotal) {
+        this.excludeFromTotal = excludeFromTotal;
     }
 }
 

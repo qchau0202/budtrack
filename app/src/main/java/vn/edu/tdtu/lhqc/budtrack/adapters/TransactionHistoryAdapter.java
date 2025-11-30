@@ -18,7 +18,7 @@ import vn.edu.tdtu.lhqc.budtrack.R;
 
 public class TransactionHistoryAdapter extends RecyclerView.Adapter<TransactionHistoryAdapter.DailyGroupViewHolder> {
 
-    private List<DailyTransactionGroup> dailyGroups;
+    List<DailyTransactionGroup> dailyGroups; // Package-private for ViewHolder access
     private OnTransactionClickListener onTransactionClickListener;
 
     public interface OnTransactionClickListener {
@@ -38,13 +38,15 @@ public class TransactionHistoryAdapter extends RecyclerView.Adapter<TransactionH
     public DailyGroupViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_daily_transaction_group, parent, false);
-        return new DailyGroupViewHolder(view);
+        DailyGroupViewHolder holder = new DailyGroupViewHolder(view);
+        holder.setAdapter(this);
+        return holder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull DailyGroupViewHolder holder, int position) {
         DailyTransactionGroup group = dailyGroups.get(position);
-        holder.bind(group);
+        holder.bind(group, position);
     }
 
     @Override
@@ -57,6 +59,7 @@ public class TransactionHistoryAdapter extends RecyclerView.Adapter<TransactionH
         private final TextView tvDate;
         private final TextView tvDailyTotal;
         private final LinearLayout transactionsContainer;
+        private TransactionHistoryAdapter adapter;
 
         DailyGroupViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -66,9 +69,32 @@ public class TransactionHistoryAdapter extends RecyclerView.Adapter<TransactionH
             transactionsContainer = itemView.findViewById(R.id.transactions_container);
         }
 
-        void bind(DailyTransactionGroup group) {
-            if (tvMonth != null) {
-                tvMonth.setText(group.getMonthLabel());
+        void setAdapter(TransactionHistoryAdapter adapter) {
+            this.adapter = adapter;
+        }
+
+        void bind(DailyTransactionGroup group, int position) {
+            // Only show month label if it's different from previous group
+            if (tvMonth != null && adapter != null) {
+                String currentMonth = group.getMonthLabel();
+                // Check if this is the first item or month changed from previous
+                boolean shouldShowMonth = position == 0;
+                if (!shouldShowMonth && position > 0) {
+                    // Compare with previous group's month
+                    List<DailyTransactionGroup> groups = adapter.dailyGroups;
+                    if (groups != null && groups.size() > position - 1) {
+                        DailyTransactionGroup previousGroup = groups.get(position - 1);
+                        if (previousGroup != null && !currentMonth.equals(previousGroup.getMonthLabel())) {
+                            shouldShowMonth = true;
+                        }
+                    }
+                }
+                if (shouldShowMonth) {
+                    tvMonth.setText(currentMonth);
+                    tvMonth.setVisibility(View.VISIBLE);
+                } else {
+                    tvMonth.setVisibility(View.GONE);
+                }
             }
             tvDate.setText(group.getDate());
             tvDailyTotal.setText(group.getTotal());

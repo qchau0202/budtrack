@@ -17,6 +17,8 @@
     <string name="btn_login">Đăng nhập</string>
     <string name="no_account">Chưa có tài khoản? </string>
     <string name="sign_up_link">Đăng ký</string>
+    <string name="sign_up_with_google">Đăng ký bằng Google</string>
+    <string name="or">Hoặc</string>
 
 <!--Register-->
     <string name="register_title">Tạo tài khoản của bạn</string>
@@ -59,6 +61,25 @@
     <string name="budget_daily">Hàng ngày</string>
     <string name="budget_personal">Cá nhân</string>
     <string name="budget_others">Khác</string>
+    <string name="add_budget">Thêm Ngân Sách</string>
+    <string name="add_budget_description">Tạo danh mục ngân sách mới</string>
+    <string name="budget_create_title">Tạo Ngân Sách</string>
+    <string name="budget_name_label">Tên Ngân Sách</string>
+    <string name="budget_name_hint">Nhập tên ngân sách</string>
+    <string name="budget_amount_label">Số Tiền Ngân Sách</string>
+    <string name="budget_period_label">Chu Kỳ</string>
+    <string name="budget_color_label">Màu Sắc</string>
+    <string name="budget_categories_label">Danh Mục</string>
+    <string name="select_period">Chọn Chu Kỳ</string>
+    <string name="select_color">Chọn Màu</string>
+    <string name="select_categories">Chọn Danh Mục</string>
+    <string name="custom_color">Màu Tùy Chỉnh</string>
+    <string name="select_custom_color">Chọn Màu Tùy Chỉnh</string>
+    <string name="budget_name_required">Tên ngân sách là bắt buộc</string>
+    <string name="budget_amount_required">Số tiền ngân sách là bắt buộc</string>
+    <string name="budget_amount_invalid">Số tiền ngân sách phải lớn hơn 0</string>
+    <string name="budget_categories_required">Vui lòng chọn ít nhất một danh mục</string>
+    <string name="budget_created">Đã tạo ngân sách thành công</string>
 
     <!--Dashboard-->
     <string name="dashboard_page">Trang thông tin</string>
@@ -131,6 +152,7 @@
     <string name="search_hint">Tìm kiếm giao dịch, nhóm, ngân sách…</string>
     <string name="search_empty_state">Nhập từ khóa để tìm kiếm</string>
     <string name="search_no_results">Không tìm thấy kết quả cho "%1$s"</string>
+    <string name="no_transactions">Không tìm thấy giao dịch</string>
     <string name="all_categories">Tất cả mục</string>
     <string name="select_subcategory_title">Chọn nhóm phụ</string>
     <string name="category_food">Thức ăn</string>
@@ -147,6 +169,8 @@
     <string name="subcategory_text">Hàng ngày</string>
     <string name="subcategory_add">Thêm</string>
     <string name="add_new_subcategory">Thêm danh mục con mới</string>
+    <string name="title">Tiêu Đề</string>
+    <string name="title_hint">Nhập tiêu đề giao dịch</string>
     <string name="note">Ghi chú</string>
     <string name="note_hint">Thêm ghi chú</string>
     <string name="date">Ngày</string>
@@ -170,6 +194,10 @@
     <string name="expense_address">Địa chỉ</string>
     <string name="expense_date">Ngày</string>
     <string name="expense_note">Ghi chú</string>
+    <string name="selected_location">Vị Trí Đã Chọn</string>
+    <string name="tap_on_map_to_select">Chạm vào bản đồ để chọn vị trí</string>
+    <string name="confirm_location">Xác Nhận Vị Trí</string>
+    <string name="please_select_location">Vui lòng chọn một vị trí trên bản đồ</string>
 
     <!--Transaction History-->
     <string name="transactions">Tất cả giao dịch</string>
@@ -207,6 +235,8 @@
     <string name="wallet_current_wallet_label">Ví hiện tại</string>
     <string name="wallet_other_wallets_label">Các ví khác</string>
     <string name="wallet_add_wallet">Thêm ví</string>
+    <string name="available_wallets">Ví Có Sẵn</string>
+    <string name="archived_wallets">Ví Đã Lưu Trữ</string>
     <!--Wallet Edit Fragment-->
     <string name="wallet_edit_title">Chỉnh sửa ví</string>
     <string name="wallet_edit_done">Xong</string>
@@ -261,6 +291,7 @@
     <string name="add_expense">Thêm Chi Tiêu</string>
     <string name="current_balance">Số dư hiện tại 250.560.000 VND</string>
     <string name="remaining_budget">Ngân sách còn lại 9.512.500 VND</string>
+    <string name="none">Không</string>
 </resources>
 
 

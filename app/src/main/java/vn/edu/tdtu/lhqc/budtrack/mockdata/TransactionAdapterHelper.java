@@ -29,20 +29,20 @@ public class TransactionAdapterHelper {
     public static List<TransactionHistoryAdapter.Transaction> convertToAdapterTransactions(
             List<Transaction> transactions) {
         List<TransactionHistoryAdapter.Transaction> adapterTransactions = new ArrayList<>();
-        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         
         for (Transaction transaction : transactions) {
             String timeStr = transaction.getDate() != null 
                     ? timeFormat.format(transaction.getDate())
-                    : "12:00 PM";
+                    : "12:00";
             
             String merchantName = transaction.getMerchantName() != null 
                     ? transaction.getMerchantName() 
                     : "Transaction";
             
             String amountText = transaction.getType() == TransactionType.INCOME
-                    ? "+" + CurrencyUtils.formatNumber(transaction.getAmount()) + " VND"
-                    : "-" + CurrencyUtils.formatNumber(transaction.getAmount()) + " VND";
+                    ? "+" + CurrencyUtils.formatCurrency(transaction.getAmount())
+                    : "-" + CurrencyUtils.formatCurrency(transaction.getAmount());
             
             // Look up category icon or use default wallet icon
             int iconResId = vn.edu.tdtu.lhqc.budtrack.R.drawable.ic_wallet_24dp; // Default
@@ -77,6 +77,7 @@ public class TransactionAdapterHelper {
             List<Transaction> transactions, boolean isIncome) {
         // Group transactions by date
         Map<String, List<TransactionHistoryAdapter.Transaction>> groupedByDate = new HashMap<>();
+        Map<String, Long> dailyTotals = new HashMap<>(); // Store daily totals
         
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
         SimpleDateFormat dayFormat = new SimpleDateFormat("MMMM d, EEE", Locale.getDefault());
@@ -92,16 +93,25 @@ public class TransactionAdapterHelper {
             
             if (!groupedByDate.containsKey(dayKey)) {
                 groupedByDate.put(dayKey, new ArrayList<>());
+                dailyTotals.put(dayKey, 0L);
             }
             
-            String timeStr = new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(transactionDate);
+            // Add to daily total
+            long currentTotal = dailyTotals.get(dayKey);
+            if (isIncome) {
+                dailyTotals.put(dayKey, currentTotal + transaction.getAmount());
+            } else {
+                dailyTotals.put(dayKey, currentTotal - transaction.getAmount());
+            }
+            
+            String timeStr = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(transactionDate);
             String merchantName = transaction.getMerchantName() != null 
                     ? transaction.getMerchantName() 
                     : "Transaction";
             
             String amountText = isIncome
-                    ? "+" + CurrencyUtils.formatNumber(transaction.getAmount()) + " VND"
-                    : "-" + CurrencyUtils.formatNumber(transaction.getAmount()) + " VND";
+                    ? "+" + CurrencyUtils.formatCurrency(transaction.getAmount())
+                    : "-" + CurrencyUtils.formatCurrency(transaction.getAmount());
             
             int iconResId = vn.edu.tdtu.lhqc.budtrack.R.drawable.ic_wallet_24dp; // Default
             if (transaction.getCategoryId() != null) {
@@ -128,29 +138,31 @@ public class TransactionAdapterHelper {
             String dayKey = entry.getKey();
             List<TransactionHistoryAdapter.Transaction> adapterTransactions = entry.getValue();
             
-            // Calculate daily total
-            long dailyTotal = 0;
-            for (TransactionHistoryAdapter.Transaction t : adapterTransactions) {
-                String amountStr = t.getAmount().replaceAll("[.,\\s]", "").replace("VND", "").trim();
-                boolean isPositive = !amountStr.startsWith("-");
-                if (amountStr.startsWith("+") || amountStr.startsWith("-")) {
-                    amountStr = amountStr.substring(1);
-                }
-                try {
-                    long amount = Long.parseLong(amountStr);
-                    dailyTotal += isPositive ? amount : -amount;
-                } catch (NumberFormatException e) {
-                    // Ignore
-                }
-            }
+            // Get daily total from map
+            long dailyTotal = dailyTotals.getOrDefault(dayKey, 0L);
             
             String totalText = dailyTotal >= 0
-                    ? "+" + CurrencyUtils.formatNumber(dailyTotal) + " VND"
-                    : "-" + CurrencyUtils.formatNumber(Math.abs(dailyTotal)) + " VND";
+                    ? "+" + CurrencyUtils.formatCurrency(dailyTotal)
+                    : "-" + CurrencyUtils.formatCurrency(Math.abs(dailyTotal));
             
-            // Extract month from day key
-            String monthLabel = dayKey.split(",")[0].split(" ")[0] + " " +
-                    new SimpleDateFormat("yyyy", Locale.getDefault()).format(calendar.getTime());
+            // Extract month and year from first transaction of the day
+            String monthLabel = "";
+            if (!adapterTransactions.isEmpty()) {
+                // Get date from first transaction
+                for (Transaction transaction : transactions) {
+                    Date transactionDate = transaction.getDate() != null 
+                            ? transaction.getDate() 
+                            : calendar.getTime();
+                    String transactionDayKey = dayFormat.format(transactionDate);
+                    if (transactionDayKey.equals(dayKey)) {
+                        monthLabel = dateFormat.format(transactionDate);
+                        break;
+                    }
+                }
+            }
+            if (monthLabel.isEmpty()) {
+                monthLabel = dateFormat.format(calendar.getTime());
+            }
             
             TransactionHistoryAdapter.DailyTransactionGroup group =
                     new TransactionHistoryAdapter.DailyTransactionGroup(

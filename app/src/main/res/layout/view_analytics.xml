@@ -103,6 +103,7 @@
 
     <!-- Bars row (placeholder without library) -->
     <LinearLayout
+        android:id="@+id/bars_container"
         android:layout_width="match_parent"
         android:layout_height="160dp"
         android:orientation="horizontal"
@@ -118,10 +119,12 @@
             android:gravity="bottom|center_horizontal"
             android:orientation="vertical">
             <View
+                android:id="@+id/bar_mon"
                 android:layout_width="20dp"
                 android:layout_height="72dp"
                 android:background="@drawable/bg_bar_default" />
             <TextView
+                android:id="@+id/tv_date_mon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Mon"
@@ -138,10 +141,12 @@
             android:gravity="bottom|center_horizontal"
             android:orientation="vertical">
             <View
+                android:id="@+id/bar_tue"
                 android:layout_width="20dp"
                 android:layout_height="120dp"
                 android:background="@drawable/bg_bar_default" />
             <TextView
+                android:id="@+id/tv_date_tue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tue"
@@ -158,10 +163,12 @@
             android:gravity="bottom|center_horizontal"
             android:orientation="vertical">
             <View
+                android:id="@+id/bar_wed"
                 android:layout_width="20dp"
                 android:layout_height="84dp"
                 android:background="@drawable/bg_bar_default" />
             <TextView
+                android:id="@+id/tv_date_wed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Wed"
@@ -178,10 +185,12 @@
             android:gravity="bottom|center_horizontal"
             android:orientation="vertical">
             <View
+                android:id="@+id/bar_thu"
                 android:layout_width="20dp"
                 android:layout_height="92dp"
                 android:background="@drawable/bg_bar_default" />
             <TextView
+                android:id="@+id/tv_date_thu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thu"
@@ -198,10 +207,12 @@
             android:gravity="bottom|center_horizontal"
             android:orientation="vertical">
             <View
+                android:id="@+id/bar_fri"
                 android:layout_width="24dp"
                 android:layout_height="148dp"
                 android:background="@drawable/bg_bar_active" />
             <TextView
+                android:id="@+id/tv_date_fri"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Fri"
@@ -219,10 +230,12 @@
             android:gravity="bottom|center_horizontal"
             android:orientation="vertical">
             <View
+                android:id="@+id/bar_sat"
                 android:layout_width="20dp"
                 android:layout_height="116dp"
                 android:background="@drawable/bg_bar_default" />
             <TextView
+                android:id="@+id/tv_date_sat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sat"
@@ -239,10 +252,12 @@
             android:gravity="bottom|center_horizontal"
             android:orientation="vertical">
             <View
+                android:id="@+id/bar_sun"
                 android:layout_width="20dp"
                 android:layout_height="76dp"
                 android:background="@drawable/bg_bar_default" />
             <TextView
+                android:id="@+id/tv_date_sun"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sun"

@@ -16,6 +16,8 @@
     <string name="btn_login">Login</string>
     <string name="no_account">Don\'t have an account? </string>
     <string name="sign_up_link">Sign Up</string>
+    <string name="sign_up_with_google">Sign up with Google</string>
+    <string name="or">Or</string>
 
     <!--Register-->
     <string name="register_title">Create your account</string>
@@ -57,6 +59,25 @@
     <string name="budget_daily">Daily</string>
     <string name="budget_personal">Personal</string>
     <string name="budget_others">Others</string>
+    <string name="add_budget">Add Budget</string>
+    <string name="add_budget_description">Create a new budget category</string>
+    <string name="budget_create_title">Create Budget</string>
+    <string name="budget_name_label">Budget Name</string>
+    <string name="budget_name_hint">Enter budget name</string>
+    <string name="budget_amount_label">Budget Amount</string>
+    <string name="budget_period_label">Period</string>
+    <string name="budget_color_label">Color</string>
+    <string name="budget_categories_label">Categories</string>
+    <string name="select_period">Select Period</string>
+    <string name="select_color">Select Color</string>
+    <string name="select_categories">Select Categories</string>
+    <string name="custom_color">Custom Color</string>
+    <string name="select_custom_color">Select Custom Color</string>
+    <string name="budget_name_required">Budget name is required</string>
+    <string name="budget_amount_required">Budget amount is required</string>
+    <string name="budget_amount_invalid">Budget amount must be greater than 0</string>
+    <string name="budget_categories_required">Please select at least one category</string>
+    <string name="budget_created">Budget created successfully</string>
     <!--dashboard-->
     <string name="dashboard_page">Dashboard page</string>
     <string name="previous_month">Previous month</string>
@@ -126,6 +147,7 @@
     <string name="search_hint">Search transactions, categories, budgets…</string>
     <string name="search_empty_state">Enter keywords to search</string>
     <string name="search_no_results">No results found for "%1$s"</string>
+    <string name="no_transactions">No transactions found</string>
     <string name="all_categories">All categories</string>
     <!-- Add Record Bottom Sheets -->
     <string name="add_record">Add Record</string>
@@ -152,6 +174,8 @@
     <string name="subcategory_text">Daily</string>
     <string name="subcategory_add">Add</string>
     <string name="add_new_subcategory">Add new subcategory</string>
+    <string name="title">Title</string>
+    <string name="title_hint">Enter transaction title</string>
     <string name="note">Note</string>
     <string name="note_hint">Add note</string>
     <string name="date">Date</string>
@@ -173,6 +197,10 @@
     <string name="expense_address">Address</string>
     <string name="expense_date">Date</string>
     <string name="expense_note">Note</string>
+    <string name="selected_location">Selected Location</string>
+    <string name="tap_on_map_to_select">Tap on map to select location</string>
+    <string name="confirm_location">Confirm Location</string>
+    <string name="please_select_location">Please select a location on the map</string>
     <!--Transaction History-->
     <string name="transactions">All transactions</string>
     <string name="total">Total</string>
@@ -207,6 +235,8 @@
     <string name="wallet_current_wallet_label">Current Wallet</string>
     <string name="wallet_other_wallets_label">Other Wallets</string>
     <string name="wallet_add_wallet">Add Wallet</string>
+    <string name="available_wallets">Available Wallets</string>
+    <string name="archived_wallets">Archived Wallets</string>
     <!--Wallet Edit Fragment-->
     <string name="wallet_edit_title">Edit Wallet</string>
     <string name="wallet_edit_done">Done</string>

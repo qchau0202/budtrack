@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -30,11 +31,14 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.activities.MainActivity;
@@ -43,6 +47,12 @@ import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 // Fragment to display expense locations on an OpenStreetMap view.
 public class MapFragment extends Fragment {
 
+    public static final String RESULT_KEY_LOCATION = "location_selected";
+    public static final String RESULT_LOCATION_ADDRESS = "location_address";
+    public static final String RESULT_LOCATION_LAT = "location_lat";
+    public static final String RESULT_LOCATION_LNG = "location_lng";
+    
+    private static final String ARG_SELECTION_MODE = "selection_mode";
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 2001;
 
     private MapView mapView;
@@ -58,9 +68,27 @@ public class MapFragment extends Fragment {
     private MaterialButton btnViewDetails;
     private ImageButton btnCloseDetails;
     private EditText etMapSearch;
+    
+    // Location selection mode
+    private boolean isSelectionMode = false;
+    private Marker selectedLocationMarker = null;
+    private View locationSelectionPanel;
+    private TextView tvSelectedLocationAddress;
+    private MaterialButton btnConfirmLocation;
+    private Double selectedLocationLat = null;
+    private Double selectedLocationLng = null;
+    private String selectedLocationAddress = null;
 
     public static MapFragment newInstance() {
         return new MapFragment();
+    }
+    
+    public static MapFragment newInstanceForLocationSelection() {
+        MapFragment fragment = new MapFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(ARG_SELECTION_MODE, true);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -70,14 +98,18 @@ public class MapFragment extends Fragment {
                 PreferenceManager.getDefaultSharedPreferences(requireContext()));
         Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
 
-        // Sample data - replace with real expenses later (Ho Chi Minh City locations)
+        // Check if in selection mode
+        if (getArguments() != null) {
+            isSelectionMode = getArguments().getBoolean(ARG_SELECTION_MODE, false);
+        }
+
+        // Only load expense locations if not in selection mode
+        if (!isSelectionMode) {
+            expenseLocations = new ArrayList<>();
+            // No hardcoded data - expense locations will be loaded from database/transactions
+        } else {
         expenseLocations = new ArrayList<>();
-        expenseLocations.add(new ExpenseLocation(10.762622, 106.660172, "Nhà Hàng Ngon", 150000, 
-                "Food", "160 Pasteur, Bến Nghé, Quận 1, Hồ Chí Minh", "01 Jan 2025", "Lunch with team"));
-        expenseLocations.add(new ExpenseLocation(10.7769, 106.7009, "Vincom Center", 500000,
-                "Shopping", "72 Lê Thánh Tôn, Bến Nghé, Quận 1, Hồ Chí Minh", "02 Jan 2025", "Monthly groceries"));
-        expenseLocations.add(new ExpenseLocation(10.8231, 106.6297, "Trạm Xăng Petrolimex", 200000,
-                "Transport", "123 Nguyễn Huệ, Bến Nghé, Quận 1, Hồ Chí Minh", "03 Jan 2025", "Fuel refill"));
+        }
     }
 
     @Override
@@ -90,7 +122,11 @@ public class MapFragment extends Fragment {
         }
 
         setupHeader(root);
+        if (isSelectionMode) {
+            setupLocationSelectionPanel(root);
+        } else {
         setupExpenseDetailsPanel(root);
+        }
         setupMap(root);
         requestLocationPermission();
 
@@ -100,19 +136,29 @@ public class MapFragment extends Fragment {
     private void setupHeader(View root) {
         ImageButton backButton = root.findViewById(R.id.btn_back_map);
         ImageButton searchButton = root.findViewById(R.id.btn_map_search);
+        ImageButton filterButton = root.findViewById(R.id.btn_map_filter);
         etMapSearch = root.findViewById(R.id.et_map_search);
 
-        backButton.setOnClickListener(v -> requireActivity().onBackPressed());
+        backButton.setOnClickListener(v -> handleBackPress());
 
+        // Hide filter button in selection mode, but keep search
+        if (isSelectionMode) {
+            if (filterButton != null) filterButton.setVisibility(View.GONE);
+        }
+
+        // Setup search functionality for both modes
+        if (searchButton != null) {
         searchButton.setOnClickListener(v -> {
-            String query = etMapSearch.getText().toString().trim();
+                String query = etMapSearch != null ? etMapSearch.getText().toString().trim() : "";
             if (!query.isEmpty()) {
                 performSearch(query);
             }
             hideKeyboardAndClearFocus();
         });
+        }
 
         // Handle search action from keyboard
+        if (etMapSearch != null) {
         etMapSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 String query = etMapSearch.getText().toString().trim();
@@ -124,11 +170,33 @@ public class MapFragment extends Fragment {
             }
             return false;
         });
+        }
     }
 
     private void performSearch(String query) {
-        // TODO: Implement search functionality
-        Toast.makeText(requireContext(), "Searching for: " + query, Toast.LENGTH_SHORT).show();
+        // Use Geocoder to search for location
+        try {
+            android.location.Geocoder geocoder = new android.location.Geocoder(requireContext(), java.util.Locale.getDefault());
+            java.util.List<android.location.Address> addresses = geocoder.getFromLocationName(query, 1);
+            
+            if (addresses != null && !addresses.isEmpty()) {
+                android.location.Address address = addresses.get(0);
+                GeoPoint geoPoint = new GeoPoint(address.getLatitude(), address.getLongitude());
+                
+                // Center map on found location
+                mapView.getController().animateTo(geoPoint);
+                mapView.getController().setZoom(15.0);
+                
+                // If in selection mode, automatically select this location
+                if (isSelectionMode) {
+                    selectLocationOnMap(geoPoint);
+                }
+            } else {
+                Toast.makeText(requireContext(), "Location not found: " + query, Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error searching location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupExpenseDetailsPanel(View root) {
@@ -192,6 +260,22 @@ public class MapFragment extends Fragment {
     private void hideExpenseDetails() {
         expenseDetailsPanel.setVisibility(View.GONE);
     }
+    
+    private void setupLocationSelectionPanel(View root) {
+        locationSelectionPanel = root.findViewById(R.id.location_selection_panel);
+        if (locationSelectionPanel == null) {
+            // Panel should exist in layout
+            return;
+        }
+        tvSelectedLocationAddress = root.findViewById(R.id.tv_selected_location_address);
+        btnConfirmLocation = root.findViewById(R.id.btn_confirm_location);
+        
+        if (btnConfirmLocation != null) {
+            btnConfirmLocation.setOnClickListener(v -> confirmLocationSelection());
+        }
+        
+        locationSelectionPanel.setVisibility(View.VISIBLE);
+    }
 
     private void setupMap(View root) {
         mapView = root.findViewById(R.id.osm_map);
@@ -199,26 +283,193 @@ public class MapFragment extends Fragment {
         
         mapView.setMultiTouchControls(true);
         
+        if (isSelectionMode) {
+            // In selection mode, allow tapping on map to select location
+            mapView.getOverlays().add(new RotationGestureOverlay(mapView));
+            // Add custom overlay to handle tap events
+            mapView.getOverlays().add(new Overlay() {
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e, MapView mapView) {
+                    if (isSelectionMode) {
+                        GeoPoint geoPoint = (GeoPoint) mapView.getProjection().fromPixels(
+                                (int) e.getX(), (int) e.getY());
+                        selectLocationOnMap(geoPoint);
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        } else {
         // Hide keyboard when map is tapped
         mapView.setOnTouchListener((v, event) -> {
-            if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 hideKeyboardAndClearFocus();
             }
             return false; // Let the map handle the touch event
         });
+        }
         
         GeoPoint defaultPoint = new GeoPoint(10.762622, 106.660172);
         mapView.getController().setZoom(12.0);
         mapView.getController().setCenter(defaultPoint);
 
+        if (!isSelectionMode) {
         addExpenseMarkers();
+        }
+    }
+
+    private void selectLocationOnMap(GeoPoint point) {
+        // Remove previous selection marker
+        if (selectedLocationMarker != null) {
+            mapView.getOverlays().remove(selectedLocationMarker);
+        }
+        
+        // Create new marker for selected location
+        selectedLocationMarker = new Marker(mapView);
+        selectedLocationMarker.setPosition(point);
+        selectedLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        
+        // Set custom icon with primary green color
+        Drawable markerIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_location_on_24dp);
+        if (markerIcon != null) {
+            markerIcon = markerIcon.mutate();
+            markerIcon.setTint(ContextCompat.getColor(requireContext(), R.color.primary_green));
+            
+            int scaledWidth = (int) (markerIcon.getIntrinsicWidth() * 2.0f);
+            int scaledHeight = (int) (markerIcon.getIntrinsicHeight() * 2.0f);
+            
+            Bitmap markerBitmap = drawableToBitmap(markerIcon, scaledWidth, scaledHeight);
+            if (markerBitmap != null) {
+                selectedLocationMarker.setIcon(new android.graphics.drawable.BitmapDrawable(getResources(), markerBitmap));
+            }
+        }
+        
+        mapView.getOverlays().add(selectedLocationMarker);
+        mapView.invalidate();
+        
+        // Get address from coordinates (reverse geocoding)
+        getAddressFromCoordinates(point.getLatitude(), point.getLongitude());
+    }
+    
+    private void getAddressFromCoordinates(double lat, double lng) {
+        // Simple reverse geocoding - in production, use Geocoder or API
+        // For now, show coordinates as address
+        String address = String.format(Locale.getDefault(), "%.6f, %.6f", lat, lng);
+        
+        // Try to use Android Geocoder if available
+        try {
+            android.location.Geocoder geocoder = new android.location.Geocoder(requireContext(), java.util.Locale.getDefault());
+            java.util.List<android.location.Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                android.location.Address addressObj = addresses.get(0);
+                StringBuilder addressBuilder = new StringBuilder();
+                for (int i = 0; i <= addressObj.getMaxAddressLineIndex(); i++) {
+                    if (i > 0) addressBuilder.append(", ");
+                    addressBuilder.append(addressObj.getAddressLine(i));
+                }
+                address = addressBuilder.toString();
+            }
+        } catch (Exception e) {
+            // If geocoding fails, use coordinates
+        }
+        
+        // Update UI
+        if (tvSelectedLocationAddress != null) {
+            tvSelectedLocationAddress.setText(address);
+        }
+        
+        // Store selected location
+        selectedLocationLat = lat;
+        selectedLocationLng = lng;
+        selectedLocationAddress = address;
+    }
+    
+    private void confirmLocationSelection() {
+        if (selectedLocationMarker == null || selectedLocationLat == null || selectedLocationLng == null) {
+            if (getContext() != null) {
+                Toast.makeText(getContext(), getString(R.string.please_select_location), Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
+        
+        android.content.Context context = getContext();
+        if (context == null || getActivity() == null) {
+            return;
+        }
+        
+        // Store location in SharedPreferences temporarily so it can be retrieved
+        // even if the calling fragment (bottom sheet) was dismissed
+        android.content.SharedPreferences prefs = context.getSharedPreferences("location_selection", android.content.Context.MODE_PRIVATE);
+        prefs.edit()
+                .putString("address", selectedLocationAddress != null ? selectedLocationAddress : "")
+                .putFloat("lat", selectedLocationLat.floatValue())
+                .putFloat("lng", selectedLocationLng.floatValue())
+                .putBoolean("has_location", true)
+                .apply();
+        
+        // Also send via Fragment Result for immediate listeners
+        Bundle result = new Bundle();
+        result.putString(RESULT_LOCATION_ADDRESS, selectedLocationAddress != null ? selectedLocationAddress : "");
+        result.putDouble(RESULT_LOCATION_LAT, selectedLocationLat);
+        result.putDouble(RESULT_LOCATION_LNG, selectedLocationLng);
+        getActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_LOCATION, result);
+        
+        // Check if we should re-open transaction create fragment
+        android.content.SharedPreferences statePrefs = context.getSharedPreferences("transaction_state", android.content.Context.MODE_PRIVATE);
+        boolean shouldReopen = statePrefs.getBoolean("should_reopen", false);
+        
+        if (shouldReopen) {
+            // Don't clear the flag here - let TransactionCreateFragment handle it after restoring state
+            // The state will be cleared when transaction is saved or fragment is dismissed without saving
+            
+            // Re-open transaction create fragment - it will restore state from SharedPreferences
+            TransactionCreateFragment transactionFragment = new TransactionCreateFragment();
+            // State is already saved in SharedPreferences, fragment will restore it
+            transactionFragment.show(getActivity().getSupportFragmentManager(), TransactionCreateFragment.TAG);
+        }
+        
+        // Navigate back
+        getActivity().onBackPressed();
+    }
+    
+    private void handleBackPress() {
+        // If in selection mode, check if we should re-open transaction fragment
+        if (isSelectionMode) {
+            android.content.Context context = getContext();
+            if (context != null && getActivity() != null) {
+                android.content.SharedPreferences statePrefs = context.getSharedPreferences("transaction_state", android.content.Context.MODE_PRIVATE);
+                boolean shouldReopen = statePrefs.getBoolean("should_reopen", false);
+                
+                if (shouldReopen) {
+                    // Don't clear the flag here - let TransactionCreateFragment handle it after restoring state
+                    
+                    // Manually pop this fragment from back stack
+                    if (getActivity().getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                        getActivity().getSupportFragmentManager().popBackStack();
+                    }
+                    
+                    // Re-open transaction create fragment - it will restore state from SharedPreferences
+                    TransactionCreateFragment transactionFragment = new TransactionCreateFragment();
+                    // State is already saved in SharedPreferences, fragment will restore it
+                    transactionFragment.show(getActivity().getSupportFragmentManager(), TransactionCreateFragment.TAG);
+                    return; // Don't call onBackPressed
+                }
+            }
+        }
+        
+        // Navigate back normally if not in selection mode or shouldn't reopen
+        if (getActivity() != null) {
+            getActivity().onBackPressed();
+        }
     }
     
     private void hideKeyboardAndClearFocus() {
+        if (etMapSearch != null) {
         etMapSearch.clearFocus();
         InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(etMapSearch.getWindowToken(), 0);
+            }
         }
     }
 

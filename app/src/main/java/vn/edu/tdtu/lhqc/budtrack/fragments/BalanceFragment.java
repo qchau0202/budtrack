@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.BalanceController;
+import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -58,18 +59,58 @@ public class BalanceFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        
+        // Listen for transaction creation to refresh balance immediately
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED,
+            this,
+            (requestKey, result) -> {
+                if (TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED.equals(requestKey)) {
+                    // Immediately refresh if fragment is visible
+                    refreshBalance();
+                }
+            }
+        );
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_balance, container, false);
+        setupBalanceView(root);
+        return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Always refresh when fragment becomes visible
+        refreshBalance();
+    }
+    
+    private void refreshBalance() {
+        if (getView() != null && isAdded() && !isDetached()) {
+            setupBalanceView(getView());
+        }
+    }
+    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Clean up Fragment Result listener
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener(
+            TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED);
+    }
+
+    private void setupBalanceView(View root) {
         TextView tvBalance = root.findViewById(R.id.tv_total_balance_amount);
         ImageButton btnVisibility = root.findViewById(R.id.btn_visibility);
 
         if (tvBalance != null && btnVisibility != null) {
-            // Preserve the original unmasked balance text
-            final String originalBalanceText = tvBalance.getText() != null ? tvBalance.getText().toString() : "";
+            // Calculate total balance from actual wallet data
+            long totalBalance = BalanceController.calculateTotalBalance(requireContext());
+            final String originalBalanceText = CurrencyUtils.formatCurrency(totalBalance);
+            
             boolean hidden = BalanceController.isHidden(requireContext());
             tvBalance.setText(BalanceController.formatDisplay(originalBalanceText, hidden));
             btnVisibility.setImageResource(hidden ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
@@ -80,6 +121,5 @@ public class BalanceFragment extends Fragment {
                 btnVisibility.setImageResource(nowHidden ? R.drawable.ic_visibility_off_24dp : R.drawable.ic_visibility_24dp);
             });
         }
-        return root;
     }
 }

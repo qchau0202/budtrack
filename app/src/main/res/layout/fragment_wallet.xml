@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:paddingStart="24dp"
-                android:paddingEnd="24dp"
+                android:paddingEnd="48dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="16dp"
                 android:gravity="center_vertical">
@@ -80,7 +80,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="4,000,000 VND"
+                    android:text="@string/amount_hint"
                     android:textColor="@color/primary_black"
                     android:textSize="32sp"
                     android:textStyle="bold" />
@@ -95,7 +95,45 @@
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp">
 
-                <!-- Wallet items will be added here programmatically -->
+                <!-- Available Wallets Section Header -->
+                <TextView
+                    android:id="@+id/tv_available_wallets_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/available_wallets"
+                    android:textColor="@color/primary_black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="12dp"
+                    android:visibility="gone" />
+
+                <!-- Available wallet items will be added here programmatically -->
+                <LinearLayout
+                    android:id="@+id/available_wallets_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <!-- Archived Wallets Section Header -->
+                <TextView
+                    android:id="@+id/tv_archived_wallets_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/archived_wallets"
+                    android:textColor="@color/primary_black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="12dp"
+                    android:visibility="gone" />
+
+                <!-- Archived wallet items will be added here programmatically -->
+                <LinearLayout
+                    android:id="@+id/archived_wallets_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
                 
                 <!-- Add wallet button -->
                 <LinearLayout

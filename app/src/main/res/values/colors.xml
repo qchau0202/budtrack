@@ -22,4 +22,15 @@
     <color name="category_tab_green">#E5F4DC</color>
     <color name="category_tab_yellow">#FFF4E5</color>
     <color name="category_tab_red">#FFE5E5</color>
+    
+    <!-- custom colors for budget -->
+    <color name="custom_color_blue">#2196F3</color>
+    <color name="custom_color_purple">#9C27B0</color>
+    <color name="custom_color_orange">#FF9800</color>
+    <color name="custom_color_cyan">#00BCD4</color>
+    <color name="custom_color_pink">#E91E63</color>
+    <color name="custom_color_indigo">#3F51B5</color>
+    <color name="custom_color_teal">#009688</color>
+    <color name="custom_color_amber">#FFC107</color>
+    <color name="custom_color_lime">#CDDC39</color>
 </resources>
