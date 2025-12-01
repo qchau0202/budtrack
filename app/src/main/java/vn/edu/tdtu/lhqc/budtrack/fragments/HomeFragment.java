@@ -58,7 +58,7 @@ public class HomeFragment extends Fragment {
     
     // Track current analytics tab selection
     private boolean isIncomeSelectedForAnalytics = false;
-    
+
     // Flag to track if we need to refresh when fragment becomes visible
     private boolean needsRefresh = false;
 

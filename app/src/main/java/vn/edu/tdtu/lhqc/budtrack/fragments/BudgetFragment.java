@@ -1,11 +1,12 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
 import android.content.Context;
+import android.graphics.drawable.ClipDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RoundRectShape;
 import android.os.Bundle;
-
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -143,27 +147,25 @@ public class BudgetFragment extends Fragment {
         // Setup Total Budget
         setupTotalBudget(root, totalBudget, totalSpent);
 
-        // Remove old hardcoded budget cards
-        LinearLayout budgetContent = root.findViewById(R.id.budget_content);
-        if (budgetContent != null) {
-            // Remove hardcoded budget cards (they have specific IDs)
-            View cardDaily = root.findViewById(R.id.card_daily_budget);
-            View cardPersonal = root.findViewById(R.id.card_personal_budget);
-            View cardOthers = root.findViewById(R.id.card_others_budget);
-            
-            if (cardDaily != null && cardDaily.getParent() != null) {
-                ((ViewGroup) cardDaily.getParent()).removeView(cardDaily);
+        // Remove old budget cards (both hardcoded and dynamically created)
+        LinearLayout budgetContainer = root.findViewById(R.id.budget_content);
+        if (budgetContainer != null) { 
+            // Remove all dynamically created budget cards (they have a specific tag)
+            List<View> viewsToRemove = new ArrayList<>();
+            for (int i = 0; i < budgetContainer.getChildCount(); i++) {
+                View child = budgetContainer.getChildAt(i);
+                // Check if this is a dynamically created budget card by checking for the tag
+                if (child.getTag() != null && child.getTag().equals("DYNAMIC_BUDGET_CARD")) {
+                    viewsToRemove.add(child);
+                }
             }
-            if (cardPersonal != null && cardPersonal.getParent() != null) {
-                ((ViewGroup) cardPersonal.getParent()).removeView(cardPersonal);
-            }
-            if (cardOthers != null && cardOthers.getParent() != null) {
-                ((ViewGroup) cardOthers.getParent()).removeView(cardOthers);
+            // Remove all tagged views
+            for (View view : viewsToRemove) {
+                budgetContainer.removeView(view);
             }
         }
 
         // Dynamically create budget cards
-        LinearLayout budgetContainer = root.findViewById(R.id.budget_content);
         if (budgetContainer != null) {
             // Find the add budget button to insert cards after it
             View addBudgetButton = root.findViewById(R.id.btn_add_budget);
@@ -173,6 +175,8 @@ public class BudgetFragment extends Fragment {
             for (Budget budget : budgets) {
                 long spentAmount = BudgetCalculator.calculateSpentAmount(requireContext(), budget);
                 View budgetCard = createBudgetCard(budget, spentAmount, budgetContainer);
+                // Tag the card so we can identify and remove it later
+                budgetCard.setTag("DYNAMIC_BUDGET_CARD");
                 if (insertIndex >= 0) {
                     // Insert after the add button (insertIndex + 1)
                     budgetContainer.addView(budgetCard, insertIndex + 1);
@@ -276,16 +280,23 @@ public class BudgetFragment extends Fragment {
         }
 
         if (progressBar != null) {
-            if (budget.getCustomColor() != null) {
-                // For custom colors, set tint directly
-                progressBar.getProgressDrawable().setColorFilter(
-                    budget.getCustomColor(), 
-                    android.graphics.PorterDuff.Mode.SRC_IN);
-            } else if (budget.getColorResId() != 0) {
-                ProgressBarUtils.setProgressBarColor(requireContext(), progressBar, budget.getColorResId());
-            }
             progressBar.setMax(100);
             progressBar.setProgress(Math.min(percentage, 100));
+            
+            // Only apply user's color when there's spending (percentage > 0)
+            // When percentage is 0, keep it grey (default)
+            if (percentage > 0) {
+                if (budget.getCustomColor() != null) {
+                    // For custom colors, create a proper drawable with the custom color
+                    setProgressBarCustomColor(progressBar, budget.getCustomColor());
+                } else if (budget.getColorResId() != 0) {
+                    ProgressBarUtils.setProgressBarColor(requireContext(), progressBar, budget.getColorResId());
+                }
+            } else {
+                // When no spending, ensure it's grey (reset to default)
+                // Reset to default drawable from XML
+                progressBar.setProgressDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.progress_bar_budget));
+            }
         }
 
         if (tvSpent != null) {
@@ -312,11 +323,13 @@ public class BudgetFragment extends Fragment {
         // Make the card clickable to navigate to detail
             card.setOnClickListener(v -> {
             int colorResId = budget.getCustomColor() != null ? 0 : budget.getColorResId();
+            Integer customColor = budget.getCustomColor();
                 BudgetDetailFragment detailFragment = BudgetDetailFragment.newInstance(
                 budget.getName(),
                 budget.getBudgetAmount(),
                 spentAmount,
-                colorResId
+                colorResId,
+                customColor
                 );
                 
                 requireActivity().getSupportFragmentManager()
@@ -329,6 +342,46 @@ public class BudgetFragment extends Fragment {
             card.setFocusable(true);
 
         return card;
+    }
+
+    /**
+     * Sets a custom color for the progress bar (similar to ProgressBarUtils but for custom colors).
+     * Creates a proper drawable with grey background and custom color for progress.
+     */
+    private void setProgressBarCustomColor(ProgressBar progressBar, int customColor) {
+        if (progressBar == null) {
+            return;
+        }
+
+        // Convert dp to pixels for corner radius (4dp)
+        float density = requireContext().getResources().getDisplayMetrics().density;
+        float cornerRadius = 4.0f * density;
+
+        // Create background shape (grey)
+        ShapeDrawable backgroundShape = new ShapeDrawable();
+        backgroundShape.setShape(new RoundRectShape(
+            new float[]{cornerRadius, cornerRadius, cornerRadius, cornerRadius,
+                       cornerRadius, cornerRadius, cornerRadius, cornerRadius}, null, null));
+        backgroundShape.getPaint().setColor(ContextCompat.getColor(requireContext(), R.color.secondary_grey));
+
+        // Create progress shape with the custom color
+        ShapeDrawable progressShape = new ShapeDrawable();
+        progressShape.setShape(new RoundRectShape(
+            new float[]{cornerRadius, cornerRadius, cornerRadius, cornerRadius,
+                       cornerRadius, cornerRadius, cornerRadius, cornerRadius}, null, null));
+        progressShape.getPaint().setColor(customColor);
+
+        // Create clip drawable for progress
+        ClipDrawable clipDrawable = new ClipDrawable(progressShape,
+            Gravity.START, ClipDrawable.HORIZONTAL);
+
+        // Create layer drawable
+        LayerDrawable layerDrawable = new LayerDrawable(
+            new android.graphics.drawable.Drawable[]{backgroundShape, clipDrawable});
+        layerDrawable.setId(0, android.R.id.background);
+        layerDrawable.setId(1, android.R.id.progress);
+
+        progressBar.setProgressDrawable(layerDrawable);
     }
 
 }

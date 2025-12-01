@@ -102,6 +102,9 @@
     <string name="language_dialog_confirm">Confirm</string>
     <string name="edit">Edit</string>
     <string name="signout_text">SIGN OUT</string>
+    <string name="sign_out_title">Sign Out</string>
+    <string name="sign_out_message">Are you sure you want to sign out? You will need to log in again to access your account.</string>
+    <string name="sign_out_confirm">Sign Out</string>
     <!-- Reminder Settings -->
     <string name="reminder">Reminder</string>
     <string name="reminder_off">Off</string>
@@ -184,6 +187,22 @@
     <string name="no_note">No note</string>
     <string name="error_amount_required">Please enter amount</string>
     <string name="error_amount_invalid">Amount must be greater than 0</string>
+    <string name="error_wallet_required">Please select a wallet</string>
+    <string name="error_email_required">Email is required</string>
+    <string name="error_email_invalid">Please enter a valid email address</string>
+    <string name="error_password_required">Password is required</string>
+    <string name="error_password_min_length">Password must be at least 6 characters</string>
+    <string name="error_full_name_required">Full name is required</string>
+    <string name="error_full_name_min_length">Full name must be at least 2 characters</string>
+    <string name="error_confirm_password_required">Confirm password is required</string>
+    <string name="error_passwords_not_match">Passwords do not match</string>
+    <string name="error_email_already_exists">Email already registered. Please login instead.</string>
+    <string name="error_invalid_credentials">Invalid email or password</string>
+    <string name="login_successful">Login successful!</string>
+    <string name="logout_successful">Logged out successfully</string>
+    <string name="registration_successful">Registration successful! Please login.</string>
+    <string name="google_sign_in_coming_soon">Google Sign-In coming soon</string>
+    <string name="no_categories_available">No categories available</string>
     <string name="transaction_saved">Transaction saved: %1$s - %2$s VND - %3$s</string>
     <!--Map-->
     <string name="map_title">Budtrack expense map</string>

@@ -106,6 +106,9 @@
     <string name="language_dialog_confirm">Xác nhận</string>
     <string name="edit">Chỉnh sửa</string>
     <string name="signout_text">ĐĂNG XUẤT</string>
+    <string name="sign_out_title">Đăng xuất</string>
+    <string name="sign_out_message">Bạn có chắc chắn muốn đăng xuất? Bạn sẽ cần đăng nhập lại để truy cập tài khoản của mình.</string>
+    <string name="sign_out_confirm">Đăng xuất</string>
     <!-- Reminder Settings -->
     <string name="reminder">Nhắc nhở</string>
     <string name="reminder_off">Tắt</string>
@@ -179,6 +182,22 @@
     <string name="no_note">Không có ghi chú</string>
     <string name="error_amount_required">Vui lòng nhập số tiền</string>
     <string name="error_amount_invalid">Số tiền phải lớn hơn 0</string>
+    <string name="error_wallet_required">Vui lòng chọn ví</string>
+    <string name="error_email_required">Email là bắt buộc</string>
+    <string name="error_email_invalid">Vui lòng nhập địa chỉ email hợp lệ</string>
+    <string name="error_password_required">Mật khẩu là bắt buộc</string>
+    <string name="error_password_min_length">Mật khẩu phải có ít nhất 6 ký tự</string>
+    <string name="error_full_name_required">Họ và tên là bắt buộc</string>
+    <string name="error_full_name_min_length">Họ và tên phải có ít nhất 2 ký tự</string>
+    <string name="error_confirm_password_required">Xác nhận mật khẩu là bắt buộc</string>
+    <string name="error_passwords_not_match">Mật khẩu không khớp</string>
+    <string name="error_email_already_exists">Email đã được đăng ký. Vui lòng đăng nhập.</string>
+    <string name="error_invalid_credentials">Email hoặc mật khẩu không đúng</string>
+    <string name="login_successful">Đăng nhập thành công!</string>
+    <string name="logout_successful">Đăng xuất thành công</string>
+    <string name="registration_successful">Đăng ký thành công! Vui lòng đăng nhập.</string>
+    <string name="google_sign_in_coming_soon">Đăng nhập bằng Google sẽ sớm ra mắt</string>
+    <string name="no_categories_available">Không có danh mục nào</string>
     <string name="transaction_saved">Đã thêm giao dịch %1$s: %2$s VND - %3$s</string>
 
     <!--Map-->

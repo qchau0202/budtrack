@@ -29,7 +29,11 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import android.content.Intent;
+
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.activities.LoginActivity;
+import vn.edu.tdtu.lhqc.budtrack.controllers.auth.AuthController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.notifications.ReminderNotificationController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
@@ -149,6 +153,12 @@ public class ProfileFragment extends Fragment {
                     showReminderDialog(tvReminderValue);
                 }
             });
+        }
+
+        // Set up sign out button
+        MaterialButton btnLogout = root.findViewById(R.id.btn_logout);
+        if (btnLogout != null) {
+            btnLogout.setOnClickListener(v -> showSignOutConfirmationDialog());
         }
 
         return root;
@@ -469,6 +479,41 @@ public class ProfileFragment extends Fragment {
             switchMaterial.setChecked(false);
             containerReminderOptions.setVisibility(View.GONE);
             dialog.dismiss();
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    private void showSignOutConfirmationDialog() {
+        if (getContext() == null) return;
+
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_sign_out_confirmation, null, false);
+
+        MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        MaterialButton btnSignOut = dialogView.findViewById(R.id.btn_sign_out);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnSignOut.setOnClickListener(v -> {
+            // Sign out user
+            AuthController.logout(requireContext());
+            dialog.dismiss();
+            
+            // Show logout success toast
+            Toast.makeText(requireContext(), getString(R.string.logout_successful), Toast.LENGTH_SHORT).show();
+            
+            // Navigate to LoginActivity and clear back stack
+            Intent intent = new Intent(requireContext(), LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            requireActivity().finish();
         });
 
         dialog.show();

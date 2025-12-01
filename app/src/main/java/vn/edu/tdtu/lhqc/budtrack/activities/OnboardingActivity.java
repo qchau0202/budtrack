@@ -12,6 +12,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.auth.AuthController;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
@@ -28,6 +29,15 @@ public class OnboardingActivity extends AppCompatActivity {
         LanguageManager.applySavedLanguage(this);
         ThemeManager.applySavedTheme(this);
         EdgeToEdge.enable(this);
+        
+        // Check if user is already logged in, skip to MainActivity
+        if (AuthController.isLoggedIn(this)) {
+            Intent intent = new Intent(OnboardingActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+        
         setContentView(R.layout.activity_onboarding);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

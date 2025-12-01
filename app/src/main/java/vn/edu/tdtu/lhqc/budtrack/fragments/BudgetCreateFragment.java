@@ -470,7 +470,7 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
 
     private void showCategorySelectionDialog() {
         if (availableCategories == null || availableCategories.isEmpty()) {
-            Toast.makeText(requireContext(), "No categories available", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.no_categories_available), Toast.LENGTH_SHORT).show();
             return;
         }
 

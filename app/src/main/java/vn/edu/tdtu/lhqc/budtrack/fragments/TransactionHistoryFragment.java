@@ -108,7 +108,7 @@ public class TransactionHistoryFragment extends Fragment {
                             getView().post(() -> refreshTransactions());
                         } else {
                             // If view is not ready, refresh will happen in onResume
-                            refreshTransactions();
+                        refreshTransactions();
                         }
                     }
                 }

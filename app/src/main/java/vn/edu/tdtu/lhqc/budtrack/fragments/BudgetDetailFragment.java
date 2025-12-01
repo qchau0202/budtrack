@@ -39,6 +39,7 @@ public class BudgetDetailFragment extends Fragment {
     private static final String ARG_BUDGET_AMOUNT = "budget_amount";
     private static final String ARG_SPENT_AMOUNT = "spent_amount";
     private static final String ARG_COLOR_RES_ID = "color_res_id";
+    private static final String ARG_CUSTOM_COLOR = "custom_color";
 
 
     public BudgetDetailFragment() {
@@ -46,13 +47,16 @@ public class BudgetDetailFragment extends Fragment {
     }
 
     public static BudgetDetailFragment newInstance(String budgetName, long budgetAmount, 
-                                                   long spentAmount, int colorResId) {
+                                                   long spentAmount, int colorResId, Integer customColor) {
         BudgetDetailFragment fragment = new BudgetDetailFragment();
         Bundle args = new Bundle();
         args.putString(ARG_BUDGET_NAME, budgetName);
         args.putLong(ARG_BUDGET_AMOUNT, budgetAmount);
         args.putLong(ARG_SPENT_AMOUNT, spentAmount);
         args.putInt(ARG_COLOR_RES_ID, colorResId);
+        if (customColor != null) {
+            args.putInt(ARG_CUSTOM_COLOR, customColor);
+        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -75,7 +79,8 @@ public class BudgetDetailFragment extends Fragment {
         String budgetName = args.getString(ARG_BUDGET_NAME, "Budget");
         long budgetAmount = args.getLong(ARG_BUDGET_AMOUNT, 0);
         long spentAmount = args.getLong(ARG_SPENT_AMOUNT, 0);
-        int colorResId = args.getInt(ARG_COLOR_RES_ID, R.color.primary_green);
+        int colorResId = args.getInt(ARG_COLOR_RES_ID, 0);
+        Integer customColor = args.containsKey(ARG_CUSTOM_COLOR) ? args.getInt(ARG_CUSTOM_COLOR) : null;
 
         // Set budget title
         TextView tvBudgetTitle = root.findViewById(R.id.tv_budget_title);
@@ -84,7 +89,7 @@ public class BudgetDetailFragment extends Fragment {
         }
 
         // Setup balance section
-        setupBalanceSection(root, budgetAmount, spentAmount, colorResId);
+        setupBalanceSection(root, budgetAmount, spentAmount, colorResId, customColor);
 
         // Setup back button
         ImageButton btnBack = root.findViewById(R.id.btn_back);
@@ -125,7 +130,7 @@ public class BudgetDetailFragment extends Fragment {
         setupTransactionHistory(root, incomeTransactions, expenseTransactions);
     }
 
-    private void setupBalanceSection(View root, long budgetAmount, long spentAmount, int colorResId) {
+    private void setupBalanceSection(View root, long budgetAmount, long spentAmount, int colorResId, Integer customColor) {
         TextView tvBalanceAmount = root.findViewById(R.id.tv_balance_amount);
         ProgressBar progressBalance = root.findViewById(R.id.progress_balance);
         TextView tvSpentInfo = root.findViewById(R.id.tv_spent_info);
@@ -139,8 +144,19 @@ public class BudgetDetailFragment extends Fragment {
             progressBalance.setMax(100);
             progressBalance.setProgress(Math.min(percentage, 100));
             
-            // Set progress bar color
-            ProgressBarUtils.setProgressBarColor(requireContext(), progressBalance, colorResId);
+            // Set progress bar color - handle both custom color and color resource ID
+            if (customColor != null) {
+                // For custom colors, set tint directly
+                progressBalance.getProgressDrawable().setColorFilter(
+                    customColor, 
+                    android.graphics.PorterDuff.Mode.SRC_IN);
+            } else if (colorResId != 0) {
+                // Use color resource ID
+                ProgressBarUtils.setProgressBarColor(requireContext(), progressBalance, colorResId);
+            } else {
+                // Default to primary green if no color specified
+                ProgressBarUtils.setProgressBarColor(requireContext(), progressBalance, R.color.primary_green);
+            }
         }
 
         if (tvSpentInfo != null) {
