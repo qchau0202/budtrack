@@ -22,10 +22,15 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.widget.ImageView;
+
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCalculator;
+import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCategoryManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager;
 import vn.edu.tdtu.lhqc.budtrack.models.Budget;
+import vn.edu.tdtu.lhqc.budtrack.models.Category;
+import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.ProgressBarUtils;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
@@ -116,15 +121,22 @@ public class BudgetFragment extends Fragment {
             this,
             (requestKey, result) -> {
                 if (BudgetCreateFragment.RESULT_KEY.equals(requestKey)) {
-                    String budgetName = result.getString(BudgetCreateFragment.RESULT_BUDGET_NAME);
-                    long budgetAmount = result.getLong(BudgetCreateFragment.RESULT_BUDGET_AMOUNT);
-                    int colorResId = result.getInt(BudgetCreateFragment.RESULT_BUDGET_COLOR);
-                    String period = result.getString(BudgetCreateFragment.RESULT_BUDGET_PERIOD);
-                    long[] categoryIds = result.getLongArray(BudgetCreateFragment.RESULT_BUDGET_CATEGORIES);
-                    
                     // Budget is already saved by BudgetCreateFragment
                     // Just refresh the budget list
         setupBudgetData(root);
+                }
+            }
+        );
+        
+        // Set up Fragment Result listener for budget updates
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            BudgetCreateFragment.RESULT_KEY_UPDATED,
+            this,
+            (requestKey, result) -> {
+                if (BudgetCreateFragment.RESULT_KEY_UPDATED.equals(requestKey)) {
+                    // Budget is already updated by BudgetCreateFragment
+                    // Just refresh the budget list
+                    setupBudgetData(root);
                 }
             }
         );
@@ -157,7 +169,7 @@ public class BudgetFragment extends Fragment {
                 // Check if this is a dynamically created budget card by checking for the tag
                 if (child.getTag() != null && child.getTag().equals("DYNAMIC_BUDGET_CARD")) {
                     viewsToRemove.add(child);
-                }
+            }
             }
             // Remove all tagged views
             for (View view : viewsToRemove) {
@@ -212,15 +224,15 @@ public class BudgetFragment extends Fragment {
         }
 
         if (tvSpent != null) {
-            tvSpent.setText("-" + CurrencyUtils.formatCurrency(totalSpent) + " " + getString(R.string.spent));
+            tvSpent.setText(String.format("%s %s", CurrencyUtils.formatCurrency(totalSpent), getString(R.string.spent)));
         }
 
         if (tvLeft != null) {
             if (remaining >= 0) {
-                tvLeft.setText(CurrencyUtils.formatCurrency(remaining) + " " + getString(R.string.left));
+                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(remaining), getString(R.string.left)));
                 tvLeft.setTextColor(getResources().getColor(R.color.primary_black, null));
             } else {
-                tvLeft.setText(CurrencyUtils.formatCurrency(Math.abs(remaining)) + " " + getString(R.string.overspending));
+                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(Math.abs(remaining)), getString(R.string.overspending)));
                 tvLeft.setTextColor(getResources().getColor(R.color.primary_red, null));
             }
         }
@@ -238,7 +250,10 @@ public class BudgetFragment extends Fragment {
         ProgressBar progressBar = card.findViewById(R.id.progress_budget);
         TextView tvSpent = card.findViewById(R.id.tv_budget_spent);
         TextView tvLeft = card.findViewById(R.id.tv_budget_left);
-        ImageButton btnMenu = card.findViewById(R.id.btn_budget_menu);
+        LinearLayout containerCategoryIcons = card.findViewById(R.id.container_category_icons);
+        
+        // Display category icons
+        setupCategoryIcons(containerCategoryIcons, budget);
 
         // Get color (custom or resource)
         int colorValue = 0;
@@ -300,24 +315,17 @@ public class BudgetFragment extends Fragment {
         }
 
         if (tvSpent != null) {
-            tvSpent.setText("-" + CurrencyUtils.formatCurrency(spentAmount) + " " + getString(R.string.spent));
+            tvSpent.setText(String.format("%s %s", CurrencyUtils.formatCurrency(spentAmount), getString(R.string.spent)));
         }
 
         if (tvLeft != null) {
             if (remaining >= 0) {
-                tvLeft.setText(CurrencyUtils.formatCurrency(remaining) + " " + getString(R.string.left));
+                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(remaining), getString(R.string.left)));
                 tvLeft.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
             } else {
-                tvLeft.setText(CurrencyUtils.formatCurrency(Math.abs(remaining)) + " " + getString(R.string.overspending));
+                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(Math.abs(remaining)), getString(R.string.overspending)));
                 tvLeft.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_red));
             }
-        }
-
-        if (btnMenu != null) {
-            btnMenu.setOnClickListener(v -> {
-                Toast.makeText(requireContext(), budget.getName() + " menu", Toast.LENGTH_SHORT).show();
-                // TODO: Implement budget menu functionality (edit/delete)
-            });
         }
 
         // Make the card clickable to navigate to detail
@@ -325,6 +333,7 @@ public class BudgetFragment extends Fragment {
             int colorResId = budget.getCustomColor() != null ? 0 : budget.getColorResId();
             Integer customColor = budget.getCustomColor();
                 BudgetDetailFragment detailFragment = BudgetDetailFragment.newInstance(
+                budget.getId(),
                 budget.getName(),
                 budget.getBudgetAmount(),
                 spentAmount,
@@ -382,6 +391,71 @@ public class BudgetFragment extends Fragment {
         layerDrawable.setId(1, android.R.id.progress);
 
         progressBar.setProgressDrawable(layerDrawable);
+    }
+
+    /**
+     * Sets up category icons for a budget card.
+     * Displays icons for all categories associated with this budget.
+     */
+    private void setupCategoryIcons(LinearLayout container, Budget budget) {
+        if (container == null || budget == null) {
+            return;
+        }
+
+        // Clear existing icons
+        container.removeAllViews();
+
+        // Get category IDs for this budget
+        List<Long> categoryIds = BudgetCategoryManager.getCategoryIdsForBudget(requireContext(), budget.getId());
+        if (categoryIds.isEmpty()) {
+            container.setVisibility(View.GONE);
+            return;
+        }
+
+        container.setVisibility(View.VISIBLE);
+        List<Category> allCategories = MockCategoryData.getSampleCategories();
+
+        // Create icon views for each category
+        for (Long categoryId : categoryIds) {
+            // Find the category by ID
+            Category category = null;
+            for (Category cat : allCategories) {
+                if (cat.getId() == categoryId) {
+                    category = cat;
+                    break;
+                }
+            }
+
+            if (category != null) {
+                // Create ImageView for category icon
+                ImageView iconView = new ImageView(requireContext());
+                int iconSize = (int) (32 * requireContext().getResources().getDisplayMetrics().density);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(iconSize, iconSize);
+                params.setMarginEnd((int) (8 * requireContext().getResources().getDisplayMetrics().density));
+                iconView.setLayoutParams(params);
+                iconView.setImageResource(category.getIconResId());
+                iconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                iconView.setPadding(
+                    (int) (4 * requireContext().getResources().getDisplayMetrics().density),
+                    (int) (4 * requireContext().getResources().getDisplayMetrics().density),
+                    (int) (4 * requireContext().getResources().getDisplayMetrics().density),
+                    (int) (4 * requireContext().getResources().getDisplayMetrics().density)
+                );
+
+                // Set icon color based on budget color
+                int colorValue = 0;
+                if (budget.getCustomColor() != null) {
+                    colorValue = budget.getCustomColor();
+                } else if (budget.getColorResId() != 0) {
+                    colorValue = ContextCompat.getColor(requireContext(), budget.getColorResId());
+                }
+                if (colorValue != 0) {
+                    iconView.setColorFilter(colorValue);
+                }
+
+                container.addView(iconView);
+            }
+        }
     }
 
 }

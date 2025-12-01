@@ -3,9 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/primary_white"
-    android:paddingTop="16dp"
-    android:paddingBottom="32dp">
+    android:background="@color/primary_white">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,7 +12,8 @@
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
         android:paddingTop="16dp"
-        android:paddingBottom="32dp">
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -92,203 +91,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:columnCount="4"
-                android:useDefaultMargins="true">
-
-                <!-- Add Category -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardCategoryAdd"
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardBackgroundColor="@color/primary_white"
-                        app:cardCornerRadius="18dp"
-                        app:strokeColor="@color/secondary_grey"
-                        app:strokeWidth="1dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:padding="16dp"
-                            android:src="@drawable/ic_add_24dp"
-                            android:contentDescription="@string/add_new_category"
-                            app:tint="@color/primary_green" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/add_new_category"
-                        android:textColor="@color/primary_black"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Food -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardCategoryFood"
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardBackgroundColor="@color/primary_white"
-                        app:cardCornerRadius="18dp"
-                        app:strokeColor="@color/secondary_grey"
-                        app:strokeWidth="1dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:padding="16dp"
-                            android:src="@drawable/ic_food_24dp"
-                            android:contentDescription="@string/category_food"
-                            app:tint="@color/primary_green" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/category_food"
-                        android:textColor="@color/primary_black"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Shopping -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardCategoryShopping"
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardBackgroundColor="@color/primary_white"
-                        app:cardCornerRadius="18dp"
-                        app:strokeColor="@color/secondary_grey"
-                        app:strokeWidth="1dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:padding="16dp"
-                            android:src="@drawable/ic_shopping_24dp"
-                            android:contentDescription="@string/category_shopping"
-                            app:tint="@color/primary_green" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/category_shopping"
-                        android:textColor="@color/primary_black"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Transport -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardCategoryTransport"
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardBackgroundColor="@color/primary_white"
-                        app:cardCornerRadius="18dp"
-                        app:strokeColor="@color/secondary_grey"
-                        app:strokeWidth="1dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:padding="16dp"
-                            android:src="@drawable/ic_transport_24dp"
-                            android:contentDescription="@string/category_transport"
-                            app:tint="@color/primary_green" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/category_transport"
-                        android:textColor="@color/primary_black"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Home -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardCategoryHome"
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardBackgroundColor="@color/primary_white"
-                        app:cardCornerRadius="18dp"
-                        app:strokeColor="@color/secondary_grey"
-                        app:strokeWidth="1dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:padding="16dp"
-                            android:src="@drawable/ic_home_24dp"
-                            android:contentDescription="@string/category_home"
-                            app:tint="@color/primary_green" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/category_home"
-                        android:textColor="@color/primary_black"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </GridLayout>
+                android:useDefaultMargins="true" />
         </LinearLayout>
 </FrameLayout>
 

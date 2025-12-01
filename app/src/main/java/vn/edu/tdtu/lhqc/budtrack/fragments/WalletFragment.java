@@ -394,12 +394,13 @@ public class WalletFragment extends Fragment {
         View view = LayoutInflater.from(requireContext()).inflate(R.layout.view_bottom_sheet_wallet_type_selection, null);
         dialog.setContentView(view);
 
-        // Configure bottom sheet to expand fully
+        // Configure bottom sheet to expand fully and disable dragging to prevent accidental dismissal
         View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (bottomSheet != null) {
             BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
             behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             behavior.setSkipCollapsed(true);
+            behavior.setDraggable(false); // Disable dragging to prevent accidental dismissal
         }
 
         // Setup click listeners
@@ -431,12 +432,13 @@ public class WalletFragment extends Fragment {
         View view = LayoutInflater.from(requireContext()).inflate(R.layout.view_bottom_sheet_wallet_edit, null);
         dialog.setContentView(view);
 
-        // Configure bottom sheet to expand fully
+        // Configure bottom sheet to expand fully and disable dragging to prevent accidental dismissal while scrolling
         View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (bottomSheet != null) {
             BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
             behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             behavior.setSkipCollapsed(true);
+            behavior.setDraggable(false); // Disable dragging to prevent accidental dismissal while scrolling
         }
 
         // Get views

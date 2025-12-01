@@ -73,8 +73,10 @@ public final class GeneralHeaderController {
         }
         activity.getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, SearchFragment.newInstance(), "SEARCH_FRAGMENT")
-                .addToBackStack(null)
+                // Add on top of the current main fragment so that we can
+                // cleanly remove it when switching bottom‑nav tabs.
+                .add(R.id.fragment_container, SearchFragment.newInstance(), "SEARCH_FRAGMENT")
+                .addToBackStack("SEARCH_FRAGMENT")
                 .commit();
     }
 
@@ -88,8 +90,8 @@ public final class GeneralHeaderController {
         }
         activity.getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, MapFragment.newInstance(), "MAP_FRAGMENT")
-                .addToBackStack(null)
+                .add(R.id.fragment_container, MapFragment.newInstance(), "MAP_FRAGMENT")
+                .addToBackStack("MAP_FRAGMENT")
                 .commit();
     }
 
@@ -103,8 +105,8 @@ public final class GeneralHeaderController {
         }
         activity.getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, NotificationFragment.newInstance(), "NOTIFICATION_FRAGMENT")
-                .addToBackStack(null)
+                .add(R.id.fragment_container, NotificationFragment.newInstance(), "NOTIFICATION_FRAGMENT")
+                .addToBackStack("NOTIFICATION_FRAGMENT")
                 .commit();
     }
 

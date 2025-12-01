@@ -6,35 +6,37 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.graphics.Color;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupWindow;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
-import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCalculator;
-import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.BudgetDisplayData;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockBudgetData;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockBudgetHelper;
-import vn.edu.tdtu.lhqc.budtrack.models.Budget;
+import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.BalanceController;
+import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
+import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
-import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.BalanceController;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
@@ -123,6 +125,12 @@ public class HomeFragment extends Fragment {
         // Initialize pie chart
         setupPieChart(root);
 
+        // View all categories button
+        View btnViewAllCategories = root.findViewById(R.id.btn_view_all_categories);
+        if (btnViewAllCategories != null) {
+            btnViewAllCategories.setOnClickListener(v -> openCategoryManagement());
+        }
+
         // Setup analytics tabs inside included view
         setupAnalyticsTabs(root);
         
@@ -173,6 +181,16 @@ public class HomeFragment extends Fragment {
         }
     }
     
+    private void openCategoryManagement() {
+        // Open CategoryFragment on top of current tab
+        CategoryFragment fragment = new CategoryFragment();
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment, "CATEGORY_FRAGMENT")
+                .addToBackStack(null)
+                .commit();
+    }
+    
     private void setupBalanceView(View root) {
         TextView tvBalance = root.findViewById(R.id.tv_total_balance_amount);
         ImageButton btnVisibility = root.findViewById(R.id.btn_visibility);
@@ -201,47 +219,114 @@ public class HomeFragment extends Fragment {
     }
     
     private void setupPieChart(View root) {
-        // Load budgets from mockdata
-        List<Budget> budgets = MockBudgetData.getSampleBudgets();
-        
-        // Create BudgetDisplayData with spent amounts
-        LinkedHashMap<String, BudgetDisplayData> budgetData = new LinkedHashMap<>();
+        // Get all transactions and filter to expenses only
+        List<Transaction> allTransactions = TransactionManager.getTransactions(requireContext());
+        List<Transaction> expenseTransactions = new ArrayList<>();
+        for (Transaction transaction : allTransactions) {
+            if (transaction != null && transaction.getType() == TransactionType.EXPENSE) {
+                expenseTransactions.add(transaction);
+            }
+        }
+
+        // Aggregate spent amount by category
+        Map<Long, Long> categorySums = new LinkedHashMap<>();
         long totalSpent = 0;
         
-        for (vn.edu.tdtu.lhqc.budtrack.models.Budget budget : budgets) {
-            long spentAmount = MockBudgetHelper.getMockSpentAmount(budget);
-            BudgetDisplayData displayData = new BudgetDisplayData(budget, spentAmount);
-            budgetData.put(budget.getName(), displayData);
-            totalSpent += spentAmount;
+        for (Transaction transaction : expenseTransactions) {
+            long amount = transaction.getAmount();
+            totalSpent += amount;
+
+            // All expense transactions are expected to have a category
+            Long categoryId = transaction.getCategoryId();
+            if (categoryId == null) {
+                // Skip if no category set (should not happen, but avoid crashing)
+                continue;
+            }
+
+            Long current = categorySums.get(categoryId);
+            if (current == null) current = 0L;
+            categorySums.put(categoryId, current + amount);
+        }
+
+        // Build category summaries with icon + title
+        List<CategorySummary> summaries = new ArrayList<>();
+        List<Category> allCategories = MockCategoryData.getSampleCategories();
+
+        for (Map.Entry<Long, Long> entry : categorySums.entrySet()) {
+            Long categoryId = entry.getKey();
+            long amount = entry.getValue();
+
+            Category matched = null;
+            for (Category category : allCategories) {
+                if (category.getId() == categoryId) {
+                    matched = category;
+                    break;
+                }
+            }
+
+            if (matched != null) {
+                summaries.add(new CategorySummary(
+                        matched.getName(),
+                        matched.getIconResId(),
+                        amount,
+                        matched.getColor()
+                ));
+            }
+        }
+
+        // Sort by spent amount descending
+        Collections.sort(summaries, new Comparator<CategorySummary>() {
+            @Override
+            public int compare(CategorySummary o1, CategorySummary o2) {
+                return Long.compare(o2.amount, o1.amount);
+            }
+        });
+
+        // Limit to top 5 categories for clarity
+        if (summaries.size() > 5) {
+            summaries = new ArrayList<>(summaries.subList(0, 5));
         }
 
         // Initialize pie chart
         PieChartView pieChart = root.findViewById(R.id.pieChart);
-        if (pieChart != null && totalSpent > 0) {
+        if (pieChart != null) {
+            if (totalSpent > 0 && !summaries.isEmpty()) {
             LinkedHashMap<String, Float> pieData = new LinkedHashMap<>();
-            for (String key : budgetData.keySet()) {
-                BudgetDisplayData budget = budgetData.get(key);
-                float percentage = totalSpent > 0 ? (float) ((budget.getSpentAmount() / (double) totalSpent) * 100) : 0;
-                pieData.put(key, percentage);
-            }
+                List<Integer> colors = new ArrayList<>();
 
-            pieChart.setData(pieData, Arrays.asList(
-                    ContextCompat.getColor(requireContext(), R.color.primary_green),
-                    ContextCompat.getColor(requireContext(), R.color.primary_yellow),
-                    ContextCompat.getColor(requireContext(), R.color.primary_red)
-            ));
+                // Generate distinct HSV colors using only Android's Color utilities
+                java.util.Random random = new java.util.Random();
+                float baseHue = random.nextFloat() * 360f;
+                float hueStep = summaries.size() > 0 ? 360f / summaries.size() : 360f;
+
+                for (int i = 0; i < summaries.size(); i++) {
+                    CategorySummary summary = summaries.get(i);
+                    float percentage = (float) ((summary.amount / (double) totalSpent) * 100f);
+                    pieData.put(summary.name, percentage);
+
+                    // Generate a pleasant color solely via Android's Color utilities
+                    float hue = (baseHue + i * hueStep) % 360f;
+                    float saturation = 0.65f;
+                    float value = 0.9f;
+                    int colorInt = Color.HSVToColor(new float[]{hue, saturation, value});
+
+                    colors.add(colorInt);
+                }
+
+                pieChart.setData(pieData, colors);
             float density = getResources().getDisplayMetrics().density;
             pieChart.setRingThicknessPx(12f * density);
             pieChart.setSegmentGapDegrees(14f);
             pieChart.setCenterTexts(getString(R.string.expense), CurrencyUtils.formatCurrency(totalSpent));
-        } else if (pieChart != null) {
-            // If no spending, show empty chart
-            pieChart.setData(new LinkedHashMap<>(), Arrays.asList());
-            pieChart.setCenterTexts(getString(R.string.expense), CurrencyUtils.formatCurrency(0));
+            } else {
+                // No categories or no transactions: clear chart and show simple text
+                pieChart.setData(new LinkedHashMap<String, Float>(), new ArrayList<Integer>());
+                pieChart.setCenterTexts(null, getString(R.string.pie_no_data));
+            }
         }
 
-        // Update budget tabs with amounts and percentages
-        updateBudgetTabs(root, budgetData, totalSpent);
+        // Update category list below the pie chart
+        updateCategoryTabs(root, summaries, totalSpent);
     }
 
     private void setupAnalyticsTabs(View root) {
@@ -380,13 +465,10 @@ public class HomeFragment extends Fragment {
             TextView dateText = analyticsCard.findViewById(dateIds[i]);
             
             if (bar != null) {
-                // Set up long-press listener for tooltip
+                // Set up tap listener for tooltip instead of long-press
                 final int dayIndex = i;
                 final Calendar dayCalendar = dayCalendars[i];
-                bar.setOnLongClickListener(v -> {
-                    showBarTooltip(v, dayCalendar, finalDailyAmounts[dayIndex], showIncome);
-                    return true;
-                });
+                bar.setOnClickListener(v -> showBarTooltip(v, dayCalendar, finalDailyAmounts[dayIndex], showIncome));
                 // Calculate bar height (max 140dp, min 20dp)
                 int maxHeightDp = 140;
                 int minHeightDp = 20;
@@ -516,60 +598,53 @@ public class HomeFragment extends Fragment {
         }, 2000);
     }
     
-    // Update budget tabs with dynamic data. This method can be called whenever data changes.
-    private void updateBudgetTabs(View root, LinkedHashMap<String, BudgetDisplayData> budgetData, long totalSpent) {
-        // Daily Budget (maps to Transport tab in layout)
-        TextView tvCategoryTransport = root.findViewById(R.id.tv_category_transport);
-        TextView tvAmountTransport = root.findViewById(R.id.tv_amount_transport);
-        TextView tvPercentTransport = root.findViewById(R.id.tv_percent_transport);
-        if (budgetData.containsKey("Daily")) {
-            BudgetDisplayData daily = budgetData.get("Daily");
-            if (tvCategoryTransport != null) {
-                tvCategoryTransport.setText(daily.getName());
-            }
-            if (tvAmountTransport != null) {
-                tvAmountTransport.setText(CurrencyUtils.formatCurrency(daily.getSpentAmount()));
-            }
-            if (tvPercentTransport != null && totalSpent > 0) {
-                float percentage = (float) ((daily.getSpentAmount() / (double) totalSpent) * 100);
-                tvPercentTransport.setText(String.format(Locale.getDefault(), "%.0f%%", percentage));
-            }
+    // Update category tabs with dynamic data (icon + title + amount + percentage)
+    private void updateCategoryTabs(View root, List<CategorySummary> summaries, long totalSpent) {
+        LinearLayout container = root.findViewById(R.id.container_category_tabs);
+        if (container == null) {
+            return;
         }
 
-        // Personal Budget (maps to Food tab in layout)
-        TextView tvCategoryFood = root.findViewById(R.id.tv_category_food);
-        TextView tvAmountFood = root.findViewById(R.id.tv_amount_food);
-        TextView tvPercentFood = root.findViewById(R.id.tv_percent_food);
-        if (budgetData.containsKey("Personal")) {
-            BudgetDisplayData personal = budgetData.get("Personal");
-            if (tvCategoryFood != null) {
-                tvCategoryFood.setText(personal.getName());
-            }
-            if (tvAmountFood != null) {
-                tvAmountFood.setText(CurrencyUtils.formatCurrency(personal.getSpentAmount()));
-            }
-            if (tvPercentFood != null && totalSpent > 0) {
-                float percentage = (float) ((personal.getSpentAmount() / (double) totalSpent) * 100);
-                tvPercentFood.setText(String.format(Locale.getDefault(), "%.0f%%", percentage));
-            }
+        container.removeAllViews();
+
+        if (summaries == null || summaries.isEmpty() || totalSpent <= 0) {
+            return;
         }
 
-        // Others Budget (maps to Shopping tab in layout)
-        TextView tvCategoryShopping = root.findViewById(R.id.tv_category_shopping);
-        TextView tvAmountShopping = root.findViewById(R.id.tv_amount_shopping);
-        TextView tvPercentShopping = root.findViewById(R.id.tv_percent_shopping);
-        if (budgetData.containsKey("Others")) {
-            BudgetDisplayData others = budgetData.get("Others");
-            if (tvCategoryShopping != null) {
-                tvCategoryShopping.setText(others.getName());
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        float density = getResources().getDisplayMetrics().density;
+
+        for (CategorySummary summary : summaries) {
+            View itemView = inflater.inflate(R.layout.item_pie_category_tab, container, false);
+
+            ImageView ivIcon = itemView.findViewById(R.id.iv_category_icon);
+            TextView tvName = itemView.findViewById(R.id.tv_category_name);
+            TextView tvAmount = itemView.findViewById(R.id.tv_category_amount);
+            TextView tvPercent = itemView.findViewById(R.id.tv_category_percent);
+
+            if (ivIcon != null) {
+                ivIcon.setImageResource(summary.iconResId);
             }
-            if (tvAmountShopping != null) {
-                tvAmountShopping.setText(CurrencyUtils.formatCurrency(others.getSpentAmount()));
+            if (tvName != null) {
+                tvName.setText(summary.name);
             }
-            if (tvPercentShopping != null && totalSpent > 0) {
-                float percentage = (float) ((others.getSpentAmount() / (double) totalSpent) * 100);
-                tvPercentShopping.setText(String.format(Locale.getDefault(), "%.0f%%", percentage));
+            if (tvAmount != null) {
+                tvAmount.setText(CurrencyUtils.formatCurrency(summary.amount));
             }
+            if (tvPercent != null) {
+                float percentage = (float) ((summary.amount / (double) totalSpent) * 100f);
+                tvPercent.setText(String.format(Locale.getDefault(), "%.0f%%", percentage));
+        }
+
+            // Add right margin between items
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            params.rightMargin = (int) (8 * density);
+            itemView.setLayoutParams(params);
+
+            container.addView(itemView);
         }
     }
 
@@ -581,5 +656,20 @@ public class HomeFragment extends Fragment {
         transaction.replace(R.id.fragment_container, walletFragment, "WALLET_FRAGMENT");
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    // Simple data holder for category summary in pie chart
+    private static class CategorySummary {
+        final String name;
+        final int iconResId;
+        final long amount;
+        final String colorHex;
+
+        CategorySummary(String name, int iconResId, long amount, String colorHex) {
+            this.name = name;
+            this.iconResId = iconResId;
+            this.amount = amount;
+            this.colorHex = colorHex;
+        }
     }
 }

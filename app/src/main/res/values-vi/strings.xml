@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--Text hint apply for all cases-->
+    <string name="text_hint">text</string>
+
 <!--Get started-->
     <string name="app_name">Budtrack</string>
     <string name="illustration_description">Minh họa giới thiệu</string>
@@ -49,6 +52,8 @@
     <string name="this_month_total_spend">Tổng chi tháng này</string>
     <string name="transactions_in_month">Giao dịch trong %1$s</string>
     <string name="view_all_transactions">Xem các giao dịch</string>
+    <string name="categories">Danh mục</string>
+    <string name="view_all_categories">Xem tất cả</string>
     <string name="filter_this_month">Tháng</string>
 
     <!--Budget-->
@@ -64,6 +69,7 @@
     <string name="add_budget">Thêm Ngân Sách</string>
     <string name="add_budget_description">Tạo danh mục ngân sách mới</string>
     <string name="budget_create_title">Tạo Ngân Sách</string>
+    <string name="budget_edit_title">Chỉnh Sửa Ngân Sách</string>
     <string name="budget_name_label">Tên Ngân Sách</string>
     <string name="budget_name_hint">Nhập tên ngân sách</string>
     <string name="budget_amount_label">Số Tiền Ngân Sách</string>
@@ -80,6 +86,9 @@
     <string name="budget_amount_invalid">Số tiền ngân sách phải lớn hơn 0</string>
     <string name="budget_categories_required">Vui lòng chọn ít nhất một danh mục</string>
     <string name="budget_created">Đã tạo ngân sách thành công</string>
+    <string name="budget_updated">Đã cập nhật ngân sách thành công</string>
+    <string name="budget_not_found">Không tìm thấy ngân sách</string>
+    <string name="pie_no_data">Chưa có dữ liệu chi tiêu theo danh mục</string>
 
     <!--Dashboard-->
     <string name="dashboard_page">Trang thông tin</string>
@@ -110,7 +119,7 @@
     <string name="sign_out_message">Bạn có chắc chắn muốn đăng xuất? Bạn sẽ cần đăng nhập lại để truy cập tài khoản của mình.</string>
     <string name="sign_out_confirm">Đăng xuất</string>
     <!-- Reminder Settings -->
-    <string name="reminder">Nhắc nhở</string>
+    <string name="reminder">Nhắc nhở chi tiêu</string>
     <string name="reminder_off">Tắt</string>
     <string name="reminder_on">Bật</string>
     <string name="reminder_settings_title">Cài đặt nhắc nhở</string>
@@ -157,21 +166,23 @@
     <string name="search_no_results">Không tìm thấy kết quả cho "%1$s"</string>
     <string name="no_transactions">Không tìm thấy giao dịch</string>
     <string name="all_categories">Tất cả mục</string>
-    <string name="select_subcategory_title">Chọn nhóm phụ</string>
     <string name="category_food">Thức ăn</string>
     <string name="category_shopping">Mua sắm</string>
     <string name="category_transport">Di chuyển</string>
     <string name="category_home">Nhà</string>
     <string name="edit_category">Chỉnh sửa danh mục</string>
     <string name="add_new_category">Thêm danh mục</string>
-    <string name="select_subcategory">Chọn danh mục con</string>
+    <string name="category_create_title">Tạo danh mục</string>
+    <string name="category_edit_title">Chỉnh sửa danh mục</string>
+    <string name="category_name_label">Tên danh mục</string>
+    <string name="category_name_hint">Nhập tên danh mục</string>
+    <string name="category_icon_label">Chọn biểu tượng</string>
+    <string name="category_name_required">Tên danh mục là bắt buộc</string>
+    <string name="category_icon_required">Vui lòng chọn biểu tượng</string>
     <string name="budget">Ngân sách</string>
     <string name="wallet">Ví</string>
     <string name="select_wallet">Chọn ví tiền</string>
     <string name="cash">Tiền mặt</string>
-    <string name="subcategory_text">Hàng ngày</string>
-    <string name="subcategory_add">Thêm</string>
-    <string name="add_new_subcategory">Thêm danh mục con mới</string>
     <string name="title">Tiêu Đề</string>
     <string name="title_hint">Nhập tiêu đề giao dịch</string>
     <string name="note">Ghi chú</string>
@@ -198,6 +209,7 @@
     <string name="registration_successful">Đăng ký thành công! Vui lòng đăng nhập.</string>
     <string name="google_sign_in_coming_soon">Đăng nhập bằng Google sẽ sớm ra mắt</string>
     <string name="no_categories_available">Không có danh mục nào</string>
+    <string name="category_already_in_use">Danh mục \"%1$s\" đã được sử dụng trong ngân sách khác</string>
     <string name="transaction_saved">Đã thêm giao dịch %1$s: %2$s VND - %3$s</string>
 
     <!--Map-->

@@ -68,7 +68,7 @@ public class WalletCreateFragment extends BottomSheetDialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        // Configure bottom sheet to expand fully
+        // Configure bottom sheet to expand fully and disable dragging to prevent accidental dismissal while scrolling
         if (getDialog() != null && getDialog() instanceof BottomSheetDialog) {
             BottomSheetDialog dialog = (BottomSheetDialog) getDialog();
             View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
@@ -76,6 +76,7 @@ public class WalletCreateFragment extends BottomSheetDialogFragment {
                 BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
                 behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 behavior.setSkipCollapsed(true);
+                behavior.setDraggable(false); // Disable dragging to prevent accidental dismissal while scrolling
             }
         }
     }

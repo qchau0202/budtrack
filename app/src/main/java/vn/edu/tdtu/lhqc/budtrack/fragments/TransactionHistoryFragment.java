@@ -221,12 +221,12 @@ public class TransactionHistoryFragment extends Fragment {
         }
         
         // Sort by date (newest first)
-        Collections.sort(incomeTransactions, (t1, t2) -> {
+        incomeTransactions.sort((t1, t2) -> {
             Date d1 = t1.getDate() != null ? t1.getDate() : new Date(0);
             Date d2 = t2.getDate() != null ? t2.getDate() : new Date(0);
             return d2.compareTo(d1);
         });
-        Collections.sort(expenseTransactions, (t1, t2) -> {
+        expenseTransactions.sort((t1, t2) -> {
             Date d1 = t1.getDate() != null ? t1.getDate() : new Date(0);
             Date d2 = t2.getDate() != null ? t2.getDate() : new Date(0);
             return d2.compareTo(d1);
@@ -337,12 +337,10 @@ public class TransactionHistoryFragment extends Fragment {
             }
             
             // Make row clickable
-            String finalMerchantName = merchantName;
+            Transaction finalTransaction = transaction;
             rowView.setOnClickListener(v -> {
                 TransactionDetailBottomSheet bottomSheet = TransactionDetailBottomSheet.newInstance(
-                        finalMerchantName,
-                    transDate != null ? timeFormat.format(transDate) : "",
-                    amountText
+                    finalTransaction.getId()
                 );
                 bottomSheet.show(getParentFragmentManager(), TransactionDetailBottomSheet.TAG);
             });

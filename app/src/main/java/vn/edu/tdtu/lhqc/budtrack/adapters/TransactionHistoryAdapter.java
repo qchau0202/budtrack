@@ -153,18 +153,21 @@ public class TransactionHistoryAdapter extends RecyclerView.Adapter<TransactionH
 
     // Data model classes
     public static class Transaction {
+        private final long transactionId;
         private final String merchantName;
         private final String time;
         private final String amount;
         private final int iconResId;
 
-        public Transaction(String merchantName, String time, String amount, int iconResId) {
+        public Transaction(long transactionId, String merchantName, String time, String amount, int iconResId) {
+            this.transactionId = transactionId;
             this.merchantName = merchantName;
             this.time = time;
             this.amount = amount;
             this.iconResId = iconResId;
         }
 
+        public long getTransactionId() { return transactionId; }
         public String getMerchantName() { return merchantName; }
         public String getTime() { return time; }
         public String getAmount() { return amount; }

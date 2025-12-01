@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,8 +14,12 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.card.MaterialCardView;
+
+import java.util.List;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.category.CategoryManager;
 
 public class CategorySelectBottomSheet extends BottomSheetDialogFragment {
 
@@ -36,7 +42,10 @@ public class CategorySelectBottomSheet extends BottomSheetDialogFragment {
     }
 
     private OnCategorySelectedListener listener;
+    private List<CategoryManager.CategoryItem> allCategories;
     private int titleResId = R.string.select_category_title;
+    private GridLayout gridCategories;
+    private androidx.appcompat.widget.AppCompatEditText etSearch;
 
     public static CategorySelectBottomSheet newInstance(@StringRes int titleResId) {
         CategorySelectBottomSheet sheet = new CategorySelectBottomSheet();
@@ -70,11 +79,8 @@ public class CategorySelectBottomSheet extends BottomSheetDialogFragment {
     private void initViews(View view) {
         ImageButton btnBack = view.findViewById(R.id.btnCategoryBack);
         TextView title = view.findViewById(R.id.tvCategoryTitle);
-        View cardAdd = view.findViewById(R.id.cardCategoryAdd);
-        View cardFood = view.findViewById(R.id.cardCategoryFood);
-        View cardShopping = view.findViewById(R.id.cardCategoryShopping);
-        View cardTransport = view.findViewById(R.id.cardCategoryTransport);
-        View cardHome = view.findViewById(R.id.cardCategoryHome);
+        etSearch = view.findViewById(R.id.etSearchCategories);
+        gridCategories = view.findViewById(R.id.gridCategories);
 
         if (title != null) {
             title.setText(getString(titleResId));
@@ -82,52 +88,106 @@ public class CategorySelectBottomSheet extends BottomSheetDialogFragment {
 
         btnBack.setOnClickListener(v -> dismiss());
 
-        cardAdd.setOnClickListener(v -> {
+        // Load all categories once
+        allCategories = CategoryManager.getCategories(requireContext());
+        populateCategoryGrid(true, allCategories);
+
+        if (etSearch != null) {
+            etSearch.addTextChangedListener(new android.text.TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    String query = s.toString().trim().toLowerCase();
+                    List<CategoryManager.CategoryItem> filtered = new java.util.ArrayList<>();
+                    if (allCategories != null) {
+                        for (CategoryManager.CategoryItem item : allCategories) {
+                            if (item.name != null && item.name.toLowerCase().contains(query)) {
+                                filtered.add(item);
+                            }
+                        }
+                    }
+                    boolean showAdd = query.isEmpty();
+                    populateCategoryGrid(showAdd, filtered);
+                }
+
+                @Override
+                public void afterTextChanged(android.text.Editable s) { }
+            });
+        }
+    }
+
+    private void populateCategoryGrid(boolean showAdd, List<CategoryManager.CategoryItem> categories) {
+        if (gridCategories == null) {
+            return;
+        }
+
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+
+        // Clear all current items
+        gridCategories.removeAllViews();
+
+        // Optionally add the Add button as the first cell
+        if (showAdd) {
+            View addView = inflater.inflate(R.layout.item_category_add_option, gridCategories, false);
+            GridLayout.LayoutParams addParams = new GridLayout.LayoutParams();
+            addParams.width = 0;
+            addParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            addParams.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+            addView.setLayoutParams(addParams);
+
+            MaterialCardView addCard = addView.findViewById(R.id.cardCategoryAdd);
+            if (addCard != null) {
+                addCard.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onAddCategoryRequested();
             }
             dismiss();
         });
+            }
+            gridCategories.addView(addView);
+        }
 
-        cardFood.setOnClickListener(v -> {
+        // Then user-defined categories
+        for (CategoryManager.CategoryItem category : categories) {
+            View optionView = inflater.inflate(R.layout.item_category_grid_option, gridCategories, false);
+
+            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+            params.width = 0;
+            params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+            optionView.setLayoutParams(params);
+
+            MaterialCardView card = optionView.findViewById(R.id.card_category_option);
+            ImageView icon = optionView.findViewById(R.id.icon_category_option);
+            ImageView btnRemove = optionView.findViewById(R.id.btn_remove_category);
+            TextView label = optionView.findViewById(R.id.tv_category_option);
+
+            if (icon != null) {
+                icon.setImageResource(category.iconResId);
+            }
+            if (label != null) {
+                label.setText(category.name);
+            }
+            // Hide remove icon in selection sheet
+            if (btnRemove != null) {
+                btnRemove.setVisibility(View.GONE);
+            }
+            if (card != null) {
+                card.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onCategorySelected(new CategoryOption(
-                        getString(R.string.category_food),
-                        R.drawable.ic_food_24dp
+                                category.name,
+                                category.iconResId
                 ));
             }
             dismiss();
         });
-
-        cardShopping.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onCategorySelected(new CategoryOption(
-                        getString(R.string.category_shopping),
-                        R.drawable.ic_shopping_24dp
-                ));
             }
-            dismiss();
-        });
 
-        cardTransport.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onCategorySelected(new CategoryOption(
-                        getString(R.string.category_transport),
-                        R.drawable.ic_transport_24dp
-                ));
-            }
-            dismiss();
-        });
-
-        cardHome.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onCategorySelected(new CategoryOption(
-                        getString(R.string.category_home),
-                        R.drawable.ic_home_24dp
-                ));
-            }
-            dismiss();
-        });
+            gridCategories.addView(optionView);
+        }
     }
 }
 

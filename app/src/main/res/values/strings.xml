@@ -1,4 +1,8 @@
 <resources>
+
+    <!--Text hint apply for all cases-->
+    <string name="text_hint">text</string>
+
     <!--Get started-->
     <string name="app_name">Budtrack</string>
     <string name="illustration_description">Onboarding illustration</string>
@@ -48,6 +52,8 @@
     <string name="this_month_total_spend">This month total spend</string>
     <string name="transactions_in_month">Transactions in %1$s</string>
     <string name="view_all_transactions">View all transactions</string>
+    <string name="categories">Categories</string>
+    <string name="view_all_categories">View all</string>
     <string name="filter_this_month">Month</string>
     <!--budget-->
     <string name="budget_page">Budget page</string>
@@ -62,6 +68,7 @@
     <string name="add_budget">Add Budget</string>
     <string name="add_budget_description">Create a new budget category</string>
     <string name="budget_create_title">Create Budget</string>
+    <string name="budget_edit_title">Edit Budget</string>
     <string name="budget_name_label">Budget Name</string>
     <string name="budget_name_hint">Enter budget name</string>
     <string name="budget_amount_label">Budget Amount</string>
@@ -78,6 +85,9 @@
     <string name="budget_amount_invalid">Budget amount must be greater than 0</string>
     <string name="budget_categories_required">Please select at least one category</string>
     <string name="budget_created">Budget created successfully</string>
+    <string name="budget_updated">Budget updated successfully</string>
+    <string name="budget_not_found">Budget not found</string>
+    <string name="pie_no_data">No expense categories to display yet</string>
     <!--dashboard-->
     <string name="dashboard_page">Dashboard page</string>
     <string name="previous_month">Previous month</string>
@@ -106,7 +116,7 @@
     <string name="sign_out_message">Are you sure you want to sign out? You will need to log in again to access your account.</string>
     <string name="sign_out_confirm">Sign Out</string>
     <!-- Reminder Settings -->
-    <string name="reminder">Reminder</string>
+    <string name="reminder">Expense entry reminder</string>
     <string name="reminder_off">Off</string>
     <string name="reminder_on">On</string>
     <string name="reminder_settings_title">Reminder Settings</string>
@@ -162,21 +172,23 @@
     <string name="add_expense">Add Expense</string>
     <string name="current_balance">Current Balance $250,560.0</string>
     <string name="remaining_budget">Remaining Budget $9,512.50</string>
-    <string name="select_subcategory_title">Select Subcategory</string>
     <string name="category_food">Food</string>
     <string name="category_shopping">Shopping</string>
     <string name="category_transport">Transport</string>
     <string name="category_home">Home</string>
     <string name="edit_category">Edit Category</string>
     <string name="add_new_category">Add</string>
-    <string name="select_subcategory">Select sub category</string>
+    <string name="category_create_title">Create Category</string>
+    <string name="category_edit_title">Edit Category</string>
+    <string name="category_name_label">Category name</string>
+    <string name="category_name_hint">Enter category name</string>
+    <string name="category_icon_label">Choose an icon</string>
+    <string name="category_name_required">Category name is required</string>
+    <string name="category_icon_required">Please choose an icon</string>
     <string name="budget">Budget</string>
     <string name="wallet">Wallet</string>
     <string name="select_wallet">Select Wallet</string>
     <string name="cash">Cash</string>
-    <string name="subcategory_text">Daily</string>
-    <string name="subcategory_add">Add</string>
-    <string name="add_new_subcategory">Add new subcategory</string>
     <string name="title">Title</string>
     <string name="title_hint">Enter transaction title</string>
     <string name="note">Note</string>
@@ -203,6 +215,9 @@
     <string name="registration_successful">Registration successful! Please login.</string>
     <string name="google_sign_in_coming_soon">Google Sign-In coming soon</string>
     <string name="no_categories_available">No categories available</string>
+    <string name="edit_profile_title">Edit Profile</string>
+    <string name="edit_profile_save">Save</string>
+    <string name="category_already_in_use">Category \"%1$s\" is already used in another budget</string>
     <string name="transaction_saved">Transaction saved: %1$s - %2$s VND - %3$s</string>
     <!--Map-->
     <string name="map_title">Budtrack expense map</string>
@@ -301,4 +316,5 @@
     <string name="wallet_name_required">Wallet name is required</string>
     <string name="wallet_created">Wallet created successfully</string>
     <string name="none">None</string>
+    <string name="unknown_merchant">Unknown Merchant</string>
 </resources>

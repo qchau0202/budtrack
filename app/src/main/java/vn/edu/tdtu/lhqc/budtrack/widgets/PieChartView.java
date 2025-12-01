@@ -98,14 +98,6 @@ public class PieChartView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (labelToPercent.isEmpty()) return;
-
-        float total = 0f;
-        for (Float v : labelToPercent.values()) {
-            if (v != null) total += v;
-        }
-        if (total <= 0f) return;
-
         float left = getPaddingLeft();
         float top = getPaddingTop();
         float right = getWidth() - getPaddingRight();
@@ -119,6 +111,14 @@ public class PieChartView extends View {
         arcBounds.set(cx - half + inset, cy - half + inset, cx + half - inset, cy + half - inset);
         paint.setStrokeWidth(ringThicknessPx);
 
+        // Draw segments only when we actually have data
+        if (!labelToPercent.isEmpty()) {
+            float total = 0f;
+            for (Float v : labelToPercent.values()) {
+                if (v != null) total += v;
+            }
+
+            if (total > 0f) {
         float startAngle = -90f; // start at top
         int idx = 0;
         @ColorInt int lastColor = 0xFFCCCCCC;
@@ -139,6 +139,8 @@ public class PieChartView extends View {
             canvas.drawArc(arcBounds, startAngle + (segmentGapDegrees / 2f), drawSweep, false, paint);
             startAngle += sweep;
             idx++;
+                }
+            }
         }
 
         // Center text - use theme-aware colors
