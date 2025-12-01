@@ -318,20 +318,20 @@ public class DashboardFragment extends Fragment {
         
         // Set click listener for all dates (including dates from other months)
         // This allows users to select dates from previous/next months to view their transactions
-        cell.setOnClickListener(v -> {
-            selectedDate = (Calendar) date.clone();
+            cell.setOnClickListener(v -> {
+                selectedDate = (Calendar) date.clone();
             // If clicking a date from a different month, update currentDate to that month
             if (!isCurrentMonth) {
                 currentDate.set(Calendar.YEAR, date.get(Calendar.YEAR));
                 currentDate.set(Calendar.MONTH, date.get(Calendar.MONTH));
             }
             updateCalendar(); // Refresh to show new selection and month
-            
-            // Notify TransactionHistoryFragment about date selection
-            Bundle result = new Bundle();
-            result.putLong(RESULT_SELECTED_DATE_MILLIS, selectedDate.getTimeInMillis());
-            requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
-        });
+                
+                // Notify TransactionHistoryFragment about date selection
+                Bundle result = new Bundle();
+                result.putLong(RESULT_SELECTED_DATE_MILLIS, selectedDate.getTimeInMillis());
+                requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
+            });
         
         return cell;
     }

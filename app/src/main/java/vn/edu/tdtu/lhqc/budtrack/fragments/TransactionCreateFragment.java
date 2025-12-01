@@ -735,7 +735,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 return;
             }
 
-            // TODO: Save transaction to database
+            // Save transaction to database
             saveTransactionToDatabase(amount, title, note, location);
 
         } catch (NumberFormatException e) {
@@ -747,7 +747,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
     private void saveTransactionToDatabase(double amount, String title, String note, String location) {
         // Validate wallet selection
         if (selectedWallet == null) {
-            Toast.makeText(requireContext(), "Please select a wallet", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_wallet_required), Toast.LENGTH_SHORT).show();
             return;
         }
 

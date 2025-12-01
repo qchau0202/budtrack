@@ -19,7 +19,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import android.content.Intent;
+
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.auth.AuthController;
 import vn.edu.tdtu.lhqc.budtrack.fragments.DashboardFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.HomeFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.ProfileFragment;
@@ -55,6 +58,15 @@ public class MainActivity extends AppCompatActivity {
 		LanguageManager.applySavedLanguage(this);
 		ThemeManager.applySavedTheme(this);
         EdgeToEdge.enable(this);
+        
+        // Check if user is logged in, redirect to LoginActivity if not
+        if (!AuthController.isLoggedIn(this)) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+        
         setContentView(R.layout.activity_main);
         bottomBarContainer = findViewById(R.id.bottom_bar_container);
         

@@ -165,21 +165,6 @@
                     app:tint="@color/primary_grey" />
             </LinearLayout>
 
-            <!-- Daily Budget Card -->
-            <include
-                android:id="@+id/card_daily_budget"
-                layout="@layout/view_budget_card" />
-
-            <!-- Personal Budget Card -->
-            <include
-                android:id="@+id/card_personal_budget"
-                layout="@layout/view_budget_card" />
-
-            <!-- Others Budget Card -->
-            <include
-                android:id="@+id/card_others_budget"
-                layout="@layout/view_budget_card" />
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
