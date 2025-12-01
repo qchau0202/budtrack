@@ -9,12 +9,12 @@
     android:paddingTop="16dp"
     android:layout_marginBottom="12dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_card"
-        android:orientation="vertical"
-        android:padding="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -26,10 +26,24 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/budget"
+                android:text="@string/categories"
                 android:textColor="@color/primary_black"
                 android:textSize="20sp"
                 android:textStyle="bold"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_view_all_categories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/view_all_categories"
+                android:textColor="@color/primary_white"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                app:backgroundTint="@color/primary_green" />
 
         </LinearLayout>
 
@@ -39,7 +53,7 @@
             android:layout_height="200dp"
             android:layout_marginTop="12dp" />
 
-        <!-- Category Tabs -->
+        <!-- Category list (dynamic, populated from transactions) -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -54,176 +68,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical" />
 
-                <!-- Transport Category Tab -->
-                <LinearLayout
-                    android:id="@+id/tab_transport"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_category_tab_transport"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:layout_marginEnd="8dp"
-                    android:minWidth="120dp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <View
-                            android:layout_width="10dp"
-                            android:layout_height="10dp"
-                            android:background="@drawable/bg_circle_green"
-                            android:layout_marginEnd="8dp"/>
-
-                        <TextView
-                            android:id="@+id/tv_category_transport"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/category_transport"
-                            android:textColor="@color/primary_black"
-                            android:textSize="14sp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tv_amount_transport"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1.600.000 VND"
-                        android:textColor="@color/primary_green"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp"/>
-
-                    <TextView
-                        android:id="@+id/tv_percent_transport"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="40%"
-                        android:textColor="@color/primary_grey"
-                        android:textSize="12sp"
-                        android:layout_marginTop="2dp"/>
-                </LinearLayout>
-
-                <!-- Food Category Tab -->
-                <LinearLayout
-                    android:id="@+id/tab_food"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_category_tab_food"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:layout_marginEnd="8dp"
-                    android:minWidth="120dp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <View
-                            android:layout_width="10dp"
-                            android:layout_height="10dp"
-                            android:background="@drawable/bg_circle_yellow"
-                            android:layout_marginEnd="8dp"/>
-
-                        <TextView
-                            android:id="@+id/tv_category_food"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/category_food"
-                            android:textColor="@color/primary_black"
-                            android:textSize="14sp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tv_amount_food"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1.400.000 VND"
-                        android:textColor="@color/primary_yellow"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp"/>
-
-                    <TextView
-                        android:id="@+id/tv_percent_food"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="35%"
-                        android:textColor="@color/primary_grey"
-                        android:textSize="12sp"
-                        android:layout_marginTop="2dp"/>
-                </LinearLayout>
-
-                <!-- Shopping Category Tab -->
-                <LinearLayout
-                    android:id="@+id/tab_shopping"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_category_tab_shopping"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:minWidth="120dp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <View
-                            android:layout_width="10dp"
-                            android:layout_height="10dp"
-                            android:background="@drawable/bg_circle_red"
-                            android:layout_marginEnd="8dp"/>
-
-                        <TextView
-                            android:id="@+id/tv_category_shopping"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/category_shopping"
-                            android:textColor="@color/primary_black"
-                            android:textSize="14sp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tv_amount_shopping"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1.000.000 VND"
-                        android:textColor="@color/primary_red"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="4dp"/>
-
-                    <TextView
-                        android:id="@+id/tv_percent_shopping"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="25%"
-                        android:textColor="@color/primary_grey"
-                        android:textSize="12sp"
-                        android:layout_marginTop="2dp"/>
-                </LinearLayout>
-
-            </LinearLayout>
         </HorizontalScrollView>
     </LinearLayout>
 </LinearLayout>

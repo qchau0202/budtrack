@@ -85,7 +85,7 @@
     <!-- Bottom sheet for expense details -->
     <include
         android:id="@+id/expense_details_panel"
-        layout="@layout/view_expense_details_bottom_sheet"
+        layout="@layout/view_bottom_sheet_transaction_details_map"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:visibility="gone"

@@ -15,6 +15,7 @@ public final class AuthController {
     private static final String KEY_EMAIL = "user_email";
     private static final String KEY_PASSWORD = "user_password";
     private static final String KEY_FULL_NAME = "user_full_name";
+    private static final String KEY_ADDRESS = "user_address";
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
     private static final String KEY_IS_REGISTERED = "is_registered";
 
@@ -69,6 +70,7 @@ public final class AuthController {
         editor.putString(KEY_FULL_NAME, fullName);
         editor.putString(KEY_EMAIL, email);
         editor.putString(KEY_PASSWORD, password); // In production, this should be hashed
+        editor.putString(KEY_ADDRESS, ""); // no address yet
         editor.putBoolean(KEY_IS_REGISTERED, true);
         editor.putBoolean(KEY_IS_LOGGED_IN, false);
         editor.apply();
@@ -167,6 +169,51 @@ public final class AuthController {
         }
         SharedPreferences prefs = getPrefs(context);
         return prefs.getString(KEY_FULL_NAME, null);
+    }
+
+    /**
+     * Get current logged in user's address (optional).
+     */
+    public static String getCurrentUserAddress(Context context) {
+        if (!isLoggedIn(context)) {
+            return null;
+        }
+        SharedPreferences prefs = getPrefs(context);
+        return prefs.getString(KEY_ADDRESS, null);
+    }
+
+    /**
+     * Update current user's profile (name, email, address).
+     * Password remains unchanged.
+     */
+    public static RegistrationResult updateProfile(Context context, String fullName, String email, String address) {
+        // Reuse validation similar to register()
+        if (TextUtils.isEmpty(fullName)) {
+            return new RegistrationResult(false, "full_name_required");
+        }
+
+        if (fullName.length() < 2) {
+            return new RegistrationResult(false, "full_name_min_length");
+        }
+
+        if (TextUtils.isEmpty(email)) {
+            return new RegistrationResult(false, "email_required");
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            return new RegistrationResult(false, "email_invalid");
+        }
+
+        SharedPreferences prefs = getPrefs(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_FULL_NAME, fullName);
+        editor.putString(KEY_EMAIL, email);
+        if (address != null) {
+            editor.putString(KEY_ADDRESS, address.trim());
+        }
+        editor.apply();
+
+        return new RegistrationResult(true, null);
     }
 
     private static SharedPreferences getPrefs(Context context) {

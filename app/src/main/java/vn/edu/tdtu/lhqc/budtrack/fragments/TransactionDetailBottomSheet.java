@@ -15,23 +15,40 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
+import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager;
+import vn.edu.tdtu.lhqc.budtrack.models.Category;
+import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
+import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
+import vn.edu.tdtu.lhqc.budtrack.models.Wallet;
+import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
+import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 
 public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
 
     public static final String TAG = "TransactionDetailBottomSheet";
-    private static final String ARG_MERCHANT_NAME = "merchant_name";
-    private static final String ARG_TIME = "time";
-    private static final String ARG_AMOUNT = "amount";
+    private static final String ARG_TRANSACTION_ID = "transaction_id";
 
-    public static TransactionDetailBottomSheet newInstance(String merchantName, String time, String amount) {
+    public static TransactionDetailBottomSheet newInstance(long transactionId) {
         TransactionDetailBottomSheet sheet = new TransactionDetailBottomSheet();
         Bundle args = new Bundle();
-        args.putString(ARG_MERCHANT_NAME, merchantName);
-        args.putString(ARG_TIME, time);
-        args.putString(ARG_AMOUNT, amount);
+        args.putLong(ARG_TRANSACTION_ID, transactionId);
         sheet.setArguments(args);
         return sheet;
+    }
+    
+    // Legacy method for backward compatibility (deprecated)
+    @Deprecated
+    public static TransactionDetailBottomSheet newInstance(String merchantName, String time, String amount) {
+        // This method is kept for backward compatibility but should not be used
+        // It will create a bottom sheet with no data
+        return new TransactionDetailBottomSheet();
     }
 
     @Override
@@ -43,6 +60,7 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
     @Override
     public void onStart() {
         super.onStart();
+        // Configure bottom sheet to expand fully and disable dragging to prevent accidental dismissal while scrolling
         if (getDialog() != null && getDialog() instanceof BottomSheetDialog) {
             BottomSheetDialog dialog = (BottomSheetDialog) getDialog();
             View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
@@ -50,6 +68,7 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
                 BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
                 behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 behavior.setSkipCollapsed(true);
+                behavior.setDraggable(false); // Disable dragging to prevent accidental dismissal while scrolling
             }
         }
     }
@@ -57,39 +76,108 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.view_expense_details_bottom_sheet, container, false);
+        View view = inflater.inflate(R.layout.view_bottom_sheet_transaction_details_map, container, false);
         
         Bundle args = getArguments();
         if (args == null) {
             return view;
         }
 
-        String merchantName = args.getString(ARG_MERCHANT_NAME, "");
-        String time = args.getString(ARG_TIME, "");
-        String amount = args.getString(ARG_AMOUNT, "");
-
-        TextView tvExpenseName = view.findViewById(R.id.tv_expense_name);
-        TextView tvExpenseAmount = view.findViewById(R.id.tv_expense_amount);
-        TextView tvExpenseDate = view.findViewById(R.id.tv_expense_date);
-        ImageButton btnClose = view.findViewById(R.id.btn_close_details);
-
-        if (tvExpenseName != null) {
-            tvExpenseName.setText(merchantName);
+        long transactionId = args.getLong(ARG_TRANSACTION_ID, -1);
+        if (transactionId == -1) {
+            // No transaction ID provided, return empty view
+            return view;
         }
 
+        // Load transaction data
+        Transaction transaction = TransactionManager.getTransactionById(requireContext(), transactionId);
+        if (transaction == null) {
+            // Transaction not found, return empty view
+            return view;
+        }
+
+        // Initialize views
+        TextView tvExpenseName = view.findViewById(R.id.tv_expense_name);
+        TextView tvExpenseAddress = view.findViewById(R.id.tv_expense_address);
+        TextView tvExpenseCategory = view.findViewById(R.id.tv_expense_category);
+        TextView tvExpenseAmount = view.findViewById(R.id.tv_expense_amount);
+        TextView tvExpenseDate = view.findViewById(R.id.tv_expense_date);
+        TextView tvExpenseNote = view.findViewById(R.id.tv_expense_note);
+        ImageButton btnClose = view.findViewById(R.id.btn_close_details);
+
+        // Set merchant name
+        if (tvExpenseName != null) {
+            String merchantName = transaction.getMerchantName();
+            if (merchantName != null && !merchantName.isEmpty()) {
+            tvExpenseName.setText(merchantName);
+            } else {
+                tvExpenseName.setText(getString(R.string.unknown_merchant));
+            }
+        }
+
+        // Set address
+        if (tvExpenseAddress != null) {
+            String address = transaction.getAddress();
+            if (address != null && !address.isEmpty()) {
+                tvExpenseAddress.setText(address);
+                tvExpenseAddress.setVisibility(View.VISIBLE);
+            } else {
+                tvExpenseAddress.setVisibility(View.GONE);
+            }
+        }
+
+        // Set category
+        if (tvExpenseCategory != null) {
+            Long categoryId = transaction.getCategoryId();
+            if (categoryId != null) {
+                Category category = findCategoryById(categoryId);
+                if (category != null) {
+                    tvExpenseCategory.setText(category.getName());
+                    tvExpenseCategory.setVisibility(View.VISIBLE);
+                } else {
+                    tvExpenseCategory.setVisibility(View.GONE);
+                }
+            } else {
+                tvExpenseCategory.setVisibility(View.GONE);
+            }
+        }
+
+        // Set amount
         if (tvExpenseAmount != null) {
-            tvExpenseAmount.setText(amount);
-            // Set color based on amount (negative = red, positive = green)
-            int colorRes = amount.trim().startsWith("-") 
-                    ? R.color.primary_red 
-                    : R.color.secondary_green;
+            boolean isIncome = transaction.getType() == TransactionType.INCOME;
+            String amountText = isIncome
+                    ? "+" + CurrencyUtils.formatCurrency(transaction.getAmount())
+                    : "-" + CurrencyUtils.formatCurrency(transaction.getAmount());
+            tvExpenseAmount.setText(amountText);
+            
+            // Set color based on transaction type
+            int colorRes = isIncome ? R.color.secondary_green : R.color.primary_red;
             tvExpenseAmount.setTextColor(ContextCompat.getColor(requireContext(), colorRes));
         }
 
+        // Set date
         if (tvExpenseDate != null) {
-            tvExpenseDate.setText(time);
+            Date transactionDate = transaction.getDate();
+            if (transactionDate != null) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+                tvExpenseDate.setText(dateFormat.format(transactionDate));
+            } else {
+                tvExpenseDate.setVisibility(View.GONE);
+            }
         }
 
+        // Set note
+        if (tvExpenseNote != null) {
+            String note = transaction.getNote();
+            if (note != null && !note.isEmpty()) {
+                tvExpenseNote.setText(note);
+                tvExpenseNote.setVisibility(View.VISIBLE);
+            } else {
+                tvExpenseNote.setVisibility(View.GONE);
+            }
+        }
+
+        // Close button
         if (btnClose != null) {
             btnClose.setOnClickListener(v -> dismiss());
         }
@@ -101,6 +189,22 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
         }
 
         return view;
+    }
+
+    /**
+     * Find category by ID from MockCategoryData.
+     */
+    private Category findCategoryById(Long categoryId) {
+        if (categoryId == null) {
+            return null;
+        }
+        List<Category> categories = MockCategoryData.getSampleCategories();
+        for (Category category : categories) {
+            if (category.getId() == categoryId) {
+                return category;
+            }
+        }
+        return null;
     }
 }
 

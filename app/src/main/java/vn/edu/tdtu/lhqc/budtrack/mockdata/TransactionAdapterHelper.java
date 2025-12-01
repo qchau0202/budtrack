@@ -55,6 +55,7 @@ public class TransactionAdapterHelper {
             
             TransactionHistoryAdapter.Transaction adapterTransaction =
                     new TransactionHistoryAdapter.Transaction(
+                            transaction.getId(),
                             merchantName,
                             timeStr,
                             amountText,
@@ -123,6 +124,7 @@ public class TransactionAdapterHelper {
             
             TransactionHistoryAdapter.Transaction adapterTransaction =
                     new TransactionHistoryAdapter.Transaction(
+                            transaction.getId(),
                             merchantName,
                             timeStr,
                             amountText,

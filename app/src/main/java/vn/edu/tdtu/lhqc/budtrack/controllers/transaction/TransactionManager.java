@@ -104,6 +104,21 @@ public final class TransactionManager {
     }
 
     /**
+     * Get a transaction by ID.
+     */
+    public static Transaction getTransactionById(Context context, long transactionId) {
+        List<Transaction> allTransactions = getTransactions(context);
+        
+        for (Transaction transaction : allTransactions) {
+            if (transaction.getId() == transactionId) {
+                return transaction;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
      * Add a new transaction.
      */
     public static void addTransaction(Context context, Transaction transaction) {

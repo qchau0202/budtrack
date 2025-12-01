@@ -5,9 +5,12 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,7 +28,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -145,7 +147,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        // Configure bottom sheet to expand fully
+        // Configure bottom sheet to expand fully and disable dragging to prevent accidental dismissal while scrolling
         if (getDialog() != null && getDialog() instanceof BottomSheetDialog) {
             BottomSheetDialog dialog = (BottomSheetDialog) getDialog();
             View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
@@ -153,6 +155,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
                 behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 behavior.setSkipCollapsed(true);
+                behavior.setDraggable(false); // Disable dragging to prevent accidental dismissal while scrolling
             }
         }
     }
@@ -160,7 +163,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_transaction_create, container, false);
+        View view = inflater.inflate(R.layout.view_bottom_sheet_transaction_create, container, false);
         initViews(view);
         setupTabs();
         setupDatePicker();
@@ -209,6 +212,80 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         updateWalletText(); // Initialize wallet text to "None"
         updateCategoryText(); // Initialize category text to "None"
         updateLocationText(); // Initialize location text to "None"
+        
+        // Setup IME action handlers for Enter key navigation
+        setupImeActions();
+    }
+    
+    /**
+     * Setup IME action handlers to navigate through form fields when Enter is pressed.
+     */
+    private void setupImeActions() {
+        // Title field: Enter -> focus on Amount field
+        if (editTitle != null) {
+            editTitle.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId == EditorInfo.IME_ACTION_NEXT || 
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                    if (editAmount != null) {
+                        editAmount.requestFocus();
+                        // Show keyboard for amount field
+                        InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                        if (imm != null) {
+                            imm.showSoftInput(editAmount, InputMethodManager.SHOW_IMPLICIT);
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            });
+        }
+        
+        // Amount field: Enter -> open Wallet selection
+        if (editAmount != null) {
+            editAmount.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId == EditorInfo.IME_ACTION_NEXT || 
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                    // Hide keyboard first
+                    hideKeyboard();
+                    // Open wallet selection
+                    if (cardWallet != null) {
+                        cardWallet.performClick();
+                    }
+                    return true;
+                }
+                return false;
+            });
+        }
+        
+        // Note field: Enter -> Save transaction (if all required fields are filled)
+        if (editNote != null) {
+            editNote.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId == EditorInfo.IME_ACTION_DONE || 
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                    // Hide keyboard
+                    hideKeyboard();
+                    // Try to save if all required fields are filled
+                    if (btnSave != null) {
+                        btnSave.performClick();
+                    }
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+    
+    /**
+     * Hide the soft keyboard.
+     */
+    private void hideKeyboard() {
+        View currentFocus = getView() != null ? getView().findFocus() : null;
+        if (currentFocus != null) {
+            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+            }
+        }
     }
 
     private void setupTabs() {
@@ -427,7 +504,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
 
             @Override
             public void onAddCategoryRequested() {
-                Toast.makeText(requireContext(), getString(R.string.add_new_category), Toast.LENGTH_SHORT).show();
+                showCategoryCreateSheet();
             }
         });
         sheet.show(getParentFragmentManager(), CategorySelectBottomSheet.TAG);
@@ -455,6 +532,12 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         }
     }
 
+    private void showCategoryCreateSheet() {
+        CategoryCreateBottomSheet createBottomSheet = CategoryCreateBottomSheet.newInstance();
+        createBottomSheet.setOnCategoryCreateListener((name, iconResId) -> selectCategory(name, iconResId));
+        createBottomSheet.show(getParentFragmentManager(), "CategoryCreateBottomSheet");
+    }
+
     private void showWalletSelectionSheet() {
         WalletSelectBottomSheet sheet = WalletSelectBottomSheet.newInstance(selectedWallet);
         sheet.setOnWalletSelectedListener(new WalletSelectBottomSheet.OnWalletSelectedListener() {
@@ -467,8 +550,126 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             public void onNoneSelected() {
                 selectWallet(null);
             }
+
+            @Override
+            public void onCreateWalletRequested() {
+                // Save transaction state before opening wallet creation
+                saveTransactionState();
+                
+                // Open wallet type selection (same flow as WalletFragment)
+                showWalletTypeSelectionForTransaction();
+            }
         });
         sheet.show(getParentFragmentManager(), WalletSelectBottomSheet.TAG);
+    }
+    
+    /**
+     * Show wallet type selection bottom sheet for creating a wallet from transaction create.
+     * Follows the same flow as WalletFragment.
+     */
+    private void showWalletTypeSelectionForTransaction() {
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
+            new com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme);
+        View view = LayoutInflater.from(requireContext()).inflate(R.layout.view_bottom_sheet_wallet_type_selection, null);
+        dialog.setContentView(view);
+
+        // Configure bottom sheet to expand fully and disable dragging
+        View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        if (bottomSheet != null) {
+            com.google.android.material.bottomsheet.BottomSheetBehavior<View> behavior = 
+                com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet);
+            behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+            behavior.setSkipCollapsed(true);
+            behavior.setDraggable(false);
+        }
+
+        // Setup click listeners
+        view.findViewById(R.id.card_basic_wallet).setOnClickListener(v -> {
+            dialog.dismiss();
+            openWalletCreateForTransaction(getString(R.string.wallet_type_basic), R.drawable.ic_wallet_cash);
+        });
+
+        view.findViewById(R.id.card_investment_wallet).setOnClickListener(v -> {
+            dialog.dismiss();
+            openWalletCreateForTransaction(getString(R.string.wallet_type_investment), R.drawable.ic_wallet_cash);
+        });
+
+        view.findViewById(R.id.card_savings_wallet).setOnClickListener(v -> {
+            dialog.dismiss();
+            openWalletCreateForTransaction(getString(R.string.wallet_type_savings), R.drawable.ic_wallet_cash);
+        });
+
+        dialog.show();
+    }
+    
+    /**
+     * Open wallet creation dialog from transaction create.
+     */
+    private void openWalletCreateForTransaction(String walletTypeName, int iconResId) {
+        WalletCreateFragment createFragment = WalletCreateFragment.newInstance(walletTypeName, iconResId);
+        createFragment.show(getParentFragmentManager(), WalletCreateFragment.TAG);
+        
+        // Listen for wallet creation result
+        getParentFragmentManager().setFragmentResultListener(
+            WalletCreateFragment.RESULT_KEY,
+            this,
+            (requestKey, result) -> {
+                if (WalletCreateFragment.RESULT_KEY.equals(requestKey)) {
+                    handleWalletCreationResult(result);
+                    // Remove listener after handling
+                    getParentFragmentManager().clearFragmentResultListener(WalletCreateFragment.RESULT_KEY);
+                }
+            }
+        );
+    }
+    
+    /**
+     * Handle wallet creation result - create wallet and select it.
+     */
+    private void handleWalletCreationResult(Bundle result) {
+        // Get wallet details from result
+        String walletName = result.getString(WalletCreateFragment.RESULT_WALLET_NAME);
+        long balance = result.getLong(WalletCreateFragment.RESULT_WALLET_BALANCE);
+        int iconResId = result.getInt(WalletCreateFragment.RESULT_WALLET_ICON);
+        String walletType = result.getString(WalletCreateFragment.RESULT_WALLET_TYPE, walletName);
+        
+        if (walletName == null || walletName.isEmpty()) {
+            return; // Invalid result
+        }
+        
+        // Create the wallet using WalletManager (same as WalletFragment.addNewWallet)
+        Wallet newWallet = new Wallet(walletName, balance, iconResId, walletType);
+        vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager.addWallet(requireContext(), newWallet);
+        
+        // Small delay to ensure wallet is saved, then reload and select
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (!isAdded() || getView() == null) {
+                return;
+            }
+            
+            // Restore transaction state
+            restoreTransactionState();
+            
+            // Reload wallets to get the wallet with assigned ID
+            java.util.List<Wallet> wallets = vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager.getWallets(requireContext());
+            Wallet createdWallet = null;
+            for (Wallet wallet : wallets) {
+                if (wallet.getName().equals(walletName) && wallet.getBalance() == balance) {
+                    createdWallet = wallet;
+                    break;
+                }
+            }
+            
+            // If wallet not found by name, try to get the last one (most recently created)
+            if (createdWallet == null && !wallets.isEmpty()) {
+                createdWallet = wallets.get(wallets.size() - 1);
+            }
+            
+            // Select the newly created wallet
+            if (createdWallet != null) {
+                selectWallet(createdWallet);
+            }
+        }, 100); // Small delay to ensure wallet is persisted
     }
 
     private void selectWallet(Wallet wallet) {

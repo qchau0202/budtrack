@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Set;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCategoryManager;
+import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager;
 import vn.edu.tdtu.lhqc.budtrack.models.Budget;
 import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
@@ -41,6 +43,11 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
 
     public static final String TAG = "BudgetCreateFragment";
     public static final String RESULT_KEY = "budget_created";
+    public static final String RESULT_KEY_UPDATED = "budget_updated";
+    
+    // Arguments for edit mode
+    private static final String ARG_BUDGET_ID = "budget_id";
+    private static final String ARG_IS_EDIT_MODE = "is_edit_mode";
     
     // Result bundle keys
     public static final String RESULT_BUDGET_NAME = "budget_name";
@@ -54,6 +61,7 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
     private TextView tvPeriod;
     private TextView tvColor;
     private TextView tvCategories;
+    private TextView tvTitle;
     private View cardPeriod;
     private View cardColor;
     private View cardCategories;
@@ -61,6 +69,8 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
     private LinearLayout containerCategoryIcons;
     private TextView btnDone;
     
+    private long budgetId = 0; // 0 means new budget
+    private boolean isEditMode = false;
     private String selectedPeriod = "monthly";
     private int selectedColorResId = R.color.primary_green;
     private Integer selectedCustomColor = null; // Store custom color as ARGB integer
@@ -68,17 +78,43 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
     private Set<Long> selectedCategoryIds = new HashSet<>();
     private List<Category> availableCategories;
 
+    /**
+     * Create a new instance for creating a budget.
+     */
+    public static BudgetCreateFragment newInstance() {
+        return new BudgetCreateFragment();
+    }
+
+    /**
+     * Create a new instance for editing a budget.
+     */
+    public static BudgetCreateFragment newInstanceForEdit(long budgetId) {
+        BudgetCreateFragment fragment = new BudgetCreateFragment();
+        Bundle args = new Bundle();
+        args.putLong(ARG_BUDGET_ID, budgetId);
+        args.putBoolean(ARG_IS_EDIT_MODE, true);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(BottomSheetDialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogTheme);
         availableCategories = MockCategoryData.getSampleCategories();
+        
+        // Check if we're in edit mode
+        Bundle args = getArguments();
+        if (args != null) {
+            isEditMode = args.getBoolean(ARG_IS_EDIT_MODE, false);
+            budgetId = args.getLong(ARG_BUDGET_ID, 0);
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        // Configure bottom sheet to expand fully
+        // Configure bottom sheet to expand fully and disable dragging to prevent accidental dismissal while scrolling
         if (getDialog() != null && getDialog() instanceof BottomSheetDialog) {
             BottomSheetDialog dialog = (BottomSheetDialog) getDialog();
             View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
@@ -86,6 +122,7 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
                 BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
                 behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 behavior.setSkipCollapsed(true);
+                behavior.setDraggable(false); // Disable dragging to prevent accidental dismissal while scrolling
             }
         }
     }
@@ -93,7 +130,7 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.view_bottom_sheet_budget_create, container, false);
+        return inflater.inflate(R.layout.view_bottom_sheet_budget, container, false);
     }
 
     @Override
@@ -106,6 +143,7 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
         tvPeriod = view.findViewById(R.id.tv_period);
         tvColor = view.findViewById(R.id.tv_color);
         tvCategories = view.findViewById(R.id.tv_categories);
+        tvTitle = view.findViewById(R.id.tv_title);
         cardPeriod = view.findViewById(R.id.card_period);
         cardColor = view.findViewById(R.id.card_color);
         cardCategories = view.findViewById(R.id.card_categories);
@@ -113,11 +151,21 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
         containerCategoryIcons = view.findViewById(R.id.container_category_icons);
         btnDone = view.findViewById(R.id.btn_done);
 
+        // Update title based on mode
+        if (tvTitle != null) {
+            tvTitle.setText(isEditMode ? getString(R.string.budget_edit_title) : getString(R.string.budget_create_title));
+        }
+
         // Setup amount formatter
         setupAmountFormatter();
         
         // Setup click listeners
         setupClickListeners();
+        
+        // Load budget data if in edit mode
+        if (isEditMode && budgetId > 0) {
+            loadBudgetData();
+        }
         
         // Update initial UI
         updatePeriodText();
@@ -475,6 +523,10 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
         }
 
         final Set<Long> pendingSelection = new HashSet<>(selectedCategoryIds);
+        
+        // Get categories that are already used in other budgets
+        // When editing, exclude the current budget so its categories can still be selected
+        Set<Long> usedCategoryIds = BudgetCategoryManager.getCategoriesUsedByOtherBudgets(requireContext(), budgetId);
 
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         View dialogView = inflater.inflate(R.layout.dialog_categories_selection, null, false);
@@ -496,22 +548,57 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
             ImageView iconCategory = categoryItemView.findViewById(R.id.icon_category);
             TextView tvCategoryName = categoryItemView.findViewById(R.id.tv_category_name);
 
+            // Check if this category is already used in another budget
+            boolean isUsedInOtherBudget = usedCategoryIds.contains(category.getId());
+            boolean isCurrentlySelected = pendingSelection.contains(category.getId());
+
             // Set category icon
             if (iconCategory != null) {
                 iconCategory.setImageResource(category.getIconResId());
+                // Grey out icon if used in other budget and not currently selected
+                if (isUsedInOtherBudget && !isCurrentlySelected) {
+                    iconCategory.setAlpha(0.4f);
+                } else {
+                    iconCategory.setAlpha(1.0f);
+                }
             }
 
             // Set category name
             if (tvCategoryName != null) {
                 tvCategoryName.setText(category.getName());
+                // Grey out text if used in other budget and not currently selected
+                if (isUsedInOtherBudget && !isCurrentlySelected) {
+                    tvCategoryName.setTextColor(ContextCompat.getColor(requireContext(), R.color.secondary_grey));
+                    tvCategoryName.setAlpha(0.6f);
+                } else {
+                    tvCategoryName.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
+                    tvCategoryName.setAlpha(1.0f);
+                }
             }
 
             // Set initial selection state
-            boolean isSelected = pendingSelection.contains(category.getId());
+            boolean isSelected = isCurrentlySelected;
             styleSelectionOption(card, iconCheck, isSelected);
 
-            // Set click listener
+            // Disable card if used in other budget and not currently selected
+            if (isUsedInOtherBudget && !isCurrentlySelected) {
+                card.setEnabled(false);
+                card.setAlpha(0.5f);
+            } else {
+                card.setEnabled(true);
+                card.setAlpha(1.0f);
+            }
+
+            // Set click listener - prevent selection if already used in other budget
             View.OnClickListener categoryClickListener = v -> {
+                if (isUsedInOtherBudget && !pendingSelection.contains(category.getId())) {
+                    // Category is already used in another budget, show message
+                    Toast.makeText(requireContext(), 
+                        getString(R.string.category_already_in_use, category.getName()), 
+                        Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
                 if (pendingSelection.contains(category.getId())) {
                     pendingSelection.remove(category.getId());
                 } else {
@@ -597,6 +684,53 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
         }
     }
 
+    /**
+     * Load budget data when in edit mode.
+     */
+    private void loadBudgetData() {
+        if (!isEditMode || budgetId <= 0) {
+            return;
+        }
+
+        Budget budget = BudgetManager.getBudgetById(requireContext(), budgetId);
+        if (budget == null) {
+            return;
+        }
+
+        // Populate name
+        if (editBudgetName != null) {
+            editBudgetName.setText(budget.getName());
+            editBudgetName.setSelection(budget.getName().length());
+        }
+
+        // Populate amount (use formatNumber to avoid "VND" suffix in input field)
+        if (editBudgetAmount != null) {
+            editBudgetAmount.setText(CurrencyUtils.formatNumber(budget.getBudgetAmount()));
+        }
+
+        // Populate period
+        selectedPeriod = budget.getPeriod() != null ? budget.getPeriod() : "monthly";
+        updatePeriodText();
+
+        // Populate color
+        if (budget.getCustomColor() != null) {
+            isCustomColor = true;
+            selectedCustomColor = budget.getCustomColor();
+            selectedColorResId = 0;
+        } else {
+            isCustomColor = false;
+            selectedColorResId = budget.getColorResId();
+            selectedCustomColor = null;
+        }
+        updateColorText();
+
+        // Populate categories
+        List<Long> categoryIds = BudgetCategoryManager.getCategoryIdsForBudget(requireContext(), budgetId);
+        selectedCategoryIds.clear();
+        selectedCategoryIds.addAll(categoryIds);
+        updateCategoriesText();
+    }
+
     private void updateCategoriesText() {
         if (tvCategories != null && containerCategoryIcons != null && availableCategories != null) {
             // Clear existing icons
@@ -678,18 +812,69 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
                 return;
             }
 
-            // Create and save budget
+            if (isEditMode && budgetId > 0) {
+                // Update existing budget
+                Budget existingBudget = BudgetManager.getBudgetById(requireContext(), budgetId);
+                if (existingBudget != null) {
+                    existingBudget.setName(budgetName);
+                    existingBudget.setBudgetAmount(budgetAmount);
+                    existingBudget.setColorResId(selectedColorResId);
+                    existingBudget.setPeriod(selectedPeriod);
+                    if (isCustomColor && selectedCustomColor != null) {
+                        existingBudget.setCustomColor(selectedCustomColor);
+                    } else {
+                        existingBudget.setCustomColor(null);
+                    }
+                    
+                    // Update budget using BudgetManager
+                    BudgetManager.updateBudget(requireContext(), existingBudget);
+                    
+                    // Update budget-category relationships
+                    List<Long> categoryIdList = new ArrayList<>(selectedCategoryIds);
+                    BudgetCategoryManager.setCategoriesForBudget(
+                        requireContext(), budgetId, categoryIdList);
+
+                    // Create result bundle
+                    Bundle result = new Bundle();
+                    result.putLong("budget_id", budgetId);
+                    result.putString(RESULT_BUDGET_NAME, budgetName);
+                    result.putLong(RESULT_BUDGET_AMOUNT, budgetAmount);
+                    result.putInt(RESULT_BUDGET_COLOR, selectedColorResId);
+                    result.putBoolean("is_custom_color", isCustomColor);
+                    if (isCustomColor && selectedCustomColor != null) {
+                        result.putInt("custom_color", selectedCustomColor);
+                    }
+                    result.putString(RESULT_BUDGET_PERIOD, selectedPeriod);
+                    
+                    // Convert category IDs to long array
+                    long[] categoryIds = new long[selectedCategoryIds.size()];
+                    int index = 0;
+                    for (Long categoryId : selectedCategoryIds) {
+                        categoryIds[index++] = categoryId;
+                    }
+                    result.putLongArray(RESULT_BUDGET_CATEGORIES, categoryIds);
+
+                    // Send result
+                    requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_UPDATED, result);
+
+                    Toast.makeText(requireContext(), getString(R.string.budget_updated), Toast.LENGTH_SHORT).show();
+                    dismiss();
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.budget_not_found), Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                // Create new budget
             Budget newBudget = new Budget(budgetName, budgetAmount, selectedColorResId, selectedPeriod);
             if (isCustomColor && selectedCustomColor != null) {
                 newBudget.setCustomColor(selectedCustomColor);
             }
             
             // Save budget using BudgetManager
-            vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager.addBudget(requireContext(), newBudget);
+                BudgetManager.addBudget(requireContext(), newBudget);
             
             // Save budget-category relationships
             List<Long> categoryIdList = new ArrayList<>(selectedCategoryIds);
-            vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCategoryManager.setCategoriesForBudget(
+                BudgetCategoryManager.setCategoriesForBudget(
                 requireContext(), newBudget.getId(), categoryIdList);
 
             // Create result bundle
@@ -716,6 +901,7 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
 
             Toast.makeText(requireContext(), getString(R.string.budget_created), Toast.LENGTH_SHORT).show();
             dismiss();
+            }
         } catch (NumberFormatException e) {
             Toast.makeText(requireContext(), getString(R.string.budget_amount_invalid), Toast.LENGTH_SHORT).show();
             if (editBudgetAmount != null) editBudgetAmount.requestFocus();

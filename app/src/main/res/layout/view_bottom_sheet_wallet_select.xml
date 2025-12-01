@@ -93,6 +93,22 @@
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
+        <!-- Create Wallet Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCreateWallet"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/wallet_add_wallet"
+            android:textColor="@color/primary_white"
+            android:backgroundTint="@color/primary_green"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="8dp"
+            android:textAllCaps="false"
+            app:elevation="0dp"
+            app:strokeWidth="0dp" />
+
     </LinearLayout>
 </FrameLayout>
 

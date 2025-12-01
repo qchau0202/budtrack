@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
@@ -30,6 +31,7 @@ public class WalletSelectBottomSheet extends BottomSheetDialogFragment {
     public interface OnWalletSelectedListener {
         void onWalletSelected(Wallet wallet);
         void onNoneSelected();
+        void onCreateWalletRequested();
     }
 
     private OnWalletSelectedListener listener;
@@ -38,6 +40,7 @@ public class WalletSelectBottomSheet extends BottomSheetDialogFragment {
     private LinearLayout containerWallets;
     private View cardWalletNone;
     private ImageView ivWalletNoneCheck;
+    private MaterialButton btnCreateWallet;
 
     public static WalletSelectBottomSheet newInstance() {
         return new WalletSelectBottomSheet();
@@ -91,6 +94,7 @@ public class WalletSelectBottomSheet extends BottomSheetDialogFragment {
         containerWallets = view.findViewById(R.id.containerWallets);
         cardWalletNone = view.findViewById(R.id.cardWalletNone);
         ivWalletNoneCheck = view.findViewById(R.id.ivWalletNoneCheck);
+        btnCreateWallet = view.findViewById(R.id.btnCreateWallet);
 
         btnBack.setOnClickListener(v -> dismiss());
 
@@ -103,16 +107,42 @@ public class WalletSelectBottomSheet extends BottomSheetDialogFragment {
             }
             dismiss();
         });
+
+        // Handle "Create Wallet" button
+        if (btnCreateWallet != null) {
+            btnCreateWallet.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onCreateWalletRequested();
+                }
+                dismiss();
+            });
+        }
     }
 
     private void setupWallets() {
         if (containerWallets == null) return;
 
-        // Add wallet items dynamically (exclude archived wallets)
+        // Filter out archived wallets
+        List<Wallet> activeWallets = new java.util.ArrayList<>();
         for (Wallet wallet : wallets) {
             if (!wallet.isArchived()) {
+                activeWallets.add(wallet);
+            }
+        }
+
+        // Add wallet items dynamically
+        for (Wallet wallet : activeWallets) {
             View walletView = createWalletItem(wallet);
             containerWallets.addView(walletView);
+        }
+
+        // Show "Create Wallet" button if no wallets exist
+        if (btnCreateWallet != null) {
+            if (activeWallets.isEmpty()) {
+                btnCreateWallet.setVisibility(View.VISIBLE);
+            } else {
+                // Still show the button for convenience
+                btnCreateWallet.setVisibility(View.VISIBLE);
             }
         }
 

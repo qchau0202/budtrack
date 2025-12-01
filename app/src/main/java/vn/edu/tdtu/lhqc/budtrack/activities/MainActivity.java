@@ -145,22 +145,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 	private void setNavSelected(int navId) {
-		// First, check if there's a fragment on top that's not one of our main fragments
-		// (like NotificationFragment, MapFragment, SearchFragment) and pop it if needed
 		FragmentManager fm = getSupportFragmentManager();
-		Fragment currentTopFragment = fm.findFragmentById(R.id.fragment_container);
-		
-		// If the current top fragment is not one of our main bottom nav fragments, pop back stack
-		if (currentTopFragment != null && 
-		    currentTopFragment != homeFragment && 
-		    currentTopFragment != budgetFragment && 
-		    currentTopFragment != dashboardFragment && 
-		    currentTopFragment != profileFragment) {
-			// Pop the back stack to remove overlay fragments like NotificationFragment/MapFragment/SearchFragment
-		if (fm.getBackStackEntryCount() > 0) {
-				fm.popBackStackImmediate();
-			}
-		}
 
 		// Determine target fragment
 		Fragment target = null;
@@ -200,8 +185,22 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		FragmentTransaction ft = fm.beginTransaction();
-			ft.setReorderingAllowed(true);
-		
+		ft.setReorderingAllowed(true);
+
+		// Remove any overlay fragments (Search, Notification, Map, etc.)
+		for (Fragment fragment : fm.getFragments()) {
+			if (fragment == null) continue;
+
+			boolean isMainFragment = fragment == homeFragment
+					|| fragment == budgetFragment
+					|| fragment == dashboardFragment
+					|| fragment == profileFragment;
+
+			if (!isMainFragment && fragment.isAdded()) {
+				ft.remove(fragment);
+			}
+		}
+
 		// Hide all main fragments except the target
 		if (homeFragment != null && homeFragment != target && !homeFragment.isHidden()) {
 			ft.hide(homeFragment);
@@ -211,18 +210,24 @@ public class MainActivity extends AppCompatActivity {
 		}
 		if (dashboardFragment != null && dashboardFragment != target && !dashboardFragment.isHidden()) {
 			ft.hide(dashboardFragment);
-			}
+		}
 		if (profileFragment != null && profileFragment != target && !profileFragment.isHidden()) {
 			ft.hide(profileFragment);
 		}
-		
+
 		// Show the target fragment if it's hidden
 		if (target.isHidden() || !target.isAdded()) {
 			ft.show(target);
 		}
-		
-			ft.commit();
-			activeFragment = target;
+
+		ft.commit();
+		activeFragment = target;
+
+		// Clear any back stack entries related to overlays to avoid them
+		// being resurrected when the user presses the system back button.
+		if (fm.getBackStackEntryCount() > 0) {
+			fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+		}
 	}
 
 
@@ -244,12 +249,13 @@ public class MainActivity extends AppCompatActivity {
 		View view = LayoutInflater.from(this).inflate(R.layout.view_bottom_sheet_input_method, null);
 		dialog.setContentView(view);
 
-		// Configure bottom sheet to expand fully
+		// Configure bottom sheet to expand fully and disable dragging to prevent accidental dismissal
 		View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
 		if (bottomSheet != null) {
 			BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
 			behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 			behavior.setSkipCollapsed(true);
+			behavior.setDraggable(false); // Disable dragging to prevent accidental dismissal
 		}
 
 		// Manual input button
@@ -272,12 +278,13 @@ public class MainActivity extends AppCompatActivity {
 		View view = LayoutInflater.from(this).inflate(R.layout.view_bottom_sheet_transaction_type, null);
 		dialog.setContentView(view);
 
-		// Configure bottom sheet to expand fully
+		// Configure bottom sheet to expand fully and disable dragging to prevent accidental dismissal
 		View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
 		if (bottomSheet != null) {
 			BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
 			behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 			behavior.setSkipCollapsed(true);
+			behavior.setDraggable(false); // Disable dragging to prevent accidental dismissal
 		}
 
 		// Add Income button

@@ -250,8 +250,6 @@ public class MapFragment extends Fragment {
                 return R.drawable.bg_category_tab_shopping; // Red background
             case "transport":
                 return R.drawable.bg_category_tab_transport; // Green background
-            case "home":
-                return R.drawable.bg_category_tab; // Default
             default:
                 return R.drawable.bg_category_chip;
         }

@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -116,6 +117,17 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
 
+        // Personal info values
+        TextView tvName = root.findViewById(R.id.tv_name_value);
+        TextView tvEmail = root.findViewById(R.id.tv_email_value);
+        TextView tvAddress = root.findViewById(R.id.tv_address_value);
+        updateProfileValues(tvName, tvEmail, tvAddress);
+
+        ImageButton btnEditPersonalInfo = root.findViewById(R.id.btn_edit_personal_info);
+        if (btnEditPersonalInfo != null) {
+            btnEditPersonalInfo.setOnClickListener(v -> showEditProfileDialog(tvName, tvEmail, tvAddress));
+        }
+
         // Dark mode switch wiring
         SwitchMaterial sw = root.findViewById(R.id.sw_dark_mode);
         if (sw != null && getContext() != null) {
@@ -162,6 +174,86 @@ public class ProfileFragment extends Fragment {
         }
 
         return root;
+    }
+
+    private void updateProfileValues(TextView tvName, TextView tvEmail, TextView tvAddress) {
+        if (getContext() == null) return;
+        String name = AuthController.getCurrentUserName(requireContext());
+        String email = AuthController.getCurrentUserEmail(requireContext());
+        String address = AuthController.getCurrentUserAddress(requireContext());
+
+        if (tvName != null) {
+            tvName.setText(name != null && !name.isEmpty()
+                    ? name
+                    : getString(R.string.none));
+        }
+        if (tvEmail != null) {
+            tvEmail.setText(email != null && !email.isEmpty()
+                    ? email
+                    : getString(R.string.none));
+        }
+        if (tvAddress != null) {
+            tvAddress.setText(address != null && !address.isEmpty()
+                    ? address
+                    : getString(R.string.none));
+        }
+    }
+
+    private void showEditProfileDialog(TextView tvName, TextView tvEmail, TextView tvAddress) {
+        if (getContext() == null) return;
+
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_edit_profile, null, false);
+
+        EditText editName = dialogView.findViewById(R.id.edit_name);
+        EditText editEmail = dialogView.findViewById(R.id.edit_email);
+        EditText editAddress = dialogView.findViewById(R.id.edit_address);
+        MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        MaterialButton btnSave = dialogView.findViewById(R.id.btn_save);
+
+        String currentName = AuthController.getCurrentUserName(requireContext());
+        String currentEmail = AuthController.getCurrentUserEmail(requireContext());
+        String currentAddress = AuthController.getCurrentUserAddress(requireContext());
+
+        if (editName != null && currentName != null) editName.setText(currentName);
+        if (editEmail != null && currentEmail != null) editEmail.setText(currentEmail);
+        if (editAddress != null && currentAddress != null) editAddress.setText(currentAddress);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnSave.setOnClickListener(v -> {
+            String newName = editName != null ? editName.getText().toString().trim() : "";
+            String newEmail = editEmail != null ? editEmail.getText().toString().trim() : "";
+            String newAddress = editAddress != null ? editAddress.getText().toString().trim() : "";
+
+            AuthController.RegistrationResult result =
+                    AuthController.updateProfile(requireContext(), newName, newEmail, newAddress);
+
+            if (!result.isSuccess()) {
+                String key = result.getErrorKey();
+                int msgRes = 0;
+                if ("full_name_required".equals(key)) msgRes = R.string.error_full_name_required;
+                else if ("full_name_min_length".equals(key)) msgRes = R.string.error_full_name_min_length;
+                else if ("email_required".equals(key)) msgRes = R.string.error_email_required;
+                else if ("email_invalid".equals(key)) msgRes = R.string.error_email_invalid;
+
+                if (msgRes != 0) {
+                    Toast.makeText(requireContext(), getString(msgRes), Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+
+            updateProfileValues(tvName, tvEmail, tvAddress);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
     }
 
     private void updateLanguageValue(TextView textView) {

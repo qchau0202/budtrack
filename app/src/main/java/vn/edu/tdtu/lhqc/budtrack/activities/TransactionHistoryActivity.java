@@ -184,9 +184,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             adapter.setOnTransactionClickListener(transaction -> {
                 if (transaction != null) {
                     TransactionDetailBottomSheet bottomSheet = TransactionDetailBottomSheet.newInstance(
-                            transaction.getMerchantName(),
-                            transaction.getTime(),
-                            transaction.getAmount()
+                            transaction.getTransactionId()
                     );
                     bottomSheet.show(getSupportFragmentManager(), TransactionDetailBottomSheet.TAG);
                 }

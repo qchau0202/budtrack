@@ -153,6 +153,28 @@ public final class BudgetCategoryManager {
     }
 
     /**
+     * Get category IDs that are already used in other budgets (excluding the specified budget).
+     * This is used to prevent selecting categories that are already assigned to other budgets.
+     * 
+     * @param context The context
+     * @param excludeBudgetId The budget ID to exclude from the check (e.g., current budget being edited)
+     * @return Set of category IDs that are already used in other budgets
+     */
+    public static Set<Long> getCategoriesUsedByOtherBudgets(Context context, long excludeBudgetId) {
+        List<BudgetCategory> relationships = getRelationships(context);
+        Set<Long> usedCategoryIds = new HashSet<>();
+        
+        for (BudgetCategory relationship : relationships) {
+            // Only include categories from other budgets (not the excluded one)
+            if (relationship.getBudgetId() != excludeBudgetId) {
+                usedCategoryIds.add(relationship.getCategoryId());
+            }
+        }
+        
+        return usedCategoryIds;
+    }
+
+    /**
      * Save relationships to SharedPreferences.
      */
     private static void saveRelationships(Context context, List<BudgetCategory> relationships) {
