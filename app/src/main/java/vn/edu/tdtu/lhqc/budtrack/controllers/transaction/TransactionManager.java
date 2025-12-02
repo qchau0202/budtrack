@@ -41,9 +41,7 @@ public final class TransactionManager {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 Transaction transaction = fromJson(jsonObject);
-                if (transaction != null) {
-                    transactions.add(transaction);
-                }
+                transactions.add(transaction);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -176,7 +174,7 @@ public final class TransactionManager {
         }
         
         // Use commit() to ensure data is saved synchronously before notifying other fragments
-        prefs.edit().putString(KEY_TRANSACTIONS, jsonArray.toString()).commit();
+        prefs.edit().putString(KEY_TRANSACTIONS, jsonArray.toString()).apply();
     }
 
     /**

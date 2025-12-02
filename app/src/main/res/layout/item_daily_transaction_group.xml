@@ -10,7 +10,7 @@
         android:id="@+id/tv_month"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="October 2025"
+        android:text="@string/date"
         android:textColor="@color/primary_grey"
         android:textStyle="bold"
         android:textSize="13sp"
@@ -37,7 +37,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="October 17, Thu"
+                android:text="@string/date"
                 android:textColor="@color/primary_black"
                 android:textStyle="bold"
                 android:textSize="16sp" />
@@ -46,7 +46,7 @@
                 android:id="@+id/tv_daily_total"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-$278.30"
+                android:text="@string/amount_hint"
                 android:textColor="@color/primary_black"
                 android:textStyle="bold"
                 android:textSize="16sp" />

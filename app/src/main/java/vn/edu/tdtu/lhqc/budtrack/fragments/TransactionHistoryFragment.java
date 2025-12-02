@@ -105,7 +105,7 @@ public class TransactionHistoryFragment extends Fragment {
                         selectedDate.setTimeInMillis(dateMillis);
                         // Ensure we're on the UI thread and view is ready
                         if (getView() != null) {
-                            getView().post(() -> refreshTransactions());
+                            getView().post(this::refreshTransactions);
                         } else {
                             // If view is not ready, refresh will happen in onResume
                         refreshTransactions();
@@ -123,7 +123,7 @@ public class TransactionHistoryFragment extends Fragment {
                 if ("currency_changed".equals(requestKey)) {
                     // Refresh transaction list when currency changes
                     if (getView() != null) {
-                        getView().post(() -> refreshTransactions());
+                        getView().post(this::refreshTransactions);
                     } else {
                         refreshTransactions();
                     }
@@ -360,10 +360,9 @@ public class TransactionHistoryFragment extends Fragment {
             }
             
             // Make row clickable
-            Transaction finalTransaction = transaction;
             rowView.setOnClickListener(v -> {
                 TransactionDetailBottomSheet bottomSheet = TransactionDetailBottomSheet.newInstance(
-                    finalTransaction.getId()
+                    transaction.getId()
                 );
                 bottomSheet.show(getParentFragmentManager(), TransactionDetailBottomSheet.TAG);
             });
