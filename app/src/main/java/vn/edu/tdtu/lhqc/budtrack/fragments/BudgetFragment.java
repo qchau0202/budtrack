@@ -28,6 +28,7 @@ import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCalculator;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCategoryManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager;
+import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.models.Budget;
 import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
@@ -74,7 +75,19 @@ public class BudgetFragment extends Fragment {
                 }
             }
         );
+        
+        // Set up SharedPreferences listener for currency changes (more reliable than FragmentResult)
+        currencyPreferenceListener = (sharedPrefs, key) -> {
+            if (SettingsHandler.KEY_CURRENCY.equals(key)) {
+                // Currency changed - refresh UI immediately
+                if (rootView != null && isAdded() && !isDetached()) {
+                    rootView.post(() -> setupBudgetData(rootView));
+                }
+            }
+        };
     }
+    
+    private android.content.SharedPreferences.OnSharedPreferenceChangeListener currencyPreferenceListener;
 
     private View rootView;
 
@@ -92,6 +105,10 @@ public class BudgetFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        // Register currency preference change listener
+        if (currencyPreferenceListener != null) {
+            SettingsHandler.getPrefs(requireContext()).registerOnSharedPreferenceChangeListener(currencyPreferenceListener);
+        }
         // Always refresh when fragment becomes visible
         if (rootView != null) {
             setupBudgetData(rootView);
@@ -99,8 +116,21 @@ public class BudgetFragment extends Fragment {
     }
     
     @Override
+    public void onPause() {
+        super.onPause();
+        // Unregister currency preference change listener
+        if (currencyPreferenceListener != null) {
+            SettingsHandler.getPrefs(requireContext()).unregisterOnSharedPreferenceChangeListener(currencyPreferenceListener);
+        }
+    }
+    
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
+        // Clean up Fragment Result listeners
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener(
+            TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED);
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
         // Clean up Fragment Result listener
         requireActivity().getSupportFragmentManager().clearFragmentResultListener(
             TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED);
@@ -208,7 +238,7 @@ public class BudgetFragment extends Fragment {
         TextView tvLeft = root.findViewById(R.id.tv_total_left);
 
         if (tvAmount != null) {
-            tvAmount.setText(CurrencyUtils.formatCurrency(totalBudget));
+            tvAmount.setText(CurrencyUtils.formatCurrency(requireContext(), totalBudget));
         }
 
         long remaining = totalBudget - totalSpent;
@@ -224,15 +254,15 @@ public class BudgetFragment extends Fragment {
         }
 
         if (tvSpent != null) {
-            tvSpent.setText(String.format("%s %s", CurrencyUtils.formatCurrency(totalSpent), getString(R.string.spent)));
+            tvSpent.setText(String.format("%s %s", CurrencyUtils.formatCurrency(requireContext(), totalSpent), getString(R.string.spent)));
         }
 
         if (tvLeft != null) {
             if (remaining >= 0) {
-                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(remaining), getString(R.string.left)));
+                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(requireContext(), remaining), getString(R.string.left)));
                 tvLeft.setTextColor(getResources().getColor(R.color.primary_black, null));
             } else {
-                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(Math.abs(remaining)), getString(R.string.overspending)));
+                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(requireContext(), Math.abs(remaining)), getString(R.string.overspending)));
                 tvLeft.setTextColor(getResources().getColor(R.color.primary_red, null));
             }
         }
@@ -272,7 +302,7 @@ public class BudgetFragment extends Fragment {
         }
 
         if (tvAmount != null) {
-            tvAmount.setText(CurrencyUtils.formatCurrency(budget.getBudgetAmount()));
+            tvAmount.setText(CurrencyUtils.formatCurrency(requireContext(), budget.getBudgetAmount()));
         }
 
         long remaining = budget.getBudgetAmount() - spentAmount;
@@ -315,15 +345,15 @@ public class BudgetFragment extends Fragment {
         }
 
         if (tvSpent != null) {
-            tvSpent.setText(String.format("%s %s", CurrencyUtils.formatCurrency(spentAmount), getString(R.string.spent)));
+            tvSpent.setText(String.format("%s %s", CurrencyUtils.formatCurrency(requireContext(), spentAmount), getString(R.string.spent)));
         }
 
         if (tvLeft != null) {
             if (remaining >= 0) {
-                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(remaining), getString(R.string.left)));
+                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(requireContext(), remaining), getString(R.string.left)));
                 tvLeft.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
             } else {
-                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(Math.abs(remaining)), getString(R.string.overspending)));
+                tvLeft.setText(String.format("%s %s", CurrencyUtils.formatCurrency(requireContext(), Math.abs(remaining)), getString(R.string.overspending)));
                 tvLeft.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_red));
             }
         }

@@ -1,5 +1,7 @@
 package vn.edu.tdtu.lhqc.budtrack.mockdata;
 
+import android.content.Context;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -23,11 +25,12 @@ public class TransactionAdapterHelper {
     /**
      * Converts a list of Transaction models to TransactionHistoryAdapter.Transaction format.
      * 
+     * @param context Application context for currency formatting
      * @param transactions List of Transaction models
      * @return List of TransactionHistoryAdapter.Transaction
      */
     public static List<TransactionHistoryAdapter.Transaction> convertToAdapterTransactions(
-            List<Transaction> transactions) {
+            Context context, List<Transaction> transactions) {
         List<TransactionHistoryAdapter.Transaction> adapterTransactions = new ArrayList<>();
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         
@@ -41,12 +44,18 @@ public class TransactionAdapterHelper {
                     : "Transaction";
             
             String amountText = transaction.getType() == TransactionType.INCOME
-                    ? "+" + CurrencyUtils.formatCurrency(transaction.getAmount())
-                    : "-" + CurrencyUtils.formatCurrency(transaction.getAmount());
+                    ? "+" + CurrencyUtils.formatCurrency(context, transaction.getAmount())
+                    : "-" + CurrencyUtils.formatCurrency(context, transaction.getAmount());
             
             // Look up category icon or use default wallet icon
+            // Use categoryIconResId from transaction (user-defined categories), fallback to categoryId for legacy
             int iconResId = vn.edu.tdtu.lhqc.budtrack.R.drawable.ic_wallet_24dp; // Default
-            if (transaction.getCategoryId() != null) {
+            Integer categoryIconResId = transaction.getCategoryIconResId();
+            if (categoryIconResId != null) {
+                // Use user-defined category icon
+                iconResId = categoryIconResId;
+            } else if (transaction.getCategoryId() != null) {
+                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
                 Category category = findCategoryById(transaction.getCategoryId());
                 if (category != null) {
                     iconResId = category.getIconResId();
@@ -70,12 +79,13 @@ public class TransactionAdapterHelper {
     /**
      * Groups transactions by date and converts to DailyTransactionGroup format.
      * 
+     * @param context Application context for currency formatting
      * @param transactions List of Transaction models
      * @param isIncome Whether these are income transactions (for formatting)
      * @return List of DailyTransactionGroup
      */
     public static List<TransactionHistoryAdapter.DailyTransactionGroup> convertToDailyGroups(
-            List<Transaction> transactions, boolean isIncome) {
+            Context context, List<Transaction> transactions, boolean isIncome) {
         // Group transactions by date
         Map<String, List<TransactionHistoryAdapter.Transaction>> groupedByDate = new HashMap<>();
         Map<String, Long> dailyTotals = new HashMap<>(); // Store daily totals
@@ -111,11 +121,17 @@ public class TransactionAdapterHelper {
                     : "Transaction";
             
             String amountText = isIncome
-                    ? "+" + CurrencyUtils.formatCurrency(transaction.getAmount())
-                    : "-" + CurrencyUtils.formatCurrency(transaction.getAmount());
+                    ? "+" + CurrencyUtils.formatCurrency(context, transaction.getAmount())
+                    : "-" + CurrencyUtils.formatCurrency(context, transaction.getAmount());
             
+            // Use categoryIconResId from transaction (user-defined categories), fallback to categoryId for legacy
             int iconResId = vn.edu.tdtu.lhqc.budtrack.R.drawable.ic_wallet_24dp; // Default
-            if (transaction.getCategoryId() != null) {
+            Integer categoryIconResId = transaction.getCategoryIconResId();
+            if (categoryIconResId != null) {
+                // Use user-defined category icon
+                iconResId = categoryIconResId;
+            } else if (transaction.getCategoryId() != null) {
+                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
                 Category category = findCategoryById(transaction.getCategoryId());
                 if (category != null) {
                     iconResId = category.getIconResId();
@@ -144,8 +160,8 @@ public class TransactionAdapterHelper {
             long dailyTotal = dailyTotals.getOrDefault(dayKey, 0L);
             
             String totalText = dailyTotal >= 0
-                    ? "+" + CurrencyUtils.formatCurrency(dailyTotal)
-                    : "-" + CurrencyUtils.formatCurrency(Math.abs(dailyTotal));
+                    ? "+" + CurrencyUtils.formatCurrency(context, dailyTotal)
+                    : "-" + CurrencyUtils.formatCurrency(context, Math.abs(dailyTotal));
             
             // Extract month and year from first transaction of the day
             String monthLabel = "";

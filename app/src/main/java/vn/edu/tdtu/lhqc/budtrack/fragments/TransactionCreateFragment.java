@@ -33,6 +33,8 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.category.CategoryManager;
+import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
@@ -52,7 +54,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
     private static final String TYPE_OTHERS = "others";
     
     private MaterialButton tabExpense, tabIncome, tabOthers, btnSave;
-    private TextView tvDate, tvCategory, tvCancel, tvTitle, tvWallet, tvTime, tvLocation;
+    private TextView tvDate, tvCategory, tvCancel, tvTitle, tvWallet, tvTime, tvLocation, tvCurrency;
     private EditText editAmount, editNote, editTitle;
     private View cardDate, cardCategory, cardWallet, cardTime, cardLocation;
     private ImageView ivCategoryIcon;
@@ -103,6 +105,18 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 }
             }
         );
+        
+        // Listen for currency changes to refresh UI immediately
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            "currency_changed",
+            this,
+            (requestKey, result) -> {
+                if ("currency_changed".equals(requestKey)) {
+                    // Update currency text when currency changes
+                    updateCurrencyText();
+                }
+            }
+        );
     }
     
     @Override
@@ -121,6 +135,8 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         restoreTransactionState();
         // Also check in onResume in case view was already created
         checkForStoredLocation();
+        // Update currency text in case it changed
+        updateCurrencyText();
     }
     
     private void checkForStoredLocation() {
@@ -192,6 +208,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         tvWallet = view.findViewById(R.id.tvWallet);
         tvTime = view.findViewById(R.id.tvTime);
         tvLocation = view.findViewById(R.id.tvLocation);
+        tvCurrency = view.findViewById(R.id.tv_currency);
 
         // Cards
         cardDate = view.findViewById(R.id.cardDate);
@@ -212,6 +229,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         updateWalletText(); // Initialize wallet text to "None"
         updateCategoryText(); // Initialize category text to "None"
         updateLocationText(); // Initialize location text to "None"
+        updateCurrencyText(); // Initialize currency text dynamically
         
         // Setup IME action handlers for Enter key navigation
         setupImeActions();
@@ -915,6 +933,13 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             tvLocation.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_grey));
         }
     }
+
+    private void updateCurrencyText() {
+        if (tvCurrency != null && getContext() != null) {
+            String currency = SettingsHandler.getCurrency(requireContext());
+            tvCurrency.setText(currency);
+        }
+    }
     
     private void saveTransaction() {
         String amountText = editAmount.getText().toString().trim();
@@ -935,6 +960,17 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 editAmount.requestFocus();
                 return;
             }
+
+            // Convert amount to VND if currency is USD (amounts are always stored in VND)
+            String currentCurrency = SettingsHandler.getCurrency(requireContext());
+            if ("USD".equals(currentCurrency)) {
+                // User entered amount in USD, convert to VND for storage
+                float exchangeRate = SettingsHandler.getExchangeRate(requireContext());
+                if (exchangeRate > 0) {
+                    amount = amount * exchangeRate; // Convert USD to VND
+                }
+            }
+            // If currency is VND, amount is already in VND, no conversion needed
 
             // Save transaction to database
             saveTransactionToDatabase(amount, title, note, location);
@@ -990,20 +1026,14 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         }
 
         // Set category if selected (only for expenses)
-        // Try to find category ID from name using MockCategoryData
-        if (selectedCategory != null && transactionType == TransactionType.EXPENSE) {
-            try {
-                vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData categoryData = new vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData();
-                java.util.List<vn.edu.tdtu.lhqc.budtrack.models.Category> categories = vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData.getSampleCategories();
-                for (vn.edu.tdtu.lhqc.budtrack.models.Category category : categories) {
-                    if (category.getName().equals(selectedCategory)) {
-                        transaction.setCategoryId(category.getId());
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                // Category ID not found, skip
-            }
+        // Store category name and icon directly (user-defined categories from CategoryManager)
+        // Also set categoryId for compatibility with budget system (generated from name+icon hash)
+        if (selectedCategory != null && selectedCategoryIconResId != 0 && transactionType == TransactionType.EXPENSE) {
+            transaction.setCategoryName(selectedCategory);
+            transaction.setCategoryIconResId(selectedCategoryIconResId);
+            // Generate categoryId using same formula as BudgetCreateFragment for budget matching
+            long categoryId = (long) (selectedCategory.hashCode() * 31 + selectedCategoryIconResId);
+            transaction.setCategoryId(categoryId);
         }
 
         // Set note
@@ -1080,4 +1110,12 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Clean up Fragment Result listeners
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener(
+            MapFragment.RESULT_KEY_LOCATION);
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
+    }
 }

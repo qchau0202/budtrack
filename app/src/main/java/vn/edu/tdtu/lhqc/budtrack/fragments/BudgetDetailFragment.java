@@ -21,17 +21,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.adapters.TransactionHistoryAdapter;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCalculator;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCategoryManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager;
+import vn.edu.tdtu.lhqc.budtrack.controllers.category.CategoryManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.models.Budget;
 import vn.edu.tdtu.lhqc.budtrack.mockdata.TransactionAdapterHelper;
@@ -158,6 +161,24 @@ public class BudgetDetailFragment extends Fragment {
             }
         );
         
+        // Listen for currency changes to refresh UI immediately
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            "currency_changed",
+            this,
+            (requestKey, result) -> {
+                if ("currency_changed".equals(requestKey)) {
+                    // Refresh budget detail UI when currency changes
+                    if (root != null) {
+                        Budget budget = BudgetManager.getBudgetById(requireContext(), budgetId);
+                        if (budget != null) {
+                            setupBalanceSection(root, budget.getBudgetAmount(), spentAmount, colorResId, customColor);
+                            loadAndDisplayTransactions(root);
+                        }
+                    }
+                }
+            }
+        );
+        
         // Listen for transaction creation/updates to refresh the list
         requireActivity().getSupportFragmentManager().setFragmentResultListener(
             TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED,
@@ -180,7 +201,7 @@ public class BudgetDetailFragment extends Fragment {
         TextView tvSpentInfo = root.findViewById(R.id.tv_spent_info);
 
         if (tvBalanceAmount != null) {
-            tvBalanceAmount.setText(CurrencyUtils.formatCurrency(budgetAmount));
+            tvBalanceAmount.setText(CurrencyUtils.formatCurrency(requireContext(), budgetAmount));
         }
 
         if (progressBalance != null) {
@@ -209,7 +230,7 @@ public class BudgetDetailFragment extends Fragment {
         }
 
         if (tvSpentInfo != null) {
-            tvSpentInfo.setText(CurrencyUtils.formatCurrency(spentAmount) + " of " + CurrencyUtils.formatCurrency(budgetAmount) + " spent");
+            tvSpentInfo.setText(CurrencyUtils.formatCurrency(requireContext(), spentAmount) + " of " + CurrencyUtils.formatCurrency(requireContext(), budgetAmount) + " spent");
         }
     }
 
@@ -248,10 +269,50 @@ public class BudgetDetailFragment extends Fragment {
         List<Transaction> transactionsInRange = TransactionManager.getTransactionsInRange(
             requireContext(), startDate, endDate);
 
-        // Filter transactions by category IDs
+        // Filter transactions by category IDs (match by categoryId for legacy, or by name+icon for new transactions)
         List<Transaction> filteredTransactions = new ArrayList<>();
+        
+        // Build a map of categoryId -> (name, iconResId) for matching
+        Map<Long, String> categoryIdToName = new HashMap<>();
+        Map<Long, Integer> categoryIdToIcon = new HashMap<>();
+        List<CategoryManager.CategoryItem> allUserCategories = CategoryManager.getCategories(requireContext());
+        for (CategoryManager.CategoryItem item : allUserCategories) {
+            // Generate same ID as BudgetCreateFragment uses
+            long categoryId = (long) (item.name.hashCode() * 31 + item.iconResId);
+            categoryIdToName.put(categoryId, item.name);
+            categoryIdToIcon.put(categoryId, item.iconResId);
+        }
+        
         for (Transaction transaction : transactionsInRange) {
+            boolean matches = false;
+            
+            // Check if transaction matches by categoryId (legacy or new)
             if (transaction.getCategoryId() != null && categoryIds.contains(transaction.getCategoryId())) {
+                matches = true;
+            } else {
+                // Check if transaction matches by name+icon (for user-defined categories)
+                String transactionCategoryName = transaction.getCategoryName();
+                Integer transactionCategoryIconResId = transaction.getCategoryIconResId();
+                
+                if (transactionCategoryName != null && transactionCategoryIconResId != null) {
+                    // Check if this transaction's category matches any of the budget's categories
+                    for (Long budgetCategoryId : categoryIds) {
+                        String budgetCategoryName = categoryIdToName.get(budgetCategoryId);
+                        Integer budgetCategoryIconResId = categoryIdToIcon.get(budgetCategoryId);
+                        
+                        if (budgetCategoryName != null && budgetCategoryIconResId != null) {
+                            // Match by BOTH name AND icon
+                            if (budgetCategoryName.equals(transactionCategoryName) && 
+                                budgetCategoryIconResId.equals(transactionCategoryIconResId)) {
+                                matches = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (matches) {
                 filteredTransactions.add(transaction);
             }
         }
@@ -339,9 +400,9 @@ public class BudgetDetailFragment extends Fragment {
 
         // Convert transactions to adapter format using helper
         List<TransactionHistoryAdapter.DailyTransactionGroup> incomeGroups = 
-            TransactionAdapterHelper.convertToDailyGroups(incomeTransactions, true);
+            TransactionAdapterHelper.convertToDailyGroups(requireContext(), incomeTransactions, true);
         List<TransactionHistoryAdapter.DailyTransactionGroup> expenseGroups = 
-            TransactionAdapterHelper.convertToDailyGroups(expenseTransactions, false);
+            TransactionAdapterHelper.convertToDailyGroups(requireContext(), expenseTransactions, false);
 
         // Create adapters
         TransactionHistoryAdapter incomeAdapter = new TransactionHistoryAdapter(incomeGroups);
@@ -413,6 +474,17 @@ public class BudgetDetailFragment extends Fragment {
         layerDrawable.setId(1, android.R.id.progress);
 
         progressBar.setProgressDrawable(layerDrawable);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Clean up Fragment Result listeners
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener(
+            BudgetCreateFragment.RESULT_KEY_UPDATED);
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener(
+            TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED);
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
     }
 
 }

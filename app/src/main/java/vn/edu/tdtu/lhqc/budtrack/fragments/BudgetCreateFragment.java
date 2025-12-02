@@ -33,9 +33,10 @@ import java.util.Set;
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCategoryManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager;
+import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.models.Budget;
 import vn.edu.tdtu.lhqc.budtrack.models.Category;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
+import vn.edu.tdtu.lhqc.budtrack.controllers.category.CategoryManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.NumberInputFormatter;
 
@@ -62,6 +63,7 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
     private TextView tvColor;
     private TextView tvCategories;
     private TextView tvTitle;
+    private TextView tvCurrency;
     private View cardPeriod;
     private View cardColor;
     private View cardCategories;
@@ -101,7 +103,7 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(BottomSheetDialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogTheme);
-        availableCategories = MockCategoryData.getSampleCategories();
+        availableCategories = new ArrayList<>(); // Will be loaded in onViewCreated when context is available
         
         // Check if we're in edit mode
         Bundle args = getArguments();
@@ -109,6 +111,18 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
             isEditMode = args.getBoolean(ARG_IS_EDIT_MODE, false);
             budgetId = args.getLong(ARG_BUDGET_ID, 0);
         }
+        
+        // Listen for currency changes to refresh UI immediately
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            "currency_changed",
+            this,
+            (requestKey, result) -> {
+                if ("currency_changed".equals(requestKey)) {
+                    // Update currency text when currency changes
+                    updateCurrencyText();
+                }
+            }
+        );
     }
 
     @Override
@@ -144,12 +158,16 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
         tvColor = view.findViewById(R.id.tv_color);
         tvCategories = view.findViewById(R.id.tv_categories);
         tvTitle = view.findViewById(R.id.tv_title);
+        tvCurrency = view.findViewById(R.id.tv_currency);
         cardPeriod = view.findViewById(R.id.card_period);
         cardColor = view.findViewById(R.id.card_color);
         cardCategories = view.findViewById(R.id.card_categories);
         viewColorIndicator = view.findViewById(R.id.view_color_indicator);
         containerCategoryIcons = view.findViewById(R.id.container_category_icons);
         btnDone = view.findViewById(R.id.btn_done);
+
+        // Load user-defined categories from CategoryManager (instead of MockCategoryData)
+        loadAvailableCategories();
 
         // Update title based on mode
         if (tvTitle != null) {
@@ -171,6 +189,30 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
         updatePeriodText();
         updateColorText();
         updateCategoriesText();
+        updateCurrencyText();
+    }
+    
+    /**
+     * Load available categories from CategoryManager and convert to Category objects.
+     * Generates consistent IDs based on name+icon hash for compatibility with budget system.
+     */
+    private void loadAvailableCategories() {
+        availableCategories = new ArrayList<>();
+        List<CategoryManager.CategoryItem> userCategories = CategoryManager.getCategories(requireContext());
+        for (CategoryManager.CategoryItem item : userCategories) {
+            Category category = new Category(item.name, item.iconResId);
+            // Generate a unique ID based on name+icon hash (for compatibility with existing budget system)
+            // This same formula must be used when matching transactions to budgets
+            category.setId((long) (item.name.hashCode() * 31 + item.iconResId));
+            availableCategories.add(category);
+        }
+    }
+    
+    private void updateCurrencyText() {
+        if (tvCurrency != null && getContext() != null) {
+            String currency = SettingsHandler.getCurrency(requireContext());
+            tvCurrency.setText(currency);
+        }
     }
 
     private void setupAmountFormatter() {
@@ -517,6 +559,9 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
     }
 
     private void showCategorySelectionDialog() {
+        // Reload categories in case new ones were added
+        loadAvailableCategories();
+        
         if (availableCategories == null || availableCategories.isEmpty()) {
             Toast.makeText(requireContext(), getString(R.string.no_categories_available), Toast.LENGTH_SHORT).show();
             return;
@@ -906,6 +951,13 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
             Toast.makeText(requireContext(), getString(R.string.budget_amount_invalid), Toast.LENGTH_SHORT).show();
             if (editBudgetAmount != null) editBudgetAmount.requestFocus();
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Clean up Fragment Result listener
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
     }
 }
 

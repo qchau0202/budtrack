@@ -191,6 +191,12 @@ public final class TransactionManager {
         if (transaction.getCategoryId() != null) {
             json.put("categoryId", transaction.getCategoryId());
         }
+        if (transaction.getCategoryName() != null) {
+            json.put("categoryName", transaction.getCategoryName());
+        }
+        if (transaction.getCategoryIconResId() != null) {
+            json.put("categoryIconResId", transaction.getCategoryIconResId());
+        }
         if (transaction.getMerchantName() != null) {
             json.put("merchantName", transaction.getMerchantName());
         }
@@ -231,6 +237,12 @@ public final class TransactionManager {
         
         if (json.has("categoryId") && !json.isNull("categoryId")) {
             transaction.setCategoryId(json.getLong("categoryId"));
+        }
+        if (json.has("categoryName")) {
+            transaction.setCategoryName(json.getString("categoryName"));
+        }
+        if (json.has("categoryIconResId") && !json.isNull("categoryIconResId")) {
+            transaction.setCategoryIconResId(json.getInt("categoryIconResId"));
         }
         if (json.has("merchantName")) {
             transaction.setMerchantName(json.getString("merchantName"));

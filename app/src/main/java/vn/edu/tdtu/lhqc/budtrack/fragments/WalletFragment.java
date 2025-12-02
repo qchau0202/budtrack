@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager;
 import vn.edu.tdtu.lhqc.budtrack.models.Wallet;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
@@ -92,6 +93,18 @@ public class WalletFragment extends Fragment {
                 }
             }
         );
+        
+        // Listen for currency changes to refresh UI immediately
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            "currency_changed",
+            this,
+            (requestKey, result) -> {
+                if ("currency_changed".equals(requestKey)) {
+                    // Refresh wallet list when currency changes
+                    refreshWalletList();
+                }
+            }
+        );
     }
 
     @Override
@@ -106,7 +119,8 @@ public class WalletFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Clean up Fragment Result listener
+        // Clean up Fragment Result listeners
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
         requireActivity().getSupportFragmentManager().clearFragmentResultListener(WalletCreateFragment.RESULT_KEY);
     }
 
@@ -252,7 +266,7 @@ public class WalletFragment extends Fragment {
             // Update wallet balance display
             TextView balanceView = walletView.findViewById(R.id.tv_wallet_balance);
             if (balanceView != null) {
-                balanceView.setText(CurrencyUtils.formatCurrency(newBalance));
+                balanceView.setText(CurrencyUtils.formatCurrency(requireContext(), newBalance));
                 // Update color based on balance and archived state
                 int colorRes;
                 if (isArchived) {
@@ -315,7 +329,7 @@ public class WalletFragment extends Fragment {
         }
 
         if (tvTotalBalance != null) {
-            tvTotalBalance.setText(CurrencyUtils.formatCurrency(totalBalance));
+            tvTotalBalance.setText(CurrencyUtils.formatCurrency(requireContext(), totalBalance));
         }
     }
 
@@ -364,7 +378,7 @@ public class WalletFragment extends Fragment {
         }
 
         if (balanceView != null) {
-            balanceView.setText(CurrencyUtils.formatCurrency(wallet.getBalance()));
+            balanceView.setText(CurrencyUtils.formatCurrency(requireContext(), wallet.getBalance()));
             // Color based on balance and archived state
             int colorRes;
             if (wallet.isArchived()) {
@@ -448,6 +462,7 @@ public class WalletFragment extends Fragment {
         ImageView ivWalletIcon = view.findViewById(R.id.iv_wallet_icon);
         SwitchMaterial switchExcludeTotal = view.findViewById(R.id.switch_exclude_total);
         SwitchMaterial switchArchive = view.findViewById(R.id.switch_archive);
+        TextView tvCurrency = view.findViewById(R.id.tv_currency);
 
         // Set wallet type
         if (tvWalletType != null) {
@@ -476,6 +491,12 @@ public class WalletFragment extends Fragment {
             editBalance.setText(formattedBalance);
             // Move cursor to end so user can edit
             editBalance.setSelection(formattedBalance.length());
+        }
+
+        // Update currency text dynamically
+        if (tvCurrency != null) {
+            String currency = SettingsHandler.getCurrency(requireContext());
+            tvCurrency.setText(currency);
         }
 
         // Set switch states

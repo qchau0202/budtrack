@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.BalanceController;
 import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
@@ -110,7 +111,21 @@ public class HomeFragment extends Fragment {
                 }
             }
         );
+        
+        // Set up SharedPreferences listener for currency changes (more reliable than FragmentResult)
+        currencyPreferenceListener = (sharedPrefs, key) -> {
+            if (SettingsHandler.KEY_CURRENCY.equals(key)) {
+                // Currency changed - refresh UI immediately
+                if (getView() != null && isAdded() && !isDetached()) {
+                    getView().post(() -> refreshData());
+                } else {
+                    needsRefresh = true;
+                }
+            }
+        };
     }
+    
+    private android.content.SharedPreferences.OnSharedPreferenceChangeListener currencyPreferenceListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -143,10 +158,23 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        // Register currency preference change listener
+        if (currencyPreferenceListener != null) {
+            SettingsHandler.getPrefs(requireContext()).registerOnSharedPreferenceChangeListener(currencyPreferenceListener);
+        }
         // Always refresh when fragment becomes visible
         // This ensures data is up-to-date, especially if we missed an update while fragment was hidden
         refreshData();
         needsRefresh = false; // Clear the flag after refresh
+    }
+    
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Unregister currency preference change listener
+        if (currencyPreferenceListener != null) {
+            SettingsHandler.getPrefs(requireContext()).unregisterOnSharedPreferenceChangeListener(currencyPreferenceListener);
+        }
     }
     
     /**
@@ -174,6 +202,10 @@ public class HomeFragment extends Fragment {
         // Clean up Fragment Result listener
         requireActivity().getSupportFragmentManager().clearFragmentResultListener(
             TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED);
+        // Unregister currency preference change listener (safety check)
+        if (currencyPreferenceListener != null && getContext() != null) {
+            SettingsHandler.getPrefs(getContext()).unregisterOnSharedPreferenceChangeListener(currencyPreferenceListener);
+        }
         // Dismiss tooltip if showing
         if (tooltipPopup != null && tooltipPopup.isShowing()) {
             tooltipPopup.dismiss();
@@ -199,7 +231,7 @@ public class HomeFragment extends Fragment {
         if (tvBalance != null && btnVisibility != null) {
             // Calculate total balance from actual wallet data
             long totalBalance = BalanceController.calculateTotalBalance(requireContext());
-            final String originalBalanceText = CurrencyUtils.formatCurrency(totalBalance);
+            final String originalBalanceText = CurrencyUtils.formatCurrency(requireContext(), totalBalance);
             
             boolean hidden = BalanceController.isHidden(requireContext());
             tvBalance.setText(BalanceController.formatDisplay(originalBalanceText, hidden));
@@ -228,48 +260,67 @@ public class HomeFragment extends Fragment {
             }
         }
 
-        // Aggregate spent amount by category
-        Map<Long, Long> categorySums = new LinkedHashMap<>();
+        // Aggregate spent amount by category (using name + icon as unique key)
+        // Use a composite key: "name|iconResId" to uniquely identify categories
+        Map<String, Long> categorySums = new LinkedHashMap<>();
+        Map<String, Integer> categoryIcons = new LinkedHashMap<>(); // Store icon for each category key
         long totalSpent = 0;
         
         for (Transaction transaction : expenseTransactions) {
             long amount = transaction.getAmount();
             totalSpent += amount;
 
-            // All expense transactions are expected to have a category
-            Long categoryId = transaction.getCategoryId();
-            if (categoryId == null) {
-                // Skip if no category set (should not happen, but avoid crashing)
+            // Get category from transaction (prefer name+icon, fallback to categoryId for legacy data)
+            String categoryKey = null;
+            int iconResId = 0;
+            
+            if (transaction.getCategoryName() != null && transaction.getCategoryIconResId() != null) {
+                // Use user-defined category (name + icon)
+                categoryKey = transaction.getCategoryName() + "|" + transaction.getCategoryIconResId();
+                iconResId = transaction.getCategoryIconResId();
+            } else if (transaction.getCategoryId() != null) {
+                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
+                // But this should not be used for new transactions
+                for (Category category : MockCategoryData.getSampleCategories()) {
+                    if (category.getId() == transaction.getCategoryId()) {
+                        categoryKey = category.getName() + "|" + category.getIconResId();
+                        iconResId = category.getIconResId();
+                        break;
+                    }
+                }
+            }
+            
+            if (categoryKey == null) {
+                // Skip if no category set
                 continue;
             }
 
-            Long current = categorySums.get(categoryId);
-            if (current == null) current = 0L;
-            categorySums.put(categoryId, current + amount);
+            Long current = categorySums.get(categoryKey);
+            if (current == null) {
+                current = 0L;
+                categoryIcons.put(categoryKey, iconResId);
+            }
+            categorySums.put(categoryKey, current + amount);
         }
 
         // Build category summaries with icon + title
         List<CategorySummary> summaries = new ArrayList<>();
-        List<Category> allCategories = MockCategoryData.getSampleCategories();
 
-        for (Map.Entry<Long, Long> entry : categorySums.entrySet()) {
-            Long categoryId = entry.getKey();
+        for (Map.Entry<String, Long> entry : categorySums.entrySet()) {
+            String categoryKey = entry.getKey();
             long amount = entry.getValue();
-
-            Category matched = null;
-            for (Category category : allCategories) {
-                if (category.getId() == categoryId) {
-                    matched = category;
-                    break;
-                }
-            }
-
-            if (matched != null) {
+            
+            // Parse category key: "name|iconResId"
+            String[] parts = categoryKey.split("\\|");
+            if (parts.length == 2) {
+                String categoryName = parts[0];
+                int categoryIconResId = Integer.parseInt(parts[1]);
+                
                 summaries.add(new CategorySummary(
-                        matched.getName(),
-                        matched.getIconResId(),
+                        categoryName,
+                        categoryIconResId,
                         amount,
-                        matched.getColor()
+                        null // No color for user-defined categories
                 ));
             }
         }
@@ -317,7 +368,7 @@ public class HomeFragment extends Fragment {
             float density = getResources().getDisplayMetrics().density;
             pieChart.setRingThicknessPx(12f * density);
             pieChart.setSegmentGapDegrees(14f);
-            pieChart.setCenterTexts(getString(R.string.expense), CurrencyUtils.formatCurrency(totalSpent));
+            pieChart.setCenterTexts(getString(R.string.expense), CurrencyUtils.formatCurrency(requireContext(), totalSpent));
             } else {
                 // No categories or no transactions: clear chart and show simple text
                 pieChart.setData(new LinkedHashMap<String, Float>(), new ArrayList<Integer>());
@@ -426,7 +477,7 @@ public class HomeFragment extends Fragment {
         
         // Update total amount
         if (tvWeeklyAmount != null) {
-            tvWeeklyAmount.setText(CurrencyUtils.formatCurrency(totalAmount));
+            tvWeeklyAmount.setText(CurrencyUtils.formatCurrency(requireContext(), totalAmount));
         }
         
         // Find max amount for scaling
@@ -550,7 +601,7 @@ public class HomeFragment extends Fragment {
         
         // Format amount
         if (tvAmount != null) {
-            String amountText = CurrencyUtils.formatCurrency(amount);
+            String amountText = CurrencyUtils.formatCurrency(requireContext(), amount);
             if (amount > 0) {
                 amountText = (isIncome ? "+" : "-") + amountText;
             }
@@ -629,7 +680,7 @@ public class HomeFragment extends Fragment {
                 tvName.setText(summary.name);
             }
             if (tvAmount != null) {
-                tvAmount.setText(CurrencyUtils.formatCurrency(summary.amount));
+                tvAmount.setText(CurrencyUtils.formatCurrency(requireContext(), summary.amount));
             }
             if (tvPercent != null) {
                 float percentage = (float) ((summary.amount / (double) totalSpent) * 100f);

@@ -159,7 +159,7 @@ public class WalletSelectBottomSheet extends BottomSheetDialogFragment {
 
         // Display wallet name with balance
         String walletName = wallet.getName();
-        String balance = CurrencyUtils.formatCurrency(wallet.getBalance());
+        String balance = CurrencyUtils.formatCurrency(requireContext(), wallet.getBalance());
         tvWalletName.setText(walletName + " - " + balance);
 
         // Set click listener

@@ -35,6 +35,7 @@ import android.content.Intent;
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.activities.LoginActivity;
 import vn.edu.tdtu.lhqc.budtrack.controllers.auth.AuthController;
+import vn.edu.tdtu.lhqc.budtrack.controllers.exchangerate.ExchangeRateService;
 import vn.edu.tdtu.lhqc.budtrack.controllers.notifications.ReminderNotificationController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
@@ -165,6 +166,13 @@ public class ProfileFragment extends Fragment {
                     showReminderDialog(tvReminderValue);
                 }
             });
+        }
+
+        TextView tvCurrencyValue = root.findViewById(R.id.tv_currency_value);
+        View currencyRow = root.findViewById(R.id.row_currency);
+        if (currencyRow != null && tvCurrencyValue != null) {
+            updateCurrencyValue(tvCurrencyValue);
+            currencyRow.setOnClickListener(v -> showCurrencyDialog(tvCurrencyValue));
         }
 
         // Set up sign out button
@@ -335,6 +343,131 @@ public class ProfileFragment extends Fragment {
         cardView.setStrokeColor(strokeColor);
         checkIcon.setVisibility(selected ? View.VISIBLE : View.GONE);
     }
+
+    private void updateCurrencyValue(TextView textView) {
+        if (getContext() == null) return;
+        String currency = SettingsHandler.getCurrency(requireContext());
+        textView.setText(currency);
+    }
+
+    private void showCurrencyDialog(TextView tvCurrencyValue) {
+        if (getContext() == null) return;
+
+        final String current = SettingsHandler.getCurrency(requireContext());
+        final String[] pendingSelection = {current};
+
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_currency, null, false);
+
+        MaterialCardView cardVnd = dialogView.findViewById(R.id.card_currency_vnd);
+        MaterialCardView cardUsd = dialogView.findViewById(R.id.card_currency_usd);
+        View containerVnd = dialogView.findViewById(R.id.container_currency_vnd);
+        View containerUsd = dialogView.findViewById(R.id.container_currency_usd);
+        ImageView iconVnd = dialogView.findViewById(R.id.icon_check_vnd);
+        ImageView iconUsd = dialogView.findViewById(R.id.icon_check_usd);
+        MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        MaterialButton btnConfirm = dialogView.findViewById(R.id.btn_confirm);
+        MaterialButton btnUpdateExchange = dialogView.findViewById(R.id.btn_update_exchange);
+        TextView tvLastUpdate = dialogView.findViewById(R.id.tv_currency_exchange_last_update);
+        TextView tvNextUpdate = dialogView.findViewById(R.id.tv_currency_exchange_next_update);
+
+        // Update last update text
+        String lastUpdate = SettingsHandler.formatLastUpdateTime(requireContext());
+        if (lastUpdate != null) {
+            tvLastUpdate.setText(getString(R.string.currency_exchange_last_update, lastUpdate));
+        } else {
+            tvLastUpdate.setText(R.string.currency_exchange_never_updated);
+        }
+
+        // Update next update text
+        String nextUpdate = SettingsHandler.formatNextUpdateTime(requireContext());
+        if (nextUpdate != null) {
+            tvNextUpdate.setText(getString(R.string.currency_exchange_next_update, nextUpdate));
+        } else {
+            tvNextUpdate.setText(getString(R.string.currency_exchange_next_update, getString(R.string.currency_exchange_not_scheduled)));
+        }
+
+        Runnable refreshState = () -> {
+            styleCurrencyOption(cardVnd, iconVnd, pendingSelection[0].equals("VND"));
+            styleCurrencyOption(cardUsd, iconUsd, pendingSelection[0].equals("USD"));
+        };
+
+        View.OnClickListener vndClickListener = v -> {
+            pendingSelection[0] = "VND";
+            refreshState.run();
+        };
+
+        View.OnClickListener usdClickListener = v -> {
+            pendingSelection[0] = "USD";
+            refreshState.run();
+        };
+
+        cardVnd.setOnClickListener(vndClickListener);
+        containerVnd.setOnClickListener(vndClickListener);
+        cardUsd.setOnClickListener(usdClickListener);
+        containerUsd.setOnClickListener(usdClickListener);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        btnUpdateExchange.setOnClickListener(v -> {
+            // Update from API
+            btnUpdateExchange.setEnabled(false);
+            btnUpdateExchange.setText(R.string.currency_exchange_updating);
+            
+            new Thread(() -> {
+                boolean success = ExchangeRateService.updateExchangeRateFromAPI(requireContext());
+                requireActivity().runOnUiThread(() -> {
+                    btnUpdateExchange.setEnabled(true);
+                    btnUpdateExchange.setText(R.string.currency_exchange_update);
+                    
+                    if (success) {
+                        Toast.makeText(requireContext(), R.string.currency_exchange_updated, Toast.LENGTH_SHORT).show();
+                        // Schedule weekly updates if not already scheduled
+                        if (SettingsHandler.getNextUpdateTime(requireContext()) == 0) {
+                            SettingsHandler.scheduleWeeklyExchangeRateUpdate(requireContext());
+                        }
+                        // Refresh the dialog
+                        dialog.dismiss();
+                        showCurrencyDialog(tvCurrencyValue);
+                    } else {
+                        Toast.makeText(requireContext(), R.string.currency_exchange_update_failed, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }).start();
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnConfirm.setOnClickListener(v -> {
+            String selected = pendingSelection[0];
+            if (!selected.equals(current)) {
+                SettingsHandler.setCurrency(requireContext(), selected);
+                updateCurrencyValue(tvCurrencyValue);
+                // Currency change will be automatically detected by SharedPreferences listeners in all fragments
+                // No need to manually broadcast - the preference change listener handles it
+            }
+            dialog.dismiss();
+        });
+
+        refreshState.run();
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    private void styleCurrencyOption(MaterialCardView cardView, ImageView checkIcon, boolean selected) {
+        if (cardView == null || checkIcon == null) {
+            return;
+        }
+        int strokeColor = ContextCompat.getColor(requireContext(),
+                selected ? R.color.primary_green : R.color.secondary_grey);
+
+        cardView.setStrokeColor(strokeColor);
+        checkIcon.setVisibility(selected ? View.VISIBLE : View.GONE);
+    }
+
 
     private void updateReminderValue(TextView textView) {
         if (getContext() == null) return;

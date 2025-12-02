@@ -170,11 +170,33 @@ public class CategoryCreateBottomSheet extends BottomSheetDialogFragment {
         }
 
         if (isEditMode) {
-            // Update existing category
+            // Check if editing to match another existing category (excluding the current one)
+            if (CategoryManager.categoryExistsExcluding(requireContext(), categoryName, selectedIconResId, 
+                    oldName, oldIconResId)) {
+                Toast.makeText(requireContext(), 
+                    getString(R.string.category_duplicate_exists, categoryName), 
+                    Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // Update existing category (no duplicate found)
             CategoryManager.updateCategory(requireContext(), oldName, oldIconResId, categoryName, selectedIconResId);
         } else {
+            // Check for duplicate before adding
+            if (CategoryManager.categoryExists(requireContext(), categoryName, selectedIconResId)) {
+                Toast.makeText(requireContext(), 
+                    getString(R.string.category_duplicate_exists, categoryName), 
+                    Toast.LENGTH_SHORT).show();
+                return;
+            }
             // Persist the new category for future selections
-            CategoryManager.addCategory(requireContext(), categoryName, selectedIconResId);
+            try {
+                CategoryManager.addCategory(requireContext(), categoryName, selectedIconResId);
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(requireContext(), 
+                    getString(R.string.category_duplicate_exists, categoryName), 
+                    Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         if (listener != null) {

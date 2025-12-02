@@ -110,6 +110,20 @@
     <string name="language_value">Tiếng Việt</string>
     <string name="currency_value">VND</string>
     <string name="language_dialog_title">Chọn ngôn ngữ</string>
+    <string name="currency_dialog_title">Cài đặt tiền tệ</string>
+    <string name="currency_select_label">Chọn tiền tệ</string>
+    <string name="currency_option_vnd">VND</string>
+    <string name="currency_option_usd">USD</string>
+    <string name="currency_exchange_label">Tỷ giá hối đoái</string>
+    <string name="currency_exchange_update">Cập nhật tỷ giá</string>
+    <string name="currency_exchange_last_update">Cập nhật lần cuối: %1$s</string>
+    <string name="currency_exchange_next_update">Tự động cập nhật tiếp theo: %1$s</string>
+    <string name="currency_exchange_never_updated">Chưa cập nhật</string>
+    <string name="currency_exchange_not_scheduled">Chưa lên lịch</string>
+    <string name="currency_exchange_updated">Cập nhật tỷ giá thành công</string>
+    <string name="currency_exchange_updating">Đang cập nhật tỷ giá…</string>
+    <string name="currency_exchange_update_failed">Không thể cập nhật tỷ giá. Vui lòng thử lại.</string>
+    <string name="currency_exchange_rate_hint">Nhập tỷ giá USD sang VND</string>
     <string name="language_option_vietnamese">Tiếng Việt</string>
     <string name="language_option_english">English</string>
     <string name="language_dialog_confirm">Xác nhận</string>
@@ -210,6 +224,7 @@
     <string name="google_sign_in_coming_soon">Đăng nhập bằng Google sẽ sớm ra mắt</string>
     <string name="no_categories_available">Không có danh mục nào</string>
     <string name="category_already_in_use">Danh mục \"%1$s\" đã được sử dụng trong ngân sách khác</string>
+    <string name="category_duplicate_exists">Một danh mục với tên và biểu tượng này đã tồn tại</string>
     <string name="transaction_saved">Đã thêm giao dịch %1$s: %2$s VND - %3$s</string>
 
     <!--Map-->

@@ -55,6 +55,27 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(BottomSheetDialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogTheme);
+        
+        // Listen for currency changes to refresh UI immediately
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            "currency_changed",
+            this,
+            (requestKey, result) -> {
+                if ("currency_changed".equals(requestKey) && getView() != null) {
+                    // Refresh transaction detail when currency changes
+                    Bundle args = getArguments();
+                    if (args != null) {
+                        long transactionId = args.getLong(ARG_TRANSACTION_ID, -1);
+                        if (transactionId != -1) {
+                            Transaction transaction = TransactionManager.getTransactionById(requireContext(), transactionId);
+                            if (transaction != null) {
+                                updateTransactionDisplay(getView(), transaction);
+                            }
+                        }
+                    }
+                }
+            }
+        );
     }
 
     @Override
@@ -105,11 +126,36 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
         TextView tvExpenseNote = view.findViewById(R.id.tv_expense_note);
         ImageButton btnClose = view.findViewById(R.id.btn_close_details);
 
+        // Update transaction display
+        updateTransactionDisplay(view, transaction);
+
+        // Close button
+        if (btnClose != null) {
+            btnClose.setOnClickListener(v -> dismiss());
+        }
+
+        // Hide view details button
+        View btnViewDetails = view.findViewById(R.id.btn_view_details);
+        if (btnViewDetails != null) {
+            btnViewDetails.setVisibility(View.GONE);
+        }
+
+        return view;
+    }
+
+    private void updateTransactionDisplay(View view, Transaction transaction) {
+        TextView tvExpenseName = view.findViewById(R.id.tv_expense_name);
+        TextView tvExpenseAddress = view.findViewById(R.id.tv_expense_address);
+        TextView tvExpenseCategory = view.findViewById(R.id.tv_expense_category);
+        TextView tvExpenseAmount = view.findViewById(R.id.tv_expense_amount);
+        TextView tvExpenseDate = view.findViewById(R.id.tv_expense_date);
+        TextView tvExpenseNote = view.findViewById(R.id.tv_expense_note);
+
         // Set merchant name
         if (tvExpenseName != null) {
             String merchantName = transaction.getMerchantName();
             if (merchantName != null && !merchantName.isEmpty()) {
-            tvExpenseName.setText(merchantName);
+                tvExpenseName.setText(merchantName);
             } else {
                 tvExpenseName.setText(getString(R.string.unknown_merchant));
             }
@@ -126,11 +172,18 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
             }
         }
 
-        // Set category
+        // Set category (use categoryName and categoryIconResId from transaction, fallback to categoryId for legacy)
         if (tvExpenseCategory != null) {
-            Long categoryId = transaction.getCategoryId();
-            if (categoryId != null) {
-                Category category = findCategoryById(categoryId);
+            String categoryName = transaction.getCategoryName();
+            Integer categoryIconResId = transaction.getCategoryIconResId();
+            
+            if (categoryName != null && categoryIconResId != null) {
+                // Use user-defined category (name + icon)
+                tvExpenseCategory.setText(categoryName);
+                tvExpenseCategory.setVisibility(View.VISIBLE);
+            } else if (transaction.getCategoryId() != null) {
+                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
+                Category category = findCategoryById(transaction.getCategoryId());
                 if (category != null) {
                     tvExpenseCategory.setText(category.getName());
                     tvExpenseCategory.setVisibility(View.VISIBLE);
@@ -146,8 +199,8 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
         if (tvExpenseAmount != null) {
             boolean isIncome = transaction.getType() == TransactionType.INCOME;
             String amountText = isIncome
-                    ? "+" + CurrencyUtils.formatCurrency(transaction.getAmount())
-                    : "-" + CurrencyUtils.formatCurrency(transaction.getAmount());
+                    ? "+" + CurrencyUtils.formatCurrency(requireContext(), transaction.getAmount())
+                    : "-" + CurrencyUtils.formatCurrency(requireContext(), transaction.getAmount());
             tvExpenseAmount.setText(amountText);
             
             // Set color based on transaction type
@@ -176,19 +229,6 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
                 tvExpenseNote.setVisibility(View.GONE);
             }
         }
-
-        // Close button
-        if (btnClose != null) {
-            btnClose.setOnClickListener(v -> dismiss());
-        }
-
-        // Hide view details button
-        View btnViewDetails = view.findViewById(R.id.btn_view_details);
-        if (btnViewDetails != null) {
-            btnViewDetails.setVisibility(View.GONE);
-        }
-
-        return view;
     }
 
     /**
@@ -205,6 +245,13 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
             }
         }
         return null;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Clean up Fragment Result listener
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
     }
 }
 

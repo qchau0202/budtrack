@@ -23,6 +23,7 @@ import android.content.Intent;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.auth.AuthController;
+import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.fragments.DashboardFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.HomeFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.ProfileFragment;
@@ -65,6 +66,11 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
             return;
+        }
+        
+        // Initialize weekly exchange rate update schedule if not already scheduled
+        if (SettingsHandler.getNextUpdateTime(this) == 0) {
+            SettingsHandler.scheduleWeeklyExchangeRateUpdate(this);
         }
         
         setContentView(R.layout.activity_main);
