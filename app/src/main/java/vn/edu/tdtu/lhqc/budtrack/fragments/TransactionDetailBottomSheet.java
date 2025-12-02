@@ -157,7 +157,7 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
             if (merchantName != null && !merchantName.isEmpty()) {
                 tvExpenseName.setText(merchantName);
             } else {
-                tvExpenseName.setText(getString(R.string.unknown_merchant));
+                tvExpenseName.setText(getString(R.string.unknown));
             }
         }
 

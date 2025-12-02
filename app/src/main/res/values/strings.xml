@@ -331,5 +331,5 @@
     <string name="wallet_name_required">Wallet name is required</string>
     <string name="wallet_created">Wallet created successfully</string>
     <string name="none">None</string>
-    <string name="unknown_merchant">Unknown Merchant</string>
+    <string name="unknown">Unknown</string>
 </resources>

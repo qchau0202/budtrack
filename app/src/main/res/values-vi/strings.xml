@@ -223,6 +223,8 @@
     <string name="registration_successful">Đăng ký thành công! Vui lòng đăng nhập.</string>
     <string name="google_sign_in_coming_soon">Đăng nhập bằng Google sẽ sớm ra mắt</string>
     <string name="no_categories_available">Không có danh mục nào</string>
+    <string name="edit_profile_title">Chỉnh sửa hồ sơ</string>
+    <string name="edit_profile_save">Lưu</string>
     <string name="category_already_in_use">Danh mục \"%1$s\" đã được sử dụng trong ngân sách khác</string>
     <string name="category_duplicate_exists">Một danh mục với tên và biểu tượng này đã tồn tại</string>
     <string name="transaction_saved">Đã thêm giao dịch %1$s: %2$s VND - %3$s</string>
@@ -338,6 +340,7 @@
     <string name="current_balance">Số dư hiện tại 250.560.000 VND</string>
     <string name="remaining_budget">Ngân sách còn lại 9.512.500 VND</string>
     <string name="none">Không</string>
+    <string name="unknown">Không xác định</string>
 </resources>
 
 
