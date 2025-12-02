@@ -233,7 +233,7 @@
     <string name="edit_profile_save">Save</string>
     <string name="category_already_in_use">Category \"%1$s\" is already used in another budget</string>
     <string name="category_duplicate_exists">A category with this name and icon already exists</string>
-    <string name="transaction_saved">Transaction saved: %1$s - %2$s VND - %3$s</string>
+    <string name="transaction_saved">Transaction saved:</string>
     <!--Map-->
     <string name="map_title">Budtrack expense map</string>
     <string name="map_description">View your expenses based on location. See where you spend the most and track your spending patterns on the map.</string>

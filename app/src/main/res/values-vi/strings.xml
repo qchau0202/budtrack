@@ -227,7 +227,7 @@
     <string name="edit_profile_save">Lưu</string>
     <string name="category_already_in_use">Danh mục \"%1$s\" đã được sử dụng trong ngân sách khác</string>
     <string name="category_duplicate_exists">Một danh mục với tên và biểu tượng này đã tồn tại</string>
-    <string name="transaction_saved">Đã thêm giao dịch %1$s: %2$s VND - %3$s</string>
+    <string name="transaction_saved">Đã thêm giao dịch:</string>
 
     <!--Map-->
     <string name="map_title">Bản đồ chi tiêu</string>

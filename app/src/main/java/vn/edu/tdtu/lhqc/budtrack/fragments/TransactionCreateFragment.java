@@ -1067,7 +1067,8 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         String formattedAmount = CurrencyUtils.formatNumberUS(amount);
         String noteText = note.isEmpty() ? getString(R.string.no_note) : note;
 
-        String message = getString(R.string.transaction_saved, typeText, formattedAmount, noteText);
+        String message = getString(R.string.transaction_saved)
+                + " " + typeText + " - " + formattedAmount + " - " + noteText;
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
 
         // Clear saved transaction state since transaction is saved
