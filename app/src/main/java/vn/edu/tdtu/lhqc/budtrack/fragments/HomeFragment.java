@@ -6,7 +6,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.graphics.Color;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,23 +24,19 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.analytics.HomePieChartController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.BalanceController;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
-import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
-import vn.edu.tdtu.lhqc.budtrack.widgets.PieChartView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -251,133 +246,8 @@ public class HomeFragment extends Fragment {
     }
     
     private void setupPieChart(View root) {
-        // Get all transactions and filter to expenses only
-        List<Transaction> allTransactions = TransactionManager.getTransactions(requireContext());
-        List<Transaction> expenseTransactions = new ArrayList<>();
-        for (Transaction transaction : allTransactions) {
-            if (transaction != null && transaction.getType() == TransactionType.EXPENSE) {
-                expenseTransactions.add(transaction);
-            }
-        }
-
-        // Aggregate spent amount by category (using name + icon as unique key)
-        // Use a composite key: "name|iconResId" to uniquely identify categories
-        Map<String, Long> categorySums = new LinkedHashMap<>();
-        Map<String, Integer> categoryIcons = new LinkedHashMap<>(); // Store icon for each category key
-        long totalSpent = 0;
-        
-        for (Transaction transaction : expenseTransactions) {
-            long amount = transaction.getAmount();
-            totalSpent += amount;
-
-            // Get category from transaction (prefer name+icon, fallback to categoryId for legacy data)
-            String categoryKey = null;
-            int iconResId = 0;
-            
-            if (transaction.getCategoryName() != null && transaction.getCategoryIconResId() != null) {
-                // Use user-defined category (name + icon)
-                categoryKey = transaction.getCategoryName() + "|" + transaction.getCategoryIconResId();
-                iconResId = transaction.getCategoryIconResId();
-            } else if (transaction.getCategoryId() != null) {
-                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
-                // But this should not be used for new transactions
-                for (Category category : MockCategoryData.getSampleCategories()) {
-                    if (category.getId() == transaction.getCategoryId()) {
-                        categoryKey = category.getName() + "|" + category.getIconResId();
-                        iconResId = category.getIconResId();
-                        break;
-                    }
-                }
-            }
-            
-            if (categoryKey == null) {
-                // Skip if no category set
-                continue;
-            }
-
-            Long current = categorySums.get(categoryKey);
-            if (current == null) {
-                current = 0L;
-                categoryIcons.put(categoryKey, iconResId);
-            }
-            categorySums.put(categoryKey, current + amount);
-        }
-
-        // Build category summaries with icon + title
-        List<CategorySummary> summaries = new ArrayList<>();
-
-        for (Map.Entry<String, Long> entry : categorySums.entrySet()) {
-            String categoryKey = entry.getKey();
-            long amount = entry.getValue();
-            
-            // Parse category key: "name|iconResId"
-            String[] parts = categoryKey.split("\\|");
-            if (parts.length == 2) {
-                String categoryName = parts[0];
-                int categoryIconResId = Integer.parseInt(parts[1]);
-                
-                summaries.add(new CategorySummary(
-                        categoryName,
-                        categoryIconResId,
-                        amount,
-                        null // No color for user-defined categories
-                ));
-            }
-        }
-
-        // Sort by spent amount descending
-        Collections.sort(summaries, new Comparator<CategorySummary>() {
-            @Override
-            public int compare(CategorySummary o1, CategorySummary o2) {
-                return Long.compare(o2.amount, o1.amount);
-            }
-        });
-
-        // Limit to top 5 categories for clarity
-        if (summaries.size() > 5) {
-            summaries = new ArrayList<>(summaries.subList(0, 5));
-        }
-
-        // Initialize pie chart
-        PieChartView pieChart = root.findViewById(R.id.pieChart);
-        if (pieChart != null) {
-            if (totalSpent > 0 && !summaries.isEmpty()) {
-            LinkedHashMap<String, Float> pieData = new LinkedHashMap<>();
-                List<Integer> colors = new ArrayList<>();
-
-                // Generate distinct HSV colors using only Android's Color utilities
-                java.util.Random random = new java.util.Random();
-                float baseHue = random.nextFloat() * 360f;
-                float hueStep = summaries.size() > 0 ? 360f / summaries.size() : 360f;
-
-                for (int i = 0; i < summaries.size(); i++) {
-                    CategorySummary summary = summaries.get(i);
-                    float percentage = (float) ((summary.amount / (double) totalSpent) * 100f);
-                    pieData.put(summary.name, percentage);
-
-                    // Generate a pleasant color solely via Android's Color utilities
-                    float hue = (baseHue + i * hueStep) % 360f;
-                    float saturation = 0.65f;
-                    float value = 0.9f;
-                    int colorInt = Color.HSVToColor(new float[]{hue, saturation, value});
-
-                    colors.add(colorInt);
-                }
-
-                pieChart.setData(pieData, colors);
-            float density = getResources().getDisplayMetrics().density;
-            pieChart.setRingThicknessPx(12f * density);
-            pieChart.setSegmentGapDegrees(14f);
-            pieChart.setCenterTexts(getString(R.string.expense), CurrencyUtils.formatCurrency(requireContext(), totalSpent));
-            } else {
-                // No categories or no transactions: clear chart and show simple text
-                pieChart.setData(new LinkedHashMap<String, Float>(), new ArrayList<Integer>());
-                pieChart.setCenterTexts(null, getString(R.string.pie_no_data));
-            }
-        }
-
-        // Update category list below the pie chart
-        updateCategoryTabs(root, summaries, totalSpent);
+        // Delegate pie chart logic to controller to keep fragment lean
+        HomePieChartController.updatePieChartAndTabs(requireContext(), root);
     }
 
     private void setupAnalyticsTabs(View root) {
@@ -649,58 +519,6 @@ public class HomeFragment extends Fragment {
         }, 2000);
     }
     
-    // Update category tabs with dynamic data (icon + title + amount + percentage)
-    private void updateCategoryTabs(View root, List<CategorySummary> summaries, long totalSpent) {
-        LinearLayout container = root.findViewById(R.id.container_category_tabs);
-        if (container == null) {
-            return;
-        }
-
-        container.removeAllViews();
-
-        if (summaries == null || summaries.isEmpty() || totalSpent <= 0) {
-            return;
-        }
-
-        LayoutInflater inflater = LayoutInflater.from(requireContext());
-        float density = getResources().getDisplayMetrics().density;
-
-        for (CategorySummary summary : summaries) {
-            View itemView = inflater.inflate(R.layout.item_pie_category_tab, container, false);
-
-            ImageView ivIcon = itemView.findViewById(R.id.iv_category_icon);
-            TextView tvName = itemView.findViewById(R.id.tv_category_name);
-            TextView tvAmount = itemView.findViewById(R.id.tv_category_amount);
-            TextView tvPercent = itemView.findViewById(R.id.tv_category_percent);
-
-            if (ivIcon != null) {
-                ivIcon.setImageResource(summary.iconResId);
-            }
-            if (tvName != null) {
-                tvName.setText(summary.name);
-            }
-            if (tvAmount != null) {
-                tvAmount.setText(CurrencyUtils.formatCurrency(requireContext(), summary.amount));
-            }
-            if (tvPercent != null) {
-                float percentage = (float) ((summary.amount / (double) totalSpent) * 100f);
-                tvPercent.setText(String.format(Locale.getDefault(), "%.0f%%", percentage));
-        }
-
-            // Add right margin between items
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
-            params.rightMargin = (int) (8 * density);
-            itemView.setLayoutParams(params);
-
-            container.addView(itemView);
-        }
-    }
-
-
-    
     private void showWalletFragment() {
         WalletFragment walletFragment = WalletFragment.newInstance();
         FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
@@ -709,18 +527,4 @@ public class HomeFragment extends Fragment {
         transaction.commit();
     }
 
-    // Simple data holder for category summary in pie chart
-    private static class CategorySummary {
-        final String name;
-        final int iconResId;
-        final long amount;
-        final String colorHex;
-
-        CategorySummary(String name, int iconResId, long amount, String colorHex) {
-            this.name = name;
-            this.iconResId = iconResId;
-            this.amount = amount;
-            this.colorHex = colorHex;
-        }
-    }
 }
