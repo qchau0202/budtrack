@@ -105,11 +105,27 @@ public class TransactionHistoryFragment extends Fragment {
                         selectedDate.setTimeInMillis(dateMillis);
                         // Ensure we're on the UI thread and view is ready
                         if (getView() != null) {
-                            getView().post(() -> refreshTransactions());
+                            getView().post(this::refreshTransactions);
                         } else {
                             // If view is not ready, refresh will happen in onResume
                         refreshTransactions();
                         }
+                    }
+                }
+            }
+        );
+        
+        // Listen for currency changes to refresh UI immediately
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            "currency_changed",
+            this,
+            (requestKey, result) -> {
+                if ("currency_changed".equals(requestKey)) {
+                    // Refresh transaction list when currency changes
+                    if (getView() != null) {
+                        getView().post(this::refreshTransactions);
+                    } else {
+                        refreshTransactions();
                     }
                 }
             }
@@ -173,6 +189,8 @@ public class TransactionHistoryFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        // Clean up Fragment Result listeners
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
         // Clean up Fragment Result listeners
         requireActivity().getSupportFragmentManager().clearFragmentResultListener(
             TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED);
@@ -294,14 +312,19 @@ public class TransactionHistoryFragment extends Fragment {
             TextView tvAmount = rowView.findViewById(R.id.tv_amount);
             View divider = rowView.findViewById(R.id.divider);
             
-            // Set icon
+            // Set icon (use categoryIconResId from transaction, fallback to categoryId for legacy)
             int iconResId = R.drawable.ic_wallet_24dp; // Default
-            if (transaction.getCategoryId() != null) {
+            Integer categoryIconResId = transaction.getCategoryIconResId();
+            if (categoryIconResId != null) {
+                // Use user-defined category icon
+                iconResId = categoryIconResId;
+            } else if (transaction.getCategoryId() != null) {
+                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
                 Category category = findCategoryById(transaction.getCategoryId());
                 if (category != null) {
                     iconResId = category.getIconResId();
-                        }
-                    }
+                }
+            }
             if (ivIcon != null) {
                 ivIcon.setImageResource(iconResId);
             }
@@ -323,8 +346,8 @@ public class TransactionHistoryFragment extends Fragment {
             
             // Set amount
             String amountText = isIncome
-                ? "+" + CurrencyUtils.formatCurrency(transaction.getAmount())
-                : "-" + CurrencyUtils.formatCurrency(transaction.getAmount());
+                ? "+" + CurrencyUtils.formatCurrency(requireContext(), transaction.getAmount())
+                : "-" + CurrencyUtils.formatCurrency(requireContext(), transaction.getAmount());
             if (tvAmount != null) {
                 tvAmount.setText(amountText);
                 int colorResId = isIncome ? R.color.secondary_green : R.color.primary_red;
@@ -337,10 +360,9 @@ public class TransactionHistoryFragment extends Fragment {
             }
             
             // Make row clickable
-            Transaction finalTransaction = transaction;
             rowView.setOnClickListener(v -> {
                 TransactionDetailBottomSheet bottomSheet = TransactionDetailBottomSheet.newInstance(
-                    finalTransaction.getId()
+                    transaction.getId()
                 );
                 bottomSheet.show(getParentFragmentManager(), TransactionDetailBottomSheet.TAG);
             });

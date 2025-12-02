@@ -154,7 +154,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             
             // Convert to adapter format and group by date
             List<TransactionHistoryAdapter.DailyTransactionGroup> dailyGroups = 
-                TransactionAdapterHelper.convertToDailyGroups(filteredTransactions, isIncomeSelected);
+                TransactionAdapterHelper.convertToDailyGroups(this, filteredTransactions, isIncomeSelected);
             
             if (dailyGroups == null) {
                 dailyGroups = new ArrayList<>();

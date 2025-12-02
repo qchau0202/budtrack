@@ -107,6 +107,20 @@
     <string name="language_value">English</string>
     <string name="currency_value">VND</string>
     <string name="language_dialog_title">Choose language</string>
+    <string name="currency_dialog_title">Currency Settings</string>
+    <string name="currency_select_label">Select Currency</string>
+    <string name="currency_option_vnd">VND</string>
+    <string name="currency_option_usd">USD</string>
+    <string name="currency_exchange_label">Exchange Rate</string>
+    <string name="currency_exchange_update">Update Exchange Rate</string>
+    <string name="currency_exchange_last_update">Last updated: %1$s</string>
+    <string name="currency_exchange_next_update">Next auto update: %1$s</string>
+    <string name="currency_exchange_never_updated">Never updated</string>
+    <string name="currency_exchange_not_scheduled">Not scheduled</string>
+    <string name="currency_exchange_updated">Exchange rate updated successfully</string>
+    <string name="currency_exchange_updating">Updating exchange rate…</string>
+    <string name="currency_exchange_update_failed">Failed to update exchange rate. Please try again.</string>
+    <string name="currency_exchange_rate_hint">Enter USD to VND rate</string>
     <string name="language_option_vietnamese">Tiếng Việt</string>
     <string name="language_option_english">English</string>
     <string name="language_dialog_confirm">Confirm</string>
@@ -218,7 +232,8 @@
     <string name="edit_profile_title">Edit Profile</string>
     <string name="edit_profile_save">Save</string>
     <string name="category_already_in_use">Category \"%1$s\" is already used in another budget</string>
-    <string name="transaction_saved">Transaction saved: %1$s - %2$s VND - %3$s</string>
+    <string name="category_duplicate_exists">A category with this name and icon already exists</string>
+    <string name="transaction_saved">Transaction saved:</string>
     <!--Map-->
     <string name="map_title">Budtrack expense map</string>
     <string name="map_description">View your expenses based on location. See where you spend the most and track your spending patterns on the map.</string>
@@ -316,5 +331,5 @@
     <string name="wallet_name_required">Wallet name is required</string>
     <string name="wallet_created">Wallet created successfully</string>
     <string name="none">None</string>
-    <string name="unknown_merchant">Unknown Merchant</string>
+    <string name="unknown">Unknown</string>
 </resources>

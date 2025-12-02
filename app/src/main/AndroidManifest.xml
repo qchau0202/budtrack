@@ -48,6 +48,12 @@
             android:name=".controllers.notifications.ReminderNotificationController$ReminderNotificationReceiver"
             android:exported="false"
             android:enabled="true" />
+        
+        <!-- Exchange Rate Update Receiver -->
+        <receiver
+            android:name=".controllers.exchangerate.ExchangeRateUpdateReceiver"
+            android:exported="false"
+            android:enabled="true" />
     </application>
 
 </manifest>

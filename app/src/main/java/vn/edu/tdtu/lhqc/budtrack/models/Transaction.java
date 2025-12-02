@@ -11,7 +11,9 @@ public class Transaction {
     private TransactionType type; // EXPENSE, INCOME, or OTHERS
     private long amount; // Amount in VND (stored as long)
     private long walletId; // Reference to Wallet
-    private Long categoryId; // Reference to Category (nullable for income/others)
+    private Long categoryId; // Reference to Category (nullable for income/others) - DEPRECATED: use categoryName and categoryIconResId
+    private String categoryName; // Category name (for user-defined categories)
+    private Integer categoryIconResId; // Category icon resource ID (for user-defined categories)
     private String merchantName; // Name of merchant/place (e.g., "Starbucks Coffee")
     private String note; // Optional note/description
     private Date date; // Transaction date and time
@@ -70,6 +72,22 @@ public class Transaction {
 
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public Integer getCategoryIconResId() {
+        return categoryIconResId;
+    }
+
+    public void setCategoryIconResId(Integer categoryIconResId) {
+        this.categoryIconResId = categoryIconResId;
     }
 
     public String getMerchantName() {

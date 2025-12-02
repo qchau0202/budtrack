@@ -17,6 +17,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.NumberInputFormatter;
 
@@ -38,6 +39,7 @@ public class WalletCreateFragment extends BottomSheetDialogFragment {
     private EditText editBalance;
     private ImageView ivWalletIcon;
     private TextView tvWalletType;
+    private TextView tvCurrency;
     private String walletTypeName;
     private int walletIconResId;
 
@@ -63,6 +65,18 @@ public class WalletCreateFragment extends BottomSheetDialogFragment {
             walletTypeName = args.getString(ARG_WALLET_TYPE_NAME, "");
             walletIconResId = args.getInt(ARG_WALLET_ICON, R.drawable.ic_wallet_cash);
         }
+        
+        // Listen for currency changes to refresh UI immediately
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            "currency_changed",
+            this,
+            (requestKey, result) -> {
+                if ("currency_changed".equals(requestKey)) {
+                    // Update currency text when currency changes
+                    updateCurrencyText();
+                }
+            }
+        );
     }
 
     @Override
@@ -96,6 +110,7 @@ public class WalletCreateFragment extends BottomSheetDialogFragment {
         editBalance = view.findViewById(R.id.edit_balance);
         ivWalletIcon = view.findViewById(R.id.iv_wallet_icon);
         tvWalletType = view.findViewById(R.id.tv_wallet_type);
+        tvCurrency = view.findViewById(R.id.tv_currency);
 
         // Set wallet icon
         if (ivWalletIcon != null) {
@@ -106,6 +121,9 @@ public class WalletCreateFragment extends BottomSheetDialogFragment {
         if (tvWalletType != null && walletTypeName != null && !walletTypeName.isEmpty()) {
             tvWalletType.setText(walletTypeName);
         }
+
+        // Update currency text dynamically
+        updateCurrencyText();
 
         // Setup amount formatter for better UX with commas
         if (editBalance != null) {
@@ -153,6 +171,27 @@ public class WalletCreateFragment extends BottomSheetDialogFragment {
 
         Toast.makeText(requireContext(), getString(R.string.wallet_created), Toast.LENGTH_SHORT).show();
         dismiss();
+    }
+
+    private void updateCurrencyText() {
+        if (tvCurrency != null && getContext() != null) {
+            String currency = SettingsHandler.getCurrency(requireContext());
+            tvCurrency.setText(currency);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Update currency text in case it changed
+        updateCurrencyText();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Clean up Fragment Result listener
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
     }
 }
 

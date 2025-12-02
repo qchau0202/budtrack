@@ -58,9 +58,66 @@ public final class CategoryManager {
         return items;
     }
 
+    /**
+     * Check if a category with the same name AND icon already exists.
+     * @param context Application context
+     * @param name Category name
+     * @param iconResId Category icon resource ID
+     * @return true if a category with both matching name and icon exists, false otherwise
+     */
+    public static boolean categoryExists(Context context, String name, int iconResId) {
+        if (name == null || name.isEmpty() || iconResId == 0) {
+            return false;
+        }
+        
+        List<CategoryItem> categories = getCategories(context);
+        for (CategoryItem item : categories) {
+            // Match by BOTH name AND icon - both must match for it to be considered a duplicate
+            if (item.name.equals(name) && item.iconResId == iconResId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if a category with the same name AND icon already exists, excluding a specific category.
+     * Used for edit mode to allow keeping the same category but detect if editing to match another.
+     * @param context Application context
+     * @param name Category name
+     * @param iconResId Category icon resource ID
+     * @param excludeName Category name to exclude from check (the category being edited)
+     * @param excludeIconResId Category icon to exclude from check (the category being edited)
+     * @return true if another category with both matching name and icon exists, false otherwise
+     */
+    public static boolean categoryExistsExcluding(Context context, String name, int iconResId, 
+                                                  String excludeName, int excludeIconResId) {
+        if (name == null || name.isEmpty() || iconResId == 0) {
+            return false;
+        }
+        
+        List<CategoryItem> categories = getCategories(context);
+        for (CategoryItem item : categories) {
+            // Skip the category being edited
+            if (item.name.equals(excludeName) && item.iconResId == excludeIconResId) {
+                continue;
+            }
+            // Match by BOTH name AND icon
+            if (item.name.equals(name) && item.iconResId == iconResId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void addCategory(Context context, String name, int iconResId) {
         if (name == null || name.isEmpty() || iconResId == 0) {
             return;
+        }
+
+        // Check for duplicate (both name AND icon must match)
+        if (categoryExists(context, name, iconResId)) {
+            throw new IllegalArgumentException("Category with this name and icon already exists");
         }
 
         List<CategoryItem> current = getCategories(context);

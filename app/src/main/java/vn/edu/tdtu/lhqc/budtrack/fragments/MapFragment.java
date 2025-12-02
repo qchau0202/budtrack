@@ -218,7 +218,7 @@ public class MapFragment extends Fragment {
 
     private void showExpenseDetails(ExpenseLocation expense) {
         tvExpenseName.setText(expense.name);
-        tvExpenseAmount.setText(CurrencyUtils.formatCurrency(expense.amount));
+        tvExpenseAmount.setText(CurrencyUtils.formatCurrency(requireContext(), expense.amount));
         tvExpenseAddress.setText(expense.address);
         tvExpenseCategory.setText(expense.category);
         tvExpenseDate.setText(expense.date);
@@ -476,7 +476,7 @@ public class MapFragment extends Fragment {
             Marker marker = new Marker(mapView);
             marker.setPosition(new GeoPoint(expense.latitude, expense.longitude));
             marker.setTitle(expense.name);
-            marker.setSnippet(CurrencyUtils.formatCurrency(expense.amount));
+            marker.setSnippet(CurrencyUtils.formatCurrency(requireContext(), expense.amount));
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
             
             // Set custom icon - create a new instance for each marker and tint it with darker green

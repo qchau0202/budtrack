@@ -41,9 +41,7 @@ public final class TransactionManager {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 Transaction transaction = fromJson(jsonObject);
-                if (transaction != null) {
-                    transactions.add(transaction);
-                }
+                transactions.add(transaction);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -176,7 +174,7 @@ public final class TransactionManager {
         }
         
         // Use commit() to ensure data is saved synchronously before notifying other fragments
-        prefs.edit().putString(KEY_TRANSACTIONS, jsonArray.toString()).commit();
+        prefs.edit().putString(KEY_TRANSACTIONS, jsonArray.toString()).apply();
     }
 
     /**
@@ -190,6 +188,12 @@ public final class TransactionManager {
         json.put("walletId", transaction.getWalletId());
         if (transaction.getCategoryId() != null) {
             json.put("categoryId", transaction.getCategoryId());
+        }
+        if (transaction.getCategoryName() != null) {
+            json.put("categoryName", transaction.getCategoryName());
+        }
+        if (transaction.getCategoryIconResId() != null) {
+            json.put("categoryIconResId", transaction.getCategoryIconResId());
         }
         if (transaction.getMerchantName() != null) {
             json.put("merchantName", transaction.getMerchantName());
@@ -231,6 +235,12 @@ public final class TransactionManager {
         
         if (json.has("categoryId") && !json.isNull("categoryId")) {
             transaction.setCategoryId(json.getLong("categoryId"));
+        }
+        if (json.has("categoryName")) {
+            transaction.setCategoryName(json.getString("categoryName"));
+        }
+        if (json.has("categoryIconResId") && !json.isNull("categoryIconResId")) {
+            transaction.setCategoryIconResId(json.getInt("categoryIconResId"));
         }
         if (json.has("merchantName")) {
             transaction.setMerchantName(json.getString("merchantName"));

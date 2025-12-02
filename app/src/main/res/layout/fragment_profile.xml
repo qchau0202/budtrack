@@ -371,6 +371,7 @@
 
             <!-- Currency row -->
             <LinearLayout
+                android:id="@+id/row_currency"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"

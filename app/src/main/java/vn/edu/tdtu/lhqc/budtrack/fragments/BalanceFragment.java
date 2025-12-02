@@ -71,6 +71,18 @@ public class BalanceFragment extends Fragment {
                 }
             }
         );
+        
+        // Listen for currency changes to refresh UI immediately
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            "currency_changed",
+            this,
+            (requestKey, result) -> {
+                if ("currency_changed".equals(requestKey)) {
+                    // Refresh balance when currency changes
+                    refreshBalance();
+                }
+            }
+        );
     }
 
     @Override
@@ -97,9 +109,10 @@ public class BalanceFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Clean up Fragment Result listener
+        // Clean up Fragment Result listeners
         requireActivity().getSupportFragmentManager().clearFragmentResultListener(
             TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED);
+        requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
     }
 
     private void setupBalanceView(View root) {
@@ -109,7 +122,7 @@ public class BalanceFragment extends Fragment {
         if (tvBalance != null && btnVisibility != null) {
             // Calculate total balance from actual wallet data
             long totalBalance = BalanceController.calculateTotalBalance(requireContext());
-            final String originalBalanceText = CurrencyUtils.formatCurrency(totalBalance);
+            final String originalBalanceText = CurrencyUtils.formatCurrency(requireContext(), totalBalance);
             
             boolean hidden = BalanceController.isHidden(requireContext());
             tvBalance.setText(BalanceController.formatDisplay(originalBalanceText, hidden));
