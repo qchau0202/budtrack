@@ -29,6 +29,7 @@ import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.analytics.HomePieChartController;
+import vn.edu.tdtu.lhqc.budtrack.controllers.analytics.HomeWeeklyAnalyticsController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.BalanceController;
@@ -288,160 +289,14 @@ public class HomeFragment extends Fragment {
     private void setupAnalyticsBars(View root) {
         setupAnalyticsBars(root, false); // Default to expenses
     }
-    
+
     private void setupAnalyticsBars(View root, boolean showIncome) {
-        View analyticsCard = root.findViewById(R.id.card_weekly_expenses);
-        if (analyticsCard == null) {
-            return;
-        }
-        
-        TextView tvWeeklyAmount = analyticsCard.findViewById(R.id.tv_weekly_amount);
-        
-        // Get current week's transactions (Monday to Sunday)
-        Calendar calendar = Calendar.getInstance();
-        int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-        // Calculate days to subtract to get to Monday
-        // Calendar.MONDAY = 2, Calendar.SUNDAY = 1
-        int daysFromMonday = (currentDayOfWeek == Calendar.SUNDAY) ? 6 : currentDayOfWeek - Calendar.MONDAY;
-        
-        // Go back to Monday of current week
-        calendar.add(Calendar.DAY_OF_MONTH, -daysFromMonday);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        Date weekStart = calendar.getTime();
-        
-        // Go to Sunday of current week (6 days after Monday)
-        calendar.add(Calendar.DAY_OF_MONTH, 6);
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MILLISECOND, 999);
-        Date weekEnd = calendar.getTime();
-        
-        List<Transaction> weekTransactions = TransactionManager.getTransactionsInRange(
-            requireContext(), weekStart, weekEnd);
-        
-        // Filter by type
-        long[] dailyAmounts = new long[7]; // Mon-Sun
-        long totalAmount = 0;
-        
-        for (Transaction transaction : weekTransactions) {
-            boolean isIncome = transaction.getType() == TransactionType.INCOME;
-            if ((showIncome && isIncome) || (!showIncome && !isIncome)) {
-                Date transDate = transaction.getDate();
-                if (transDate != null) {
-                    Calendar transCal = Calendar.getInstance();
-                    transCal.setTime(transDate);
-                    int dayOfWeek = transCal.get(Calendar.DAY_OF_WEEK);
-                    // Convert to 0-6 (Monday=0, Sunday=6)
-                    int index = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
-                    if (index >= 0 && index < 7) {
-                        dailyAmounts[index] += transaction.getAmount();
-                        totalAmount += transaction.getAmount();
-                    }
-                }
-            }
-        }
-        
-        // Update total amount
-        if (tvWeeklyAmount != null) {
-            tvWeeklyAmount.setText(CurrencyUtils.formatCurrency(requireContext(), totalAmount));
-        }
-        
-        // Find max amount for scaling
-        long maxAmount = 0;
-        for (long amount : dailyAmounts) {
-            if (amount > maxAmount) {
-                maxAmount = amount;
-            }
-        }
-        
-        // Update bars and dates
-        int[] barIds = {R.id.bar_mon, R.id.bar_tue, R.id.bar_wed, R.id.bar_thu, R.id.bar_fri, R.id.bar_sat, R.id.bar_sun};
-        int[] dateIds = {R.id.tv_date_mon, R.id.tv_date_tue, R.id.tv_date_wed, R.id.tv_date_thu, R.id.tv_date_fri, R.id.tv_date_sat, R.id.tv_date_sun};
-        String[] dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-        
-        Calendar today = Calendar.getInstance();
-        int todayDayOfWeek = today.get(Calendar.DAY_OF_WEEK);
-        int todayIndex = (todayDayOfWeek == Calendar.SUNDAY) ? 6 : todayDayOfWeek - Calendar.MONDAY;
-        
-        // Get date labels for current week
-        Calendar dateCal = Calendar.getInstance();
-        dateCal.setTime(weekStart);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("d", Locale.getDefault());
-        SimpleDateFormat fullDateFormat = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
-        
-        // Store daily amounts and dates for tooltip
-        final long[] finalDailyAmounts = dailyAmounts;
-        final Calendar[] dayCalendars = new Calendar[7];
-        for (int i = 0; i < 7; i++) {
-            dayCalendars[i] = (Calendar) dateCal.clone();
-            dateCal.add(Calendar.DAY_OF_MONTH, 1);
-        }
-        
-        for (int i = 0; i < 7; i++) {
-            View bar = analyticsCard.findViewById(barIds[i]);
-            TextView dateText = analyticsCard.findViewById(dateIds[i]);
-            
-            if (bar != null) {
-                // Set up tap listener for tooltip instead of long-press
-                final int dayIndex = i;
-                final Calendar dayCalendar = dayCalendars[i];
-                bar.setOnClickListener(v -> showBarTooltip(v, dayCalendar, finalDailyAmounts[dayIndex], showIncome));
-                // Calculate bar height (max 140dp, min 20dp)
-                int maxHeightDp = 140;
-                int minHeightDp = 20;
-                float density = getResources().getDisplayMetrics().density;
-                int maxHeightPx = (int) (maxHeightDp * density);
-                int minHeightPx = (int) (minHeightDp * density);
-                
-                int barHeight;
-                if (maxAmount > 0) {
-                    float ratio = (float) dailyAmounts[i] / maxAmount;
-                    barHeight = (int) (minHeightPx + (maxHeightPx - minHeightPx) * ratio);
-                } else {
-                    barHeight = minHeightPx;
-                }
-                
-                // Update bar height
-                ViewGroup.LayoutParams params = bar.getLayoutParams();
-                params.height = barHeight;
-                bar.setLayoutParams(params);
-                
-                // Update bar style (active for today)
-                boolean isToday = (i == todayIndex);
-                if (isToday) {
-                    bar.setBackgroundResource(R.drawable.bg_bar_active);
-                    if (bar.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                        ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) bar.getLayoutParams();
-                        marginParams.width = (int) (24 * density);
-                        bar.setLayoutParams(marginParams);
-                    }
-                } else {
-                    bar.setBackgroundResource(R.drawable.bg_bar_default);
-                    if (bar.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                        ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) bar.getLayoutParams();
-                        marginParams.width = (int) (20 * density);
-                        bar.setLayoutParams(marginParams);
-                    }
-                }
-            }
-            
-            if (dateText != null) {
-                // Set date number
-                dateText.setText(dateFormat.format(dayCalendars[i].getTime()));
-                // Update style for today
-                if (i == todayIndex) {
-                    dateText.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
-                    dateText.setTypeface(null, android.graphics.Typeface.BOLD);
-                } else {
-                    dateText.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_grey));
-                    dateText.setTypeface(null, android.graphics.Typeface.NORMAL);
-                }
-            }
-        }
+        HomeWeeklyAnalyticsController.updateWeeklyAnalytics(
+                requireContext(),
+                root,
+                showIncome,
+                this::showBarTooltip
+        );
     }
 
     private void applyAnalyticsTabStyle(MaterialButton button, boolean selected) {
