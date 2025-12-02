@@ -147,6 +147,7 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
         TextView tvExpenseName = view.findViewById(R.id.tv_expense_name);
         TextView tvExpenseAddress = view.findViewById(R.id.tv_expense_address);
         TextView tvExpenseCategory = view.findViewById(R.id.tv_expense_category);
+        android.widget.ImageView ivExpenseCategoryIcon = view.findViewById(R.id.iv_expense_category_icon);
         TextView tvExpenseAmount = view.findViewById(R.id.tv_expense_amount);
         TextView tvExpenseDate = view.findViewById(R.id.tv_expense_date);
         TextView tvExpenseNote = view.findViewById(R.id.tv_expense_note);
@@ -181,17 +182,31 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
                 // Use user-defined category (name + icon)
                 tvExpenseCategory.setText(categoryName);
                 tvExpenseCategory.setVisibility(View.VISIBLE);
+                if (ivExpenseCategoryIcon != null) {
+                    ivExpenseCategoryIcon.setImageResource(categoryIconResId);
+                    ivExpenseCategoryIcon.setVisibility(View.VISIBLE);
+                }
             } else if (transaction.getCategoryId() != null) {
                 // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
                 Category category = findCategoryById(transaction.getCategoryId());
                 if (category != null) {
                     tvExpenseCategory.setText(category.getName());
                     tvExpenseCategory.setVisibility(View.VISIBLE);
+                    if (ivExpenseCategoryIcon != null) {
+                        ivExpenseCategoryIcon.setImageResource(category.getIconResId());
+                        ivExpenseCategoryIcon.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     tvExpenseCategory.setVisibility(View.GONE);
+                    if (ivExpenseCategoryIcon != null) {
+                        ivExpenseCategoryIcon.setVisibility(View.GONE);
+                    }
                 }
             } else {
                 tvExpenseCategory.setVisibility(View.GONE);
+                if (ivExpenseCategoryIcon != null) {
+                    ivExpenseCategoryIcon.setVisibility(View.GONE);
+                }
             }
         }
 
