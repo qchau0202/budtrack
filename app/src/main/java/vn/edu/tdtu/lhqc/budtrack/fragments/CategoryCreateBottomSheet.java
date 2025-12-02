@@ -171,11 +171,11 @@ public class CategoryCreateBottomSheet extends BottomSheetDialogFragment {
 
         if (isEditMode) {
             // Check if editing to match another existing category (excluding the current one)
-            if (CategoryManager.categoryExistsExcluding(requireContext(), categoryName, selectedIconResId, 
+            if (CategoryManager.categoryExistsExcluding(requireContext(), categoryName, selectedIconResId,
                     oldName, oldIconResId)) {
-                Toast.makeText(requireContext(), 
-                    getString(R.string.category_duplicate_exists, categoryName), 
-                    Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(),
+                        getString(R.string.category_duplicate_exists),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             // Update existing category (no duplicate found)
@@ -183,18 +183,18 @@ public class CategoryCreateBottomSheet extends BottomSheetDialogFragment {
         } else {
             // Check for duplicate before adding
             if (CategoryManager.categoryExists(requireContext(), categoryName, selectedIconResId)) {
-                Toast.makeText(requireContext(), 
-                    getString(R.string.category_duplicate_exists, categoryName), 
-                    Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(),
+                        getString(R.string.category_duplicate_exists),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             // Persist the new category for future selections
             try {
                 CategoryManager.addCategory(requireContext(), categoryName, selectedIconResId);
             } catch (IllegalArgumentException e) {
-                Toast.makeText(requireContext(), 
-                    getString(R.string.category_duplicate_exists, categoryName), 
-                    Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(),
+                        getString(R.string.category_duplicate_exists),
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
         }
