@@ -43,6 +43,18 @@ public final class HomePieChartController {
      * @param root    Root view containing the pie chart and category container
      */
     public static void updatePieChartAndTabs(Context context, View root) {
+        updatePieChartAndTabs(context, root, null);
+    }
+
+    /**
+     * Compute pie chart data from transactions and render both the chart and the
+     * category legend below it, with optional click listener for category tabs.
+     *
+     * @param context Context for data access and resources
+     * @param root    Root view containing the pie chart and category container
+     * @param categoryClickListener Optional click listener for category tabs
+     */
+    public static void updatePieChartAndTabs(Context context, View root, CategoryTabClickListener categoryClickListener) {
         if (context == null || root == null) {
             return;
         }
@@ -175,7 +187,18 @@ public final class HomePieChartController {
         }
 
         // Update category list below the pie chart
-        updateCategoryTabs(context, root, summaries, totalSpent);
+        if (categoryClickListener != null) {
+            updateCategoryTabs(context, root, summaries, totalSpent, categoryClickListener);
+        } else {
+            updateCategoryTabs(context, root, summaries, totalSpent);
+        }
+    }
+
+    /**
+     * Interface for handling category tab clicks
+     */
+    public interface CategoryTabClickListener {
+        void onCategoryTabClick(String categoryName, int categoryIconResId);
     }
 
     // Update category tabs with dynamic data (icon + title + amount + percentage)
@@ -183,6 +206,15 @@ public final class HomePieChartController {
                                            View root,
                                            List<CategorySummary> summaries,
                                            long totalSpent) {
+        updateCategoryTabs(context, root, summaries, totalSpent, null);
+    }
+
+    // Update category tabs with click listener support
+    private static void updateCategoryTabs(Context context,
+                                           View root,
+                                           List<CategorySummary> summaries,
+                                           long totalSpent,
+                                           CategoryTabClickListener clickListener) {
         LinearLayout container = root.findViewById(R.id.container_category_tabs);
         if (container == null) {
             return;
@@ -238,6 +270,18 @@ public final class HomePieChartController {
             );
             params.rightMargin = (int) (8 * density);
             itemView.setLayoutParams(params);
+
+            // Make tab clickable
+            if (clickListener != null) {
+                final CategorySummary finalSummary = summary;
+                itemView.setOnClickListener(v -> {
+                    if (clickListener != null) {
+                        clickListener.onCategoryTabClick(finalSummary.name, finalSummary.iconResId);
+                    }
+                });
+                itemView.setClickable(true);
+                itemView.setFocusable(true);
+            }
 
             container.addView(itemView);
         }

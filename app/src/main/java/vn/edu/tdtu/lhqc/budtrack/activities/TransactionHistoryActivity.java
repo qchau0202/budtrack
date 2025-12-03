@@ -34,7 +34,7 @@ import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
 import vn.edu.tdtu.lhqc.budtrack.adapters.TransactionHistoryAdapter;
-import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionDetailBottomSheet;
+import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionDetailFragment;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
@@ -62,7 +62,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         View mainLayout = findViewById(R.id.main);
         ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(48, systemBars.top, 48, systemBars.bottom);
+            v.setPadding(0, systemBars.top, 0, 0);
             return insets;
         });
 
@@ -183,10 +183,14 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             TransactionHistoryAdapter adapter = new TransactionHistoryAdapter(dailyGroups);
             adapter.setOnTransactionClickListener(transaction -> {
                 if (transaction != null) {
-                    TransactionDetailBottomSheet bottomSheet = TransactionDetailBottomSheet.newInstance(
+                    TransactionDetailFragment detailFragment = TransactionDetailFragment.newInstance(
                             transaction.getTransactionId()
                     );
-                    bottomSheet.show(getSupportFragmentManager(), TransactionDetailBottomSheet.TAG);
+                    getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, detailFragment, "TRANSACTION_DETAIL_FRAGMENT")
+                        .addToBackStack(null)
+                        .commit();
                 }
             });
             recyclerView.setAdapter(adapter);

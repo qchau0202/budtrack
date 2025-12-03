@@ -248,7 +248,18 @@ public class HomeFragment extends Fragment {
     
     private void setupPieChart(View root) {
         // Delegate pie chart logic to controller to keep fragment lean
-        HomePieChartController.updatePieChartAndTabs(requireContext(), root);
+        HomePieChartController.updatePieChartAndTabs(requireContext(), root, 
+            (categoryName, categoryIconResId) -> {
+                // Navigate to category transactions fragment
+                CategoryTransactionsFragment fragment = CategoryTransactionsFragment.newInstance(
+                    categoryName, categoryIconResId
+                );
+                requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment, "CATEGORY_TRANSACTIONS_FRAGMENT")
+                    .addToBackStack(null)
+                    .commit();
+            });
     }
 
     private void setupAnalyticsTabs(View root) {

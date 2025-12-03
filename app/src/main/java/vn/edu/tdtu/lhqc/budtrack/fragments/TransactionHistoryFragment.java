@@ -27,6 +27,7 @@ import java.util.Locale;
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.activities.TransactionHistoryActivity;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
+import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionDetailFragment;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
@@ -198,6 +199,20 @@ public class TransactionHistoryFragment extends Fragment {
             DashboardFragment.RESULT_KEY_DATE_SELECTED);
     }
 
+    /**
+     * Called by parent fragments (e.g., DashboardFragment) when a date is selected.
+     * This provides a direct, reliable way to keep the preview list in sync with the calendar,
+     * in addition to the FragmentResult mechanism.
+     */
+    public void setSelectedDate(long dateMillis) {
+        if (dateMillis <= 0) return;
+        selectedDate.setTimeInMillis(dateMillis);
+        // If view is already created, refresh immediately, otherwise onResume will handle it.
+        if (getView() != null && isAdded() && !isDetached()) {
+            getView().post(this::refreshTransactions);
+        }
+    }
+
     private void loadTransactions(LinearLayout listIncome, LinearLayout listExpenses) {
         // Clear existing views
         if (listIncome != null) {
@@ -361,10 +376,14 @@ public class TransactionHistoryFragment extends Fragment {
             
             // Make row clickable
             rowView.setOnClickListener(v -> {
-                TransactionDetailBottomSheet bottomSheet = TransactionDetailBottomSheet.newInstance(
+                TransactionDetailFragment detailFragment = TransactionDetailFragment.newInstance(
                     transaction.getId()
                 );
-                bottomSheet.show(getParentFragmentManager(), TransactionDetailBottomSheet.TAG);
+                requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, detailFragment, "TRANSACTION_DETAIL_FRAGMENT")
+                    .addToBackStack(null)
+                    .commit();
             });
             rowView.setClickable(true);
             rowView.setFocusable(true);
@@ -383,6 +402,6 @@ public class TransactionHistoryFragment extends Fragment {
             }
         }
         return null;
-                    }
+    }
 
 }
