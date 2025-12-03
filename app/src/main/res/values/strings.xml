@@ -321,6 +321,11 @@
     <string name="wallet_delete_title">Delete Wallet</string>
     <string name="wallet_delete_message">Are you sure you want to delete wallet "%1$s"?\nThis action cannot be undone.</string>
     <string name="wallet_deleted">Wallet "%1$s" deleted</string>
+    <!-- Budget delete -->
+    <string name="budget_delete_title">Delete Budget</string>
+    <string name="budget_delete_message">Are you sure you want to delete budget "%1$s"?\nThis action cannot be undone.</string>
+    <string name="budget_delete_button">Delete</string>
+    <string name="budget_deleted">Budget deleted</string>
     <!--Wallet Type Selection-->
     <string name="wallet_type_selection_title">Add Wallet</string>
     <string name="wallet_type_selection_description">Choose a wallet type that suits you</string>

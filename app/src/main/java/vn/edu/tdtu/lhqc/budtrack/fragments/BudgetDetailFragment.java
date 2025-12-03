@@ -1,6 +1,8 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
+import android.graphics.Color;
 import android.graphics.drawable.ClipDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RoundRectShape;
@@ -13,20 +15,21 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
@@ -118,6 +121,12 @@ public class BudgetDetailFragment extends Fragment {
             });
         }
 
+        // Setup delete button
+        ImageButton btnDelete = root.findViewById(R.id.btn_delete);
+        if (btnDelete != null) {
+            btnDelete.setOnClickListener(v -> showDeleteConfirmationDialog(budgetId, budgetName));
+        }
+
         // Setup edit button
         ImageButton btnEdit = root.findViewById(R.id.btn_edit);
         if (btnEdit != null) {
@@ -193,6 +202,62 @@ public class BudgetDetailFragment extends Fragment {
 
         // Load and display transactions dynamically
         loadAndDisplayTransactions(root);
+    }
+
+    private void showDeleteConfirmationDialog(long budgetId, String budgetName) {
+        if (getContext() == null || budgetId <= 0) return;
+
+        View dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_wallet_delete_confirmation, null);
+
+        TextView dialogTitle = dialogView.findViewById(R.id.dialog_title);
+        TextView dialogMessage = dialogView.findViewById(R.id.dialog_message);
+        MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        MaterialButton btnDelete = dialogView.findViewById(R.id.btn_delete);
+
+        if (dialogTitle != null) {
+            dialogTitle.setText(R.string.budget_delete_title);
+        }
+        if (dialogMessage != null) {
+            String name = (budgetName != null && !budgetName.isEmpty())
+                    ? budgetName
+                    : getString(R.string.budget);
+            dialogMessage.setText(getString(R.string.budget_delete_message, name));
+        }
+        if (btnDelete != null) {
+            btnDelete.setText(R.string.budget_delete_button);
+        }
+
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        if (btnCancel != null) {
+            btnCancel.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        if (btnDelete != null) {
+            btnDelete.setOnClickListener(v -> {
+                // Remove budget and its category relationships
+                BudgetManager.removeBudget(requireContext(), budgetId);
+                BudgetCategoryManager.removeAllForBudget(requireContext(), budgetId);
+
+                Toast.makeText(requireContext(),
+                        getString(R.string.budget_deleted), Toast.LENGTH_SHORT).show();
+
+                dialog.dismiss();
+
+                // Close detail screen
+                if (isAdded()) {
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                }
+            });
+        }
+
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
     }
 
     private void setupBalanceSection(View root, long budgetAmount, long spentAmount, int colorResId, Integer customColor) {
