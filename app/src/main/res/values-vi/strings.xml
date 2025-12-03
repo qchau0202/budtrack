@@ -319,6 +319,11 @@
     <string name="wallet_delete_title">Xóa ví</string>
     <string name="wallet_delete_message">Bạn có chắc chắn muốn xóa ví "%1$s"?\nHành động này không thể hoàn tác.</string>
     <string name="wallet_deleted">Đã xóa ví "%1$s"</string>
+    <!-- Budget delete -->
+    <string name="budget_delete_title">Xóa ngân sách</string>
+    <string name="budget_delete_message">Bạn có chắc chắn muốn xóa ngân sách "%1$s"?\nHành động này không thể hoàn tác.</string>
+    <string name="budget_delete_button">Xóa</string>
+    <string name="budget_deleted">Đã xóa ngân sách</string>
     <!--Wallet Type Selection-->
     <string name="wallet_type_selection_title">Thêm Ví</string>
     <string name="wallet_type_selection_description">Chọn loại ví phù hợp với bạn</string>

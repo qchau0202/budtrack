@@ -845,7 +845,24 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
         }
 
         try {
-            long budgetAmount = (long) CurrencyUtils.parseFormattedNumber(amountText);
+            // Parse user-entered amount in the current display currency
+            double amount = CurrencyUtils.parseFormattedNumber(amountText);
+
+            // Convert from display currency to stored currency (VND)
+            String selectedCurrency = SettingsHandler.getCurrency(requireContext());
+            long budgetAmount;
+            if ("USD".equals(selectedCurrency)) {
+                float exchangeRate = SettingsHandler.getExchangeRate(requireContext());
+                if (exchangeRate <= 0f) {
+                    // Fallback: avoid dividing/multiplying by zero; treat as 1:1 if misconfigured
+                    exchangeRate = 1f;
+                }
+                budgetAmount = (long) (amount * exchangeRate);
+            } else {
+                // VND mode: amount is already in VND
+                budgetAmount = (long) amount;
+            }
+
             if (budgetAmount <= 0) {
                 Toast.makeText(requireContext(), getString(R.string.budget_amount_invalid), Toast.LENGTH_SHORT).show();
                 if (editBudgetAmount != null) editBudgetAmount.requestFocus();
