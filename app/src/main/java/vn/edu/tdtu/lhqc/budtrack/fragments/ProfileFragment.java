@@ -60,6 +60,14 @@ public class ProfileFragment extends Fragment {
     // Permission launcher for notification permission
     private ActivityResultLauncher<String> notificationPermissionLauncher;
 
+    // Launcher for picking profile image
+    private ActivityResultLauncher<String> pickImageLauncher;
+    private ImageView imgProfilePicture;
+    private String profileImagePath;
+    private static final String PROFILE_IMAGE_FILE = "profile_image.jpg";
+    private static final String PREFS_NAME = "profile_prefs";
+    private static final String KEY_PROFILE_IMAGE_URI = "profile_image_uri";
+
     public ProfileFragment() {
         // Required empty public constructor
     }
@@ -111,12 +119,64 @@ public class ProfileFragment extends Fragment {
                     }
                 }
         );
+
+        // Initialize image picker launcher
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null && imgProfilePicture != null) {
+                        try {
+                            // Copy image to internal storage
+                            java.io.InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
+                            java.io.File file = new java.io.File(requireContext().getFilesDir(), PROFILE_IMAGE_FILE);
+                            java.io.OutputStream outputStream = new java.io.FileOutputStream(file);
+                            byte[] buffer = new byte[4096];
+                            int bytesRead;
+                            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                outputStream.write(buffer, 0, bytesRead);
+                            }
+                            inputStream.close();
+                            outputStream.close();
+                            // Save file path
+                            profileImagePath = file.getAbsolutePath();
+                            requireActivity().getSharedPreferences(PREFS_NAME, 0)
+                                    .edit()
+                                    .putString(KEY_PROFILE_IMAGE_URI, profileImagePath)
+                                    .apply();
+                            // Display image
+                            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(profileImagePath);
+                            imgProfilePicture.setImageBitmap(bitmap);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        );
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        // Profile picture
+        imgProfilePicture = root.findViewById(R.id.img_profile_picture);
+        if (imgProfilePicture != null) {
+            imgProfilePicture.setOnClickListener(v -> {
+                // Launch gallery picker
+                pickImageLauncher.launch("image/*");
+            });
+            // Load saved profile image from internal storage
+            String savedPath = requireActivity().getSharedPreferences(PREFS_NAME, 0)
+                    .getString(KEY_PROFILE_IMAGE_URI, null);
+            if (savedPath != null) {
+                java.io.File file = new java.io.File(savedPath);
+                if (file.exists()) {
+                    android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(savedPath);
+                    imgProfilePicture.setImageBitmap(bitmap);
+                }
+            }
+        }
 
         // Personal info values
         TextView tvName = root.findViewById(R.id.tv_name_value);
