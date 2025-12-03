@@ -1,8 +1,13 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -16,6 +21,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -27,10 +34,21 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.Text;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.TextRecognizer;
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
+import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.category.CategoryManager;
@@ -47,18 +65,18 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
 
     public static final String TAG = "TransactionFragment";
     public static final String RESULT_KEY_TRANSACTION_CREATED = "transaction_created";
-    
+
     // Transaction types
     private static final String TYPE_EXPENSE = "expense";
     private static final String TYPE_INCOME = "income";
     private static final String TYPE_OTHERS = "others";
-    
+
     private MaterialButton tabExpense, tabIncome, tabOthers, btnSave;
     private TextView tvDate, tvCategory, tvCancel, tvTitle, tvWallet, tvTime, tvLocation, tvCurrency;
     private EditText editAmount, editNote, editTitle;
     private View cardDate, cardCategory, cardWallet, cardTime, cardLocation;
     private ImageView ivCategoryIcon;
-    
+
     // Location data
     private String selectedLocationAddress = null;
     private Double selectedLocationLat = null;
@@ -72,11 +90,17 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
     private Wallet selectedWallet = null;
     private boolean isOCR = false;
 
+    // ML Kit OCR variables
+    private ActivityResultLauncher<Void> takePictureLauncher;
+    private ActivityResultLauncher<String> pickImageLauncher; // For gallery
+    private ActivityResultLauncher<String> requestPermissionLauncher;
+    private TextRecognizer recognizer;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(BottomSheetDialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogTheme);
-        
+
         // Read transaction type from arguments
         Bundle args = getArguments();
         if (args != null) {
@@ -90,44 +114,299 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             }
             isOCR = args.getBoolean("is_ocr", false);
         }
-        
-        // Set up Fragment Result listener for location selection using activity's fragment manager
-        // This ensures it works even if the bottom sheet is dismissed
-        requireActivity().getSupportFragmentManager().setFragmentResultListener(
-            MapFragment.RESULT_KEY_LOCATION,
-            this,
-            (requestKey, result) -> {
-                if (MapFragment.RESULT_KEY_LOCATION.equals(requestKey)) {
-                    String address = result.getString(MapFragment.RESULT_LOCATION_ADDRESS);
-                    double lat = result.getDouble(MapFragment.RESULT_LOCATION_LAT);
-                    double lng = result.getDouble(MapFragment.RESULT_LOCATION_LNG);
-                    selectLocation(address, lat, lng);
+
+        // --- ML KIT OCR SETUP START ---
+        // 1. Initialize the TextRecognizer
+        recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+
+        // 2. Initialize the ActivityResultLauncher for taking a picture
+        takePictureLauncher = registerForActivityResult(
+                new ActivityResultContracts.TakePicturePreview(),
+                bitmap -> {
+                    if (bitmap != null) {
+                        // Image was captured successfully, now process it for text
+                        processImageForText(bitmap);
+                    } else {
+                        // Handle case where user cancelled or there was an error
+                        Toast.makeText(requireContext(), "Failed to capture image", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
         );
-        
+
+        // 3. Initialize the ActivityResultLauncher for picking an image from the gallery
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        try {
+                            // Convert URI to Bitmap
+                            Bitmap bitmap = MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), uri);
+                            processImageForText(bitmap);
+                        } catch (IOException e) {
+                            Toast.makeText(requireContext(), "Failed to load image from gallery", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        );
+
+        // 4. Initialize the permission launcher for the camera
+        requestPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        // Permission granted, launch the camera
+                        takePictureLauncher.launch(null);
+                    } else {
+                        // Permission denied, inform the user
+                        Toast.makeText(requireContext(), "Camera permission is required to scan receipts", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+        // --- ML KIT OCR SETUP END ---
+
+        // Set up Fragment Result listener for location selection using activity's fragment manager
+        requireActivity().getSupportFragmentManager().setFragmentResultListener(
+                MapFragment.RESULT_KEY_LOCATION,
+                this,
+                (requestKey, result) -> {
+                    if (MapFragment.RESULT_KEY_LOCATION.equals(requestKey)) {
+                        String address = result.getString(MapFragment.RESULT_LOCATION_ADDRESS);
+                        double lat = result.getDouble(MapFragment.RESULT_LOCATION_LAT);
+                        double lng = result.getDouble(MapFragment.RESULT_LOCATION_LNG);
+                        selectLocation(address, lat, lng);
+                    }
+                }
+        );
+
         // Listen for currency changes to refresh UI immediately
         requireActivity().getSupportFragmentManager().setFragmentResultListener(
-            "currency_changed",
-            this,
-            (requestKey, result) -> {
-                if ("currency_changed".equals(requestKey)) {
-                    // Update currency text when currency changes
-                    updateCurrencyText();
+                "currency_changed",
+                this,
+                (requestKey, result) -> {
+                    if ("currency_changed".equals(requestKey)) {
+                        updateCurrencyText();
+                    }
                 }
-            }
         );
     }
-    
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Find the OCR scan button and set its listener
+        view.findViewById(R.id.btnScanReceipt).setOnClickListener(v -> {
+            // Show a dialog to let the user choose between Camera and Gallery
+            showImageSourceDialog();
+        });
+
         // Restore transaction state if reopening after location selection
         restoreTransactionState();
         // Check for stored location when view is created
         checkForStoredLocation();
     }
-    
+
+    /**
+     * Shows a dialog to let the user choose between taking a new photo or picking one from the gallery.
+     */
+    private void showImageSourceDialog() {
+        if (getContext() == null) return;
+        CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext());
+        builder.setTitle("Scan Receipt");
+        builder.setItems(options, (dialog, item) -> {
+            if (options[item].equals("Take Photo")) {
+                // Check for camera permission before launching
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                    takePictureLauncher.launch(null);
+                } else {
+                    requestPermissionLauncher.launch(Manifest.permission.CAMERA);
+                }
+            } else if (options[item].equals("Choose from Gallery")) {
+                pickImageLauncher.launch("image/*");
+            } else if (options[item].equals("Cancel")) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
+
+    // --- ML KIT OCR HELPER METHODS START ---
+    private void processImageForText(Bitmap bitmap) {
+        // Show a progress indicator to the user
+        Toast.makeText(requireContext(), "Scanning receipt...", Toast.LENGTH_SHORT).show();
+
+        InputImage image = InputImage.fromBitmap(bitmap, 0);
+
+        recognizer.process(image)
+                .addOnSuccessListener((com.google.mlkit.vision.text.Text visionText) -> {
+                    // Task completed successfully
+                    showOcrResultDialog(visionText);
+                })
+                .addOnFailureListener(e -> {
+                    // Task failed with an exception
+                    Toast.makeText(requireContext(), "Text recognition failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+    }
+
+    /**
+     * Displays the full OCR text in a dialog and proceeds to parse it on confirmation.
+     * @param visionText The recognized text object from ML Kit.
+     */
+    private void showOcrResultDialog(Text visionText) {
+        String fullText = visionText.getText();
+
+        if (getContext() == null) return;
+
+        new MaterialAlertDialogBuilder(getContext())
+                .setTitle("Scanned Text")
+                .setMessage(fullText.isEmpty() ? "No text found." : fullText)
+                .setPositiveButton("Continue", (dialog, which) -> {
+                    // User confirmed, now parse the text and fill fields
+                    findAndSetTransactionDetails(visionText);
+
+                    // Also set the full text to the note for user reference
+                    if (editNote != null && editNote.getText().toString().isEmpty()) {
+                        editNote.setText("--- OCR Result ---\n" + fullText);
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+
+    /**
+     * UPGRADED: Intelligently parses the OCR result to find the total amount and a possible title.
+     * This version uses a stricter Regex and a scoring system, and prioritizes the last number found
+     * if keyword search fails, as the total is often the last number on a receipt.
+     * * IMPORTANT FIX: Uses NumberFormat with Locale.ROOT to correctly parse decimal points ('.')
+     * regardless of the device's locale settings, solving the 84.80 -> 848 issue.
+     * * @param visionText The recognized text object from ML Kit.
+     */
+    private void findAndSetTransactionDetails(Text visionText) {
+        List<String> totalKeywords = Arrays.asList(
+                "grand total", "total", "thành tiền", "tổng cộng", "amount due", "balance"
+        );
+        String potentialTitle = "";
+        double finalAmount = -1.0;
+
+        // Regex for currency values: Looks for numbers with optional comma groups, and an optional decimal part (1 or 2 digits).
+        Pattern numberPattern = Pattern.compile("\\b\\d{1,3}(,?\\d{3})*(\\.\\d{1,2})?\\b");
+
+        // NumberFormat instance with Locale.ROOT to ensure '.' is always the decimal separator.
+        java.text.NumberFormat nf = java.text.NumberFormat.getInstance(Locale.ROOT);
+
+        // Track numbers for fallback logic
+        double largestFallbackAmount = -1.0;
+        double lastFoundAmount = -1.0; // The very last number found in the entire document
+
+        // --- PASS 1: Search for keywords and find all numbers ---
+        double keywordAmount = -1.0;
+        int bestKeywordScore = -1;
+
+        for (Text.TextBlock block : visionText.getTextBlocks()) {
+
+            for (Text.Line line : block.getLines()) {
+                String lineText = line.getText().toLowerCase(Locale.ROOT);
+
+                // --- Title Finding Logic ---
+                if (potentialTitle.isEmpty()
+                        && !lineText.matches(".*\\d+.*") // Doesn't contain many digits
+                        && lineText.length() > 3
+                        && lineText.length() < 50) {
+                    potentialTitle = line.getText();
+                }
+
+                // --- Keyword Search Logic (Prioritized) ---
+                for (int i = 0; i < totalKeywords.size(); i++) {
+                    String keyword = totalKeywords.get(i);
+                    if (lineText.contains(keyword)) {
+                        Matcher matcher = numberPattern.matcher(line.getText());
+                        double lineMaxNumber = -1;
+
+                        while (matcher.find()) {
+                            try {
+                                // 1. Standardize: Remove commas (assuming they are thousand separators)
+                                String standardizedStr = matcher.group().replaceAll(",", "");
+
+                                // 2. Parse: Use Locale.ROOT to force '.' as decimal separator
+                                double currentNumber = nf.parse(standardizedStr).doubleValue();
+                                lineMaxNumber = Math.max(lineMaxNumber, currentNumber);
+                            } catch (java.text.ParseException | NumberFormatException ignored) {
+                                // Ignore parsing errors (e.g., if group is just a dot)
+                            }
+                        }
+
+                        if (lineMaxNumber != -1) {
+                            // Score: high score for strong keywords like "total"
+                            int currentScore = totalKeywords.size() - i;
+                            if (currentScore > bestKeywordScore) {
+                                bestKeywordScore = currentScore;
+                                keywordAmount = lineMaxNumber;
+                            }
+                        }
+                    }
+                }
+
+                // --- Find All Numbers for Fallback ---
+                Matcher allNumbersMatcher = numberPattern.matcher(line.getText());
+                while (allNumbersMatcher.find()) {
+                    try {
+                        // 1. Standardize: Remove commas
+                        String standardizedStr = allNumbersMatcher.group().replaceAll(",", "");
+
+                        // 2. Parse: Use Locale.ROOT to force '.' as decimal separator
+                        double currentNumber = nf.parse(standardizedStr).doubleValue();
+
+                        largestFallbackAmount = Math.max(largestFallbackAmount, currentNumber);
+                        lastFoundAmount = currentNumber; // Update the absolute last number found
+                    } catch (java.text.ParseException | NumberFormatException ignored) {}
+                }
+            }
+        }
+
+
+        // --- PASS 2: Determine Final Amount ---
+
+        if (keywordAmount != -1.0) {
+            // 1. Success with Keyword Match
+            finalAmount = keywordAmount;
+            Toast.makeText(requireContext(), "Found amount based on keyword: " + finalAmount, Toast.LENGTH_SHORT).show();
+
+        } else if (lastFoundAmount != -1.0 && lastFoundAmount > 1.0) {
+            // 2. Fallback to the Absolute Last Number (Often the total and is a reasonable value > 1.0)
+            finalAmount = lastFoundAmount;
+            Toast.makeText(requireContext(), "Found amount as last number: " + finalAmount, Toast.LENGTH_SHORT).show();
+
+        } else if (largestFallbackAmount != -1.0) {
+            // 3. Fallback to the Largest Number Found
+            finalAmount = largestFallbackAmount;
+            Toast.makeText(requireContext(), "Found amount as largest number: " + finalAmount, Toast.LENGTH_SHORT).show();
+        }
+
+
+        // Set the found amount in the EditText
+        if (finalAmount != -1.0 && editAmount != null) {
+            // Use DecimalFormat to format the double before setting it to the EditText
+            DecimalFormat formatter = new DecimalFormat("#.##");
+            editAmount.setText(formatter.format(finalAmount));
+        } else {
+            Toast.makeText(requireContext(), "Could not confidently determine the transaction amount.", Toast.LENGTH_LONG).show();
+        }
+
+        // Set a potential title
+        if (!potentialTitle.isEmpty() && editTitle != null && editTitle.getText().toString().isEmpty()) {
+            // Clean up the title a bit (remove leading/trailing symbols)
+            String cleanedTitle = potentialTitle.replaceAll("^[\\s\\p{Punct}]+|[\\s\\p{Punct}]+$", "");
+            editTitle.setText(cleanedTitle);
+        }
+    }
+    // --- ML KIT OCR HELPER METHODS END ---
+
+
     @Override
     public void onResume() {
         super.onResume();
@@ -138,21 +417,21 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         // Update currency text in case it changed
         updateCurrencyText();
     }
-    
+
     private void checkForStoredLocation() {
         if (getContext() == null) {
             return;
         }
-        
+
         android.content.SharedPreferences prefs = requireContext().getSharedPreferences("location_selection", android.content.Context.MODE_PRIVATE);
         if (prefs.getBoolean("has_location", false)) {
             String address = prefs.getString("address", "");
             float lat = prefs.getFloat("lat", 0f);
             float lng = prefs.getFloat("lng", 0f);
-            
+
             // Clear the stored location
             prefs.edit().clear().apply();
-            
+
             // Apply the location
             if (!address.isEmpty()) {
                 selectLocation(address, lat, lng);
@@ -230,11 +509,11 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         updateCategoryText(); // Initialize category text to "None"
         updateLocationText(); // Initialize location text to "None"
         updateCurrencyText(); // Initialize currency text dynamically
-        
+
         // Setup IME action handlers for Enter key navigation
         setupImeActions();
     }
-    
+
     /**
      * Setup IME action handlers to navigate through form fields when Enter is pressed.
      */
@@ -242,8 +521,8 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         // Title field: Enter -> focus on Amount field
         if (editTitle != null) {
             editTitle.setOnEditorActionListener((v, actionId, event) -> {
-                if (actionId == EditorInfo.IME_ACTION_NEXT || 
-                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                if (actionId == EditorInfo.IME_ACTION_NEXT ||
+                        (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
                     if (editAmount != null) {
                         editAmount.requestFocus();
                         // Show keyboard for amount field
@@ -257,12 +536,12 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 return false;
             });
         }
-        
+
         // Amount field: Enter -> open Wallet selection
         if (editAmount != null) {
             editAmount.setOnEditorActionListener((v, actionId, event) -> {
-                if (actionId == EditorInfo.IME_ACTION_NEXT || 
-                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                if (actionId == EditorInfo.IME_ACTION_NEXT ||
+                        (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
                     // Hide keyboard first
                     hideKeyboard();
                     // Open wallet selection
@@ -274,12 +553,12 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 return false;
             });
         }
-        
+
         // Note field: Enter -> Save transaction (if all required fields are filled)
         if (editNote != null) {
             editNote.setOnEditorActionListener((v, actionId, event) -> {
-                if (actionId == EditorInfo.IME_ACTION_DONE || 
-                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                if (actionId == EditorInfo.IME_ACTION_DONE ||
+                        (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
                     // Hide keyboard
                     hideKeyboard();
                     // Try to save if all required fields are filled
@@ -292,7 +571,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             });
         }
     }
-    
+
     /**
      * Hide the soft keyboard.
      */
@@ -342,12 +621,12 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 selectedTab = tabOthers;
                 break;
         }
-        
+
         if (selectedTab != null) {
             TabStyleUtils.applySelectedStyle(requireContext(), selectedTab);
         }
     }
-    
+
 
     private void setupDatePicker() {
         cardDate.setOnClickListener(v -> showDatePicker());
@@ -506,7 +785,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         cardCategory.setOnClickListener(v -> showCategorySelectionSheet());
 
         cardWallet.setOnClickListener(v -> showWalletSelectionSheet());
-        
+
         cardLocation.setOnClickListener(v -> showLocationSelectionMap());
 
         btnSave.setOnClickListener(v -> saveTransaction());
@@ -539,9 +818,9 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         if (selectedCategory != null && selectedCategoryIconResId != 0) {
             // Show category with icon
             ivCategoryIcon.setImageResource(selectedCategoryIconResId);
-        ivCategoryIcon.setVisibility(View.VISIBLE);
+            ivCategoryIcon.setVisibility(View.VISIBLE);
             tvCategory.setText(selectedCategory);
-        tvCategory.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
+            tvCategory.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
         } else {
             // Show "None" when no category selected
             ivCategoryIcon.setVisibility(View.GONE);
@@ -573,29 +852,29 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             public void onCreateWalletRequested() {
                 // Save transaction state before opening wallet creation
                 saveTransactionState();
-                
+
                 // Open wallet type selection (same flow as WalletFragment)
                 showWalletTypeSelectionForTransaction();
             }
         });
         sheet.show(getParentFragmentManager(), WalletSelectBottomSheet.TAG);
     }
-    
+
     /**
      * Show wallet type selection bottom sheet for creating a wallet from transaction create.
      * Follows the same flow as WalletFragment.
      */
     private void showWalletTypeSelectionForTransaction() {
-        com.google.android.material.bottomsheet.BottomSheetDialog dialog = 
-            new com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme);
+        com.google.android.material.bottomsheet.BottomSheetDialog dialog =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme);
         View view = LayoutInflater.from(requireContext()).inflate(R.layout.view_bottom_sheet_wallet_type_selection, null);
         dialog.setContentView(view);
 
         // Configure bottom sheet to expand fully and disable dragging
         View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (bottomSheet != null) {
-            com.google.android.material.bottomsheet.BottomSheetBehavior<View> behavior = 
-                com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet);
+            com.google.android.material.bottomsheet.BottomSheetBehavior<View> behavior =
+                    com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet);
             behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
             behavior.setSkipCollapsed(true);
             behavior.setDraggable(false);
@@ -619,28 +898,28 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
 
         dialog.show();
     }
-    
+
     /**
      * Open wallet creation dialog from transaction create.
      */
     private void openWalletCreateForTransaction(String walletTypeName, int iconResId) {
         WalletCreateFragment createFragment = WalletCreateFragment.newInstance(walletTypeName, iconResId);
         createFragment.show(getParentFragmentManager(), WalletCreateFragment.TAG);
-        
+
         // Listen for wallet creation result
         getParentFragmentManager().setFragmentResultListener(
-            WalletCreateFragment.RESULT_KEY,
-            this,
-            (requestKey, result) -> {
-                if (WalletCreateFragment.RESULT_KEY.equals(requestKey)) {
-                    handleWalletCreationResult(result);
-                    // Remove listener after handling
-                    getParentFragmentManager().clearFragmentResultListener(WalletCreateFragment.RESULT_KEY);
+                WalletCreateFragment.RESULT_KEY,
+                this,
+                (requestKey, result) -> {
+                    if (WalletCreateFragment.RESULT_KEY.equals(requestKey)) {
+                        handleWalletCreationResult(result);
+                        // Remove listener after handling
+                        getParentFragmentManager().clearFragmentResultListener(WalletCreateFragment.RESULT_KEY);
+                    }
                 }
-            }
         );
     }
-    
+
     /**
      * Handle wallet creation result - create wallet and select it.
      */
@@ -650,24 +929,24 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         long balance = result.getLong(WalletCreateFragment.RESULT_WALLET_BALANCE);
         int iconResId = result.getInt(WalletCreateFragment.RESULT_WALLET_ICON);
         String walletType = result.getString(WalletCreateFragment.RESULT_WALLET_TYPE, walletName);
-        
+
         if (walletName == null || walletName.isEmpty()) {
             return; // Invalid result
         }
-        
+
         // Create the wallet using WalletManager (same as WalletFragment.addNewWallet)
         Wallet newWallet = new Wallet(walletName, balance, iconResId, walletType);
         vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager.addWallet(requireContext(), newWallet);
-        
+
         // Small delay to ensure wallet is saved, then reload and select
         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
             if (!isAdded() || getView() == null) {
                 return;
             }
-            
+
             // Restore transaction state
             restoreTransactionState();
-            
+
             // Reload wallets to get the wallet with assigned ID
             java.util.List<Wallet> wallets = vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager.getWallets(requireContext());
             Wallet createdWallet = null;
@@ -677,12 +956,12 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                     break;
                 }
             }
-            
+
             // If wallet not found by name, try to get the last one (most recently created)
             if (createdWallet == null && !wallets.isEmpty()) {
                 createdWallet = wallets.get(wallets.size() - 1);
             }
-            
+
             // Select the newly created wallet
             if (createdWallet != null) {
                 selectWallet(createdWallet);
@@ -694,7 +973,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         selectedWallet = wallet;
         updateWalletText();
     }
-        
+
     private void updateWalletText() {
         // Update wallet text
         if (selectedWallet != null) {
@@ -709,10 +988,10 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
     private void showLocationSelectionMap() {
         // Save ALL transaction state before dismissing
         saveTransactionState();
-        
+
         // Dismiss bottom sheet first so map is visible
         dismiss();
-        
+
         // Navigate to MapFragment in location selection mode
         MapFragment mapFragment = MapFragment.newInstanceForLocationSelection();
         requireActivity().getSupportFragmentManager()
@@ -721,34 +1000,37 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 .addToBackStack(null)
                 .commit();
     }
-    
+
     private void saveTransactionState() {
+        if (getContext() == null) {
+            return;
+        }
         android.content.SharedPreferences prefs = requireContext().getSharedPreferences("transaction_state", android.content.Context.MODE_PRIVATE);
         android.content.SharedPreferences.Editor editor = prefs.edit();
-        
+
         // Save transaction type and OCR flag
         editor.putString("transaction_type", selectedType);
         editor.putBoolean("is_ocr", isOCR);
         editor.putBoolean("should_reopen", true);
-        
+
         // Save amount
         if (editAmount != null) {
             String amountText = editAmount.getText().toString().trim();
             editor.putString("amount", amountText);
         }
-        
+
         // Save title
         if (editTitle != null) {
             String titleText = editTitle.getText().toString().trim();
             editor.putString("title", titleText);
         }
-        
+
         // Save note
         if (editNote != null) {
             String noteText = editNote.getText().toString().trim();
             editor.putString("note", noteText);
         }
-        
+
         // Save wallet
         if (selectedWallet != null) {
             editor.putString("wallet_name", selectedWallet.getName());
@@ -757,7 +1039,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             editor.remove("wallet_name");
             editor.remove("wallet_id");
         }
-        
+
         // Save category
         if (selectedCategory != null) {
             editor.putString("category_name", selectedCategory);
@@ -766,13 +1048,13 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             editor.remove("category_name");
             editor.remove("category_icon_res_id");
         }
-        
+
         // Save date
         editor.putLong("selected_date_millis", selectedDate.getTimeInMillis());
-        
+
         // Save time
         editor.putLong("selected_time_millis", selectedTime.getTimeInMillis());
-        
+
         // Save location (if already selected)
         if (selectedLocationAddress != null) {
             editor.putString("location_address", selectedLocationAddress);
@@ -783,51 +1065,48 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         if (selectedLocationLng != null) {
             editor.putFloat("location_lng", selectedLocationLng.floatValue());
         }
-        
+
         editor.apply();
     }
-    
+
     private void restoreTransactionState() {
         if (getContext() == null) {
             return;
         }
-        
+
         android.content.SharedPreferences prefs = requireContext().getSharedPreferences("transaction_state", android.content.Context.MODE_PRIVATE);
-        
+
         // Check if we should restore state
         if (!prefs.getBoolean("should_reopen", false)) {
             return;
         }
-        
-        // Clear the flag after checking (we'll restore it if needed)
-        // But don't clear all state yet - only clear when transaction is saved or cancelled
-        
+
         // Restore transaction type
         String savedType = prefs.getString("transaction_type", TYPE_EXPENSE);
         selectedType = savedType;
         updateTabSelection();
-        
+
         // Restore OCR flag
         isOCR = prefs.getBoolean("is_ocr", false);
-        
+
         // Restore amount
         String savedAmount = prefs.getString("amount", "");
         if (!savedAmount.isEmpty() && editAmount != null) {
             editAmount.setText(savedAmount);
         }
-        
+
         // Restore title
         String savedTitle = prefs.getString("title", "");
         if (!savedTitle.isEmpty() && editTitle != null) {
             editTitle.setText(savedTitle);
         }
-        
+
         // Restore note
         String savedNote = prefs.getString("note", "");
         if (!savedNote.isEmpty() && editNote != null) {
             editNote.setText(savedNote);
         }
-        
+
         // Restore wallet
         String savedWalletName = prefs.getString("wallet_name", null);
         if (savedWalletName != null) {
@@ -844,7 +1123,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 }
             }
         }
-        
+
         // Restore category
         String savedCategoryName = prefs.getString("category_name", null);
         if (savedCategoryName != null) {
@@ -855,23 +1134,22 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
                 updateCategoryText();
             }
         }
-        
+
         // Restore date
         long savedDateMillis = prefs.getLong("selected_date_millis", -1);
         if (savedDateMillis != -1) {
             selectedDate.setTimeInMillis(savedDateMillis);
             updateDateText();
         }
-        
+
         // Restore time
         long savedTimeMillis = prefs.getLong("selected_time_millis", -1);
         if (savedTimeMillis != -1) {
             selectedTime.setTimeInMillis(savedTimeMillis);
             updateTimeText();
         }
-        
+
         // Restore location (if not already set from location selection)
-        // First check if location was selected from map (has_location flag)
         android.content.SharedPreferences locationPrefs = requireContext().getSharedPreferences("location_selection", android.content.Context.MODE_PRIVATE);
         if (locationPrefs.getBoolean("has_location", false)) {
             // Location was just selected from map, use that
@@ -879,7 +1157,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             float lat = locationPrefs.getFloat("lat", 0f);
             float lng = locationPrefs.getFloat("lng", 0f);
             locationPrefs.edit().clear().apply(); // Clear location selection prefs
-            
+
             if (!address.isEmpty() && lat != 0f && lng != 0f) {
                 selectedLocationAddress = address;
                 selectedLocationLat = (double) lat;
@@ -903,7 +1181,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             }
         }
     }
-    
+
     private void clearTransactionState() {
         if (getContext() == null) {
             return;
@@ -924,7 +1202,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         if (tvLocation == null) {
             return;
         }
-        
+
         if (selectedLocationAddress != null && !selectedLocationAddress.isEmpty()) {
             tvLocation.setText(selectedLocationAddress);
             tvLocation.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
@@ -940,7 +1218,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             tvCurrency.setText(currency);
         }
     }
-    
+
     private void saveTransaction() {
         String amountText = editAmount.getText().toString().trim();
         String title = editTitle != null ? editTitle.getText().toString().trim() : "";
@@ -1014,10 +1292,10 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
 
         // Create transaction
         Transaction transaction = new Transaction(
-            transactionType,
-            (long) amount,
-            selectedWallet.getId(),
-            transactionDateTime.getTime()
+                transactionType,
+                (long) amount,
+                selectedWallet.getId(),
+                transactionDateTime.getTime()
         );
 
         // Set title (merchantName)
@@ -1026,12 +1304,9 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         }
 
         // Set category if selected (only for expenses)
-        // Store category name and icon directly (user-defined categories from CategoryManager)
-        // Also set categoryId for compatibility with budget system (generated from name+icon hash)
         if (selectedCategory != null && selectedCategoryIconResId != 0 && transactionType == TransactionType.EXPENSE) {
             transaction.setCategoryName(selectedCategory);
             transaction.setCategoryIconResId(selectedCategoryIconResId);
-            // Generate categoryId using same formula as BudgetCreateFragment for budget matching
             long categoryId = (long) (selectedCategory.hashCode() * 31 + selectedCategoryIconResId);
             transaction.setCategoryId(categoryId);
         }
@@ -1061,7 +1336,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             selectedWallet.setBalance(selectedWallet.getBalance() - (long) amount);
         }
         vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager.updateWallet(
-            requireContext(), selectedWallet.getName(), selectedWallet);
+                requireContext(), selectedWallet.getName(), selectedWallet);
 
         String typeText = getTransactionTypeText();
         String formattedAmount = CurrencyUtils.formatNumberUS(amount);
@@ -1074,13 +1349,10 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         // Clear saved transaction state since transaction is saved
         clearTransactionState();
 
-        // Directly refresh HomeFragment if it exists (for immediate UI update)
-        // This ensures the UI updates immediately, even if the fragment is hidden
+        // Directly refresh HomeFragment if it exists
         androidx.fragment.app.FragmentManager fm = requireActivity().getSupportFragmentManager();
         HomeFragment homeFragment = (HomeFragment) fm.findFragmentByTag("HOME_FRAGMENT");
         if (homeFragment != null && homeFragment.isAdded()) {
-            // Post to main thread to ensure UI updates happen on the correct thread
-            // This works even if the fragment is currently hidden
             new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
                 if (homeFragment.isAdded() && !homeFragment.isDetached()) {
                     homeFragment.refreshData();
@@ -1088,8 +1360,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
             });
         }
 
-        // Notify all fragments that a transaction was created (backup mechanism)
-        // Data is already saved synchronously via commit(), so we can notify immediately
+        // Notify all fragments that a transaction was created
         Bundle result = new Bundle();
         result.putBoolean("transaction_created", true);
         requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_TRANSACTION_CREATED, result);
@@ -1097,7 +1368,7 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         // Close bottom sheet
         dismiss();
     }
-    
+
     private String getTransactionTypeText() {
         switch (selectedType) {
             case TYPE_EXPENSE:
@@ -1111,12 +1382,18 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         }
     }
 
+
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         // Clean up Fragment Result listeners
         requireActivity().getSupportFragmentManager().clearFragmentResultListener(
-            MapFragment.RESULT_KEY_LOCATION);
+                MapFragment.RESULT_KEY_LOCATION);
         requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
+        // Clean up the text recognizer
+        if (recognizer != null) {
+            recognizer.close();
+        }
     }
 }
