@@ -267,42 +267,15 @@ public class MainActivity extends AppCompatActivity {
 		// Manual input button
 		view.findViewById(R.id.card_manual_input).setOnClickListener(v -> {
 			dialog.dismiss();
-			showTransactionTypeSelectionBottomSheet(false); // false = manual input
+			// Directly open transaction create with default type (expense), user can switch inside
+			openTransactionCreate("expense", false); // false = manual input
 		});
 
 		// OCR scan button
 		view.findViewById(R.id.card_ocr_scan).setOnClickListener(v -> {
 			dialog.dismiss();
-			showTransactionTypeSelectionBottomSheet(true); // true = OCR scan
-		});
-
-		dialog.show();
-	}
-
-	private void showTransactionTypeSelectionBottomSheet(boolean isOCR) {
-		BottomSheetDialog dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
-		View view = LayoutInflater.from(this).inflate(R.layout.view_bottom_sheet_transaction_type, null);
-		dialog.setContentView(view);
-
-		// Configure bottom sheet to expand fully and disable dragging to prevent accidental dismissal
-		View bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-		if (bottomSheet != null) {
-			BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
-			behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-			behavior.setSkipCollapsed(true);
-			behavior.setDraggable(false); // Disable dragging to prevent accidental dismissal
-		}
-
-		// Add Income button
-		view.findViewById(R.id.card_add_income).setOnClickListener(v -> {
-			dialog.dismiss();
-			openTransactionCreate("income", isOCR);
-		});
-
-		// Add Expense button
-		view.findViewById(R.id.card_add_expense).setOnClickListener(v -> {
-			dialog.dismiss();
-			openTransactionCreate("expense", isOCR);
+			// Directly open transaction create with default type (expense), user can switch inside
+			openTransactionCreate("expense", true); // true = OCR scan
 		});
 
 		dialog.show();

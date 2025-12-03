@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatDelegate;
 public final class ThemeManager {
 
     public enum ThemeMode {
-        FOLLOW_SYSTEM(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM),
         LIGHT(AppCompatDelegate.MODE_NIGHT_NO),
         DARK(AppCompatDelegate.MODE_NIGHT_YES);
 
@@ -29,17 +28,24 @@ public final class ThemeManager {
     private ThemeManager() { }
 
     public static void applySavedTheme(Context context) {
-        int saved = getPrefs(context).getInt(KEY_MODE, ThemeMode.FOLLOW_SYSTEM.appCompatValue);
+        if (context == null) return;
+        int saved = getPrefs(context).getInt(KEY_MODE, ThemeMode.LIGHT.appCompatValue);
+        // Clamp to known values (LIGHT or DARK) to avoid invalid modes causing crashes
+        if (saved != ThemeMode.LIGHT.appCompatValue && saved != ThemeMode.DARK.appCompatValue) {
+            saved = ThemeMode.LIGHT.appCompatValue;
+        }
         AppCompatDelegate.setDefaultNightMode(saved);
     }
 
     public static void setTheme(Context context, ThemeMode mode) {
+        if (context == null || mode == null) return;
         getPrefs(context).edit().putInt(KEY_MODE, mode.appCompatValue).apply();
         AppCompatDelegate.setDefaultNightMode(mode.appCompatValue);
     }
 
     public static boolean isDarkEnabled(Context context) {
-        int saved = getPrefs(context).getInt(KEY_MODE, ThemeMode.FOLLOW_SYSTEM.appCompatValue);
+        if (context == null) return false;
+        int saved = getPrefs(context).getInt(KEY_MODE, ThemeMode.LIGHT.appCompatValue);
         return saved == ThemeMode.DARK.appCompatValue;
     }
 

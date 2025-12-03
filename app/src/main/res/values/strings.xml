@@ -176,6 +176,11 @@
     <string name="search_no_results">No results found for "%1$s"</string>
     <string name="no_transactions">No transactions found</string>
     <string name="all_categories">All categories</string>
+    <!-- Transaction Delete -->
+    <string name="transaction_delete_title">Delete Transaction</string>
+    <string name="transaction_delete_message">Are you sure you want to delete this transaction?\nThis action cannot be undone.</string>
+    <string name="transaction_delete_button">Delete</string>
+    <string name="transaction_deleted">Transaction deleted</string>
     <!-- Add Record Bottom Sheets -->
     <string name="add_record">Add Record</string>
     <string name="manual_input">Manual Input</string>
@@ -234,6 +239,7 @@
     <string name="category_already_in_use">Category \"%1$s\" is already used in another budget</string>
     <string name="category_duplicate_exists">A category with this name and icon already exists</string>
     <string name="transaction_saved">Transaction saved:</string>
+    <string name="transaction_updated">Transaction updated</string>
     <!--Map-->
     <string name="map_title">Budtrack expense map</string>
     <string name="map_description">View your expenses based on location. See where you spend the most and track your spending patterns on the map.</string>

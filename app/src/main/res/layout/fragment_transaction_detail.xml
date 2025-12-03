@@ -31,14 +31,15 @@
                 android:gravity="center_vertical"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
-                android:paddingTop="16dp">
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp">
 
                 <ImageButton
                     android:id="@+id/btn_back"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="@drawable/bg_icon_button"
-                    android:paddingLeft="8dp"
+                    android:paddingLeft="6dp"
                     android:src="@drawable/ic_arrow_back_24dp"
                     app:tint="@color/primary_black"
                     android:contentDescription="@string/cancel" />
@@ -66,116 +67,338 @@
 
             </LinearLayout>
 
-            <!-- Main transaction info card -->
+            <!-- Amount Display (Prominent) -->
             <LinearLayout
-                android:id="@+id/transaction_main_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="24dp"
+                android:paddingBottom="24dp"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <TextView
+                    android:id="@+id/tv_transaction_amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/amount_hint"
+                    android:textColor="@color/primary_black"
+                    android:textSize="38sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_transaction_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/expense"
+                    android:textColor="@color/primary_grey"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <!-- Category Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="16dp"
+                android:padding="20dp">
+
+                <ImageView
+                    android:id="@+id/iv_transaction_icon"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_icon_button"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_wallet_24dp"
+                    app:tint="@color/primary_green" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/category"
+                        android:textColor="@color/primary_grey"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_transaction_category"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/category"
+                        android:textColor="@color/primary_black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Details Section -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@drawable/bg_card"
-                android:layout_marginTop="8dp"
-                android:layout_margin="24dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="16dp"
                 android:padding="20dp">
 
+                <!-- Date -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:paddingBottom="16dp">
 
                     <ImageView
-                        android:id="@+id/iv_transaction_icon"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="@drawable/bg_icon_button"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_wallet_24dp"
-                        app:tint="@color/primary_green" />
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_calendar_24dp"
+                        app:tint="@color/primary_grey" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:layout_marginStart="12dp">
+                        android:layout_marginStart="16dp">
 
                         <TextView
-                            android:id="@+id/tv_transaction_category"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/category"
-                            android:textColor="@color/primary_black"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:text="@string/date"
+                            android:textColor="@color/primary_grey"
+                            android:textSize="12sp" />
 
                         <TextView
                             android:id="@+id/tv_transaction_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
                             android:text="@string/date"
-                            android:textColor="@color/primary_grey"
-                            android:textSize="13sp"
-                            android:layout_marginTop="2dp" />
+                            android:textColor="@color/primary_black"
+                            android:textSize="14sp" />
+
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/tv_transaction_amount"
-                        android:layout_width="wrap_content"
+                </LinearLayout>
+
+                <!-- Time -->
+                <LinearLayout
+                    android:id="@+id/container_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_clock_24dp"
+                        app:tint="@color/primary_grey" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="@string/amount_hint"
-                        android:textColor="@color/secondary_green"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/date"
+                            android:textColor="@color/primary_grey"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_transaction_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/date"
+                            android:textColor="@color/primary_black"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Wallet -->
+                <LinearLayout
+                    android:id="@+id/container_wallet"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_wallet_24dp"
+                        app:tint="@color/primary_grey" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/wallet"
+                            android:textColor="@color/primary_grey"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_transaction_wallet"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/wallet"
+                            android:textColor="@color/primary_black"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Location -->
+                <LinearLayout
+                    android:id="@+id/container_location"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="16dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_location_on_24dp"
+                        app:tint="@color/primary_grey" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/my_location"
+                            android:textColor="@color/primary_grey"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_transaction_location"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/my_location"
+                            android:textColor="@color/primary_black"
+                            android:textSize="14sp"
+                            android:maxLines="2"
+                            android:ellipsize="end" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
                 <!-- Note -->
-                <TextView
-                    android:id="@+id/tv_transaction_note"
+                <LinearLayout
+                    android:id="@+id/container_note"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/text_hint"
-                    android:textColor="@color/primary_grey"
-                    android:textSize="14sp"
-                    android:maxLines="3"
-                    android:ellipsize="end" />
+                    android:orientation="horizontal"
+                    android:gravity="top"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_notes_24dp"
+                        app:tint="@color/primary_grey"
+                        android:layout_marginTop="2dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/note"
+                            android:textColor="@color/primary_grey"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_transaction_note"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/text_hint"
+                            android:textColor="@color/primary_black"
+                            android:textSize="14sp"
+                            android:maxLines="10" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Actions: Edit / Delete -->
+            <!-- Delete Button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
                 android:layout_marginBottom="24dp"
-                android:gravity="end"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_delete"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/wallet_delete_button"
                     android:textAllCaps="false"
                     android:textColor="@color/primary_white"
-                    android:backgroundTint="@color/primary_red" />
+                    android:backgroundTint="@color/primary_red"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_edit_bottom"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/edit"
-                    android:textAllCaps="false"
-                    android:textColor="@color/primary_white"
-                    android:backgroundTint="@color/primary_green" />
             </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-

@@ -3,6 +3,8 @@ package vn.edu.tdtu.lhqc.budtrack.fragments;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -159,14 +161,25 @@ public class DashboardFragment extends Fragment {
 
         // Initialize calendar
         initializeCalendar(root);
-        
+
         // Send initial date selection (current date) to TransactionHistoryFragment after view is created
         root.post(() -> {
+            long selectedMillis = selectedDate.getTimeInMillis();
+
+            // Notify via FragmentResult so any listener (including TransactionHistoryFragment) can react
             Bundle result = new Bundle();
-            result.putLong(RESULT_SELECTED_DATE_MILLIS, selectedDate.getTimeInMillis());
-            requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
+            result.putLong(RESULT_SELECTED_DATE_MILLIS, selectedMillis);
+            requireActivity().getSupportFragmentManager()
+                    .setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
+
+            // Also directly notify the embedded TransactionHistoryFragment for extra reliability
+            Fragment child = getChildFragmentManager()
+                    .findFragmentById(R.id.transaction_history_fragment_container);
+            if (child instanceof TransactionHistoryFragment) {
+                ((TransactionHistoryFragment) child).setSelectedDate(selectedMillis);
+            }
         });
-        
+
         return root;
     }
 
@@ -176,7 +189,7 @@ public class DashboardFragment extends Fragment {
         btnPrevMonth = root.findViewById(R.id.btn_prev_week); // Reusing the same ID from layout
         btnNextMonth = root.findViewById(R.id.btn_next_week); // Reusing the same ID from layout
         datesContainer = root.findViewById(R.id.dates_container);
-        
+
         if (tvMonthYear != null && btnPrevMonth != null && btnNextMonth != null && datesContainer != null) {
             setupCalendarListeners();
             updateCalendar();
@@ -184,13 +197,13 @@ public class DashboardFragment extends Fragment {
     }
 
     // Setup calendar navigation listeners
-    
+
     private void setupCalendarListeners() {
         btnPrevMonth.setOnClickListener(v -> {
             currentDate.add(Calendar.MONTH, -1);
             updateCalendar();
         });
-        
+
         btnNextMonth.setOnClickListener(v -> {
             currentDate.add(Calendar.MONTH, 1);
             updateCalendar();
@@ -201,34 +214,34 @@ public class DashboardFragment extends Fragment {
     private void updateCalendar() {
         // Load transaction dates for the current month
         loadTransactionDates();
-        
+
         // Update month/year display
         if (tvMonthYear != null) {
             tvMonthYear.setText(monthYearFormat.format(currentDate.getTime()));
         }
-        
+
         // Clear existing date cells
         if (datesContainer != null) {
             datesContainer.removeAllViews();
             dateCells.clear();
-            
+
             // Set calendar to first day of the month
             Calendar monthStart = (Calendar) currentDate.clone();
             monthStart.set(Calendar.DAY_OF_MONTH, 1);
-            
+
             // Get the first day of week for the first day of month
             int firstDayOfWeek = monthStart.get(Calendar.DAY_OF_WEEK);
             // Convert to Monday = 0 format (Sunday = 6, Monday = 0, ..., Saturday = 5)
             int daysFromMonday = (firstDayOfWeek == Calendar.SUNDAY) ? 6 : firstDayOfWeek - Calendar.MONDAY;
-            
+
             // Go back to the Monday of the week containing the first day of month
             monthStart.add(Calendar.DAY_OF_MONTH, -daysFromMonday);
-            
+
             // Calculate total cells needed (including leading/trailing days from other months)
             // We need to show 6 weeks (42 days) to ensure full month display
             int totalCells = 42;
             int daysPerWeek = 7;
-            
+
             // Create date cells for the month in a grid (6 weeks x 7 days)
             for (int week = 0; week < 6; week++) {
                 LinearLayout weekRow = new LinearLayout(requireContext());
@@ -237,20 +250,20 @@ public class DashboardFragment extends Fragment {
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 ));
-                
+
                 for (int day = 0; day < daysPerWeek; day++) {
                     int cellIndex = week * daysPerWeek + day;
                     if (cellIndex >= totalCells) break;
-                    
+
                     Calendar date = (Calendar) monthStart.clone();
                     date.add(Calendar.DAY_OF_MONTH, cellIndex);
-                    
+
                     // Check if this date is in the current month
                     boolean isCurrentMonth = date.get(Calendar.MONTH) == currentDate.get(Calendar.MONTH) &&
                                            date.get(Calendar.YEAR) == currentDate.get(Calendar.YEAR);
-                    
+
                     View dateCell = createDateCell(date.get(Calendar.DAY_OF_MONTH), date, isCurrentMonth);
-                    
+
                     // Set layout params for equal width cells
                     LinearLayout.LayoutParams cellParams = new LinearLayout.LayoutParams(
                         0,
@@ -258,11 +271,11 @@ public class DashboardFragment extends Fragment {
                         1.0f
                     );
                     dateCell.setLayoutParams(cellParams);
-                    
+
                     weekRow.addView(dateCell);
                     dateCells.add(dateCell);
                 }
-                
+
                 datesContainer.addView(weekRow);
             }
         }
@@ -272,27 +285,27 @@ public class DashboardFragment extends Fragment {
     private View createDateCell(int day, Calendar date, boolean isCurrentMonth) {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         LinearLayout cell = (LinearLayout) inflater.inflate(R.layout.item_date_cell, datesContainer, false);
-        
+
         TextView tvDate = cell.findViewById(R.id.tv_date);
         View eventIndicator = cell.findViewById(R.id.event_indicator);
-        
+
         tvDate.setText(String.valueOf(day));
-        
+
         // Check if this date has transactions (for any month, not just current)
         String dateKey = dateKeyFormat.format(date.getTime());
         boolean hasTransactions = datesWithTransactions.contains(dateKey);
-        
+
         // Show event indicator if date has transactions (for any month)
         if (hasTransactions) {
             eventIndicator.setVisibility(View.VISIBLE);
         } else {
             eventIndicator.setVisibility(View.GONE);
         }
-        
+
         // Check if this date is selected or is today
         boolean isSelected = isSameDay(date, selectedDate);
         boolean isToday = isSameDay(date, todayDate) && isCurrentMonth;
-        
+
         // Update appearance based on selection and month
         if (isSelected) {
             // Selected date: green background with white text (works for any month)
@@ -315,24 +328,32 @@ public class DashboardFragment extends Fragment {
             tvDate.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_black));
             tvDate.setAlpha(1.0f);
         }
-        
+
         // Set click listener for all dates (including dates from other months)
         // This allows users to select dates from previous/next months to view their transactions
-            cell.setOnClickListener(v -> {
-                selectedDate = (Calendar) date.clone();
+        cell.setOnClickListener(v -> {
+            selectedDate = (Calendar) date.clone();
+            long selectedMillis = selectedDate.getTimeInMillis();
+
             // If clicking a date from a different month, update currentDate to that month
             if (!isCurrentMonth) {
                 currentDate.set(Calendar.YEAR, date.get(Calendar.YEAR));
                 currentDate.set(Calendar.MONTH, date.get(Calendar.MONTH));
             }
             updateCalendar(); // Refresh to show new selection and month
-                
-                // Notify TransactionHistoryFragment about date selection
-                Bundle result = new Bundle();
-                result.putLong(RESULT_SELECTED_DATE_MILLIS, selectedDate.getTimeInMillis());
-                requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
-            });
-        
+
+            // Notify TransactionHistoryFragment about date selection via FragmentResult
+            Bundle result = new Bundle();
+            result.putLong(RESULT_SELECTED_DATE_MILLIS, selectedMillis);
+            requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
+
+            // Also directly notify the embedded TransactionHistoryFragment for reliability
+            Fragment child = getChildFragmentManager().findFragmentById(R.id.transaction_history_fragment_container);
+            if (child instanceof TransactionHistoryFragment) {
+                ((TransactionHistoryFragment) child).setSelectedDate(selectedMillis);
+            }
+        });
+
         return cell;
     }
 
@@ -341,7 +362,7 @@ public class DashboardFragment extends Fragment {
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
-    
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
