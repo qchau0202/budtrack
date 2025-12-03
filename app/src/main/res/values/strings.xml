@@ -343,4 +343,8 @@
     <string name="wallet_created">Wallet created successfully</string>
     <string name="none">None</string>
     <string name="unknown">Unknown</string>
+    <string name="category_icon" />
+    <string name="select_date" />
+    <string name="select_location" />
+    <string name="select_time" />
 </resources>

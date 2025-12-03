@@ -127,7 +127,7 @@ public class WalletCreateFragment extends BottomSheetDialogFragment {
 
         // Setup amount formatter for better UX with commas
         if (editBalance != null) {
-            NumberInputFormatter.attachIntegerFormatter(editBalance, null);
+            NumberInputFormatter.attach(editBalance, null);
         }
 
         // Done button
