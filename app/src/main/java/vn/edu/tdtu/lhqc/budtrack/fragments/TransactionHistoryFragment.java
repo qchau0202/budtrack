@@ -1,6 +1,7 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
@@ -26,6 +27,7 @@ import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.activities.TransactionHistoryActivity;
+import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionDetailFragment;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
@@ -52,6 +54,10 @@ public class TransactionHistoryFragment extends Fragment {
     
     // Selected date for filtering transactions (defaults to current date)
     private Calendar selectedDate = Calendar.getInstance();
+
+    // Listen for currency preference changes so we can refresh amounts immediately
+    private SharedPreferences.OnSharedPreferenceChangeListener currencyPreferenceListener;
+    private boolean needsRefreshAfterCurrencyChange = false;
 
     public TransactionHistoryFragment() {
         // Required empty public constructor
@@ -116,21 +122,17 @@ public class TransactionHistoryFragment extends Fragment {
             }
         );
         
-        // Listen for currency changes to refresh UI immediately
-        requireActivity().getSupportFragmentManager().setFragmentResultListener(
-            "currency_changed",
-            this,
-            (requestKey, result) -> {
-                if ("currency_changed".equals(requestKey)) {
-                    // Refresh transaction list when currency changes
-                    if (getView() != null) {
-                        getView().post(this::refreshTransactions);
-                    } else {
-                        refreshTransactions();
-                    }
+        // Listen for currency preference changes to refresh UI immediately
+        currencyPreferenceListener = (sharedPrefs, key) -> {
+            if (SettingsHandler.KEY_CURRENCY.equals(key)) {
+                if (getView() != null && isAdded() && !isDetached()) {
+                    getView().post(this::refreshTransactions);
+                } else {
+                    // Defer refresh until view becomes active again
+                    needsRefreshAfterCurrencyChange = true;
                 }
             }
-        );
+        };
     }
 
     @Override
@@ -173,8 +175,30 @@ public class TransactionHistoryFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        // Register currency preference listener
+        if (currencyPreferenceListener != null && getContext() != null) {
+            SettingsHandler.getPrefs(getContext())
+                    .registerOnSharedPreferenceChangeListener(currencyPreferenceListener);
+        }
+
         // Always refresh when fragment becomes visible
         refreshTransactions();
+
+        // Apply any deferred currency change
+        if (needsRefreshAfterCurrencyChange) {
+            refreshTransactions();
+            needsRefreshAfterCurrencyChange = false;
+        }
+    }
+    
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Unregister currency preference listener
+        if (currencyPreferenceListener != null && getContext() != null) {
+            SettingsHandler.getPrefs(getContext())
+                    .unregisterOnSharedPreferenceChangeListener(currencyPreferenceListener);
+        }
     }
     
     private void refreshTransactions() {
@@ -190,8 +214,6 @@ public class TransactionHistoryFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Clean up Fragment Result listeners
-        requireActivity().getSupportFragmentManager().clearFragmentResultListener("currency_changed");
         // Clean up Fragment Result listeners
         requireActivity().getSupportFragmentManager().clearFragmentResultListener(
             TransactionCreateFragment.RESULT_KEY_TRANSACTION_CREATED);
