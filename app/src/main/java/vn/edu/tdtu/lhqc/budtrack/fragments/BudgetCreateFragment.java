@@ -215,11 +215,14 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
         }
     }
 
+
     private void setupAmountFormatter() {
         if (editBudgetAmount != null) {
-            NumberInputFormatter.attachIntegerFormatter(editBudgetAmount, null);
+            // FIX: Changed "attachIntegerFormatter" to the correct method name "attach".
+            NumberInputFormatter.attach(editBudgetAmount, null);
         }
     }
+
 
     private void setupClickListeners() {
         if (btnDone != null) {

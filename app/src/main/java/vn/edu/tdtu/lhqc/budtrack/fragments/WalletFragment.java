@@ -484,10 +484,10 @@ public class WalletFragment extends Fragment {
         // Set current balance in the edit field with formatted value
         if (editBalance != null) {
             String formattedBalance = CurrencyUtils.formatNumberUS(wallet.getBalance());
-            
+
             // Setup amount formatter for better UX with commas
-            NumberInputFormatter.attachIntegerFormatter(editBalance, formattedBalance);
-            
+            NumberInputFormatter.attach(editBalance, formattedBalance);
+
             editBalance.setText(formattedBalance);
             // Move cursor to end so user can edit
             editBalance.setSelection(formattedBalance.length());

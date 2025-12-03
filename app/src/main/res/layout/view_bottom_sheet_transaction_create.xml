@@ -199,7 +199,8 @@
                 android:background="@android:color/transparent"
                 android:inputType="numberDecimal"
                 android:imeOptions="actionNext"
-                android:padding="0dp" />
+                android:padding="0dp"
+                android:digits="0123456789," /><!-- ĐÃ SỬA: Thêm thuộc tính digits để cho phép nhập dấu phẩy (decimal separator) -->
 
             <TextView
                 android:id="@+id/tv_currency"

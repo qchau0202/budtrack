@@ -60,6 +60,7 @@ import vn.edu.tdtu.lhqc.budtrack.models.Wallet;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.NumberInputFormatter;
 import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
+import java.text.DecimalFormatSymbols;
 
 public class TransactionCreateFragment extends BottomSheetDialogFragment {
 
@@ -389,12 +390,18 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
 
 
         // Set the found amount in the EditText
+        // Set the found amount in the EditText
         if (finalAmount != -1.0 && editAmount != null) {
-            // Use DecimalFormat to format the double before setting it to the EditText
-            DecimalFormat formatter = new DecimalFormat("#.##");
-            editAmount.setText(formatter.format(finalAmount));
-        } else {
-            Toast.makeText(requireContext(), "Could not confidently determine the transaction amount.", Toast.LENGTH_LONG).show();
+            // 1. Format số đã parse (84.8) thành chuỗi US (84.80)
+            DecimalFormat formatter = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.ROOT));
+            String usFormattedString = formatter.format(finalAmount);
+
+            // 2. Chuyển đổi chuỗi US thành chuỗi VND/EU (84,80) và đặt vào EditText
+            // Phương thức mới sẽ đảm bảo dấu thập phân là dấu phẩy
+            String vndFormattedString = NumberInputFormatter.formatUSStringToVNDEdittext(usFormattedString);
+            editAmount.setText(vndFormattedString);
+
+            Toast.makeText(requireContext(), "OCR amount set: " + vndFormattedString, Toast.LENGTH_LONG).show();
         }
 
         // Set a potential title
