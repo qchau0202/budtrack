@@ -61,20 +61,6 @@
                 android:focusable="true" />
         </LinearLayout>
 
-        <!-- OCR Scan Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnScanReceipt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/primary_green"
-            android:text="Scan Receipt (OCR)"
-            android:textColor="@color/primary_white"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:icon="@drawable/ic_scan_24dp"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp" />
 
         <!-- Tabs: Expense / Income / Others -->
         <LinearLayout
