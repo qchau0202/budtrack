@@ -121,6 +121,10 @@
     <string name="currency_exchange_updating">Updating exchange rate…</string>
     <string name="currency_exchange_update_failed">Failed to update exchange rate. Please try again.</string>
     <string name="currency_exchange_rate_hint">Enter USD to VND rate</string>
+    <string name="backup">Backup</string>
+    <string name="backup_last_sync">Last synced: %1$s</string>
+    <string name="backup_never_synced">Never synced</string>
+    <string name="backup_sync_success">Backup synced successfully</string>
     <string name="language_option_vietnamese">Tiếng Việt</string>
     <string name="language_option_english">English</string>
     <string name="language_dialog_confirm">Confirm</string>

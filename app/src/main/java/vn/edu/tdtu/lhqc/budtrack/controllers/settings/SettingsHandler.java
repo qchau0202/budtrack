@@ -37,6 +37,9 @@ public final class SettingsHandler {
     // Exchange rate update receiver
     private static final int EXCHANGE_RATE_UPDATE_REQUEST_CODE = 3001;
     
+    // Backup sync keys
+    private static final String KEY_BACKUP_LAST_SYNC = "backup_last_sync";
+    
     // Default values
     private static final boolean DEFAULT_REMINDER_ENABLED = false;
     private static final int DEFAULT_REMINDER_HOUR = 20; // 8 PM
@@ -322,6 +325,49 @@ public final class SettingsHandler {
         
         // Clear next update time
         getPrefs(context).edit().putLong(KEY_EXCHANGE_RATE_NEXT_UPDATE, 0).apply();
+    }
+
+    // ==================== Backup Sync Settings ====================
+
+    /**
+     * Get last backup sync timestamp
+     */
+    public static long getBackupLastSync(Context context) {
+        return getPrefs(context).getLong(KEY_BACKUP_LAST_SYNC, 0);
+    }
+
+    /**
+     * Set last backup sync timestamp to current time
+     */
+    public static void setBackupLastSync(Context context) {
+        getPrefs(context).edit().putLong(KEY_BACKUP_LAST_SYNC, System.currentTimeMillis()).apply();
+    }
+
+    /**
+     * Format last backup sync time as a readable string
+     */
+    public static String formatBackupLastSyncTime(Context context) {
+        long timestamp = getBackupLastSync(context);
+        if (timestamp == 0) {
+            return null; // Never synced
+        }
+        
+        long now = System.currentTimeMillis();
+        long diff = now - timestamp;
+        long seconds = diff / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        long days = hours / 24;
+        
+        if (days > 0) {
+            return days + (days == 1 ? " day ago" : " days ago");
+        } else if (hours > 0) {
+            return hours + (hours == 1 ? " hour ago" : " hours ago");
+        } else if (minutes > 0) {
+            return minutes + (minutes == 1 ? " minute ago" : " minutes ago");
+        } else {
+            return "Just now";
+        }
     }
 }
 

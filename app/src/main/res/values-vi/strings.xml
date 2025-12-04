@@ -124,6 +124,10 @@
     <string name="currency_exchange_updating">Đang cập nhật tỷ giá…</string>
     <string name="currency_exchange_update_failed">Không thể cập nhật tỷ giá. Vui lòng thử lại.</string>
     <string name="currency_exchange_rate_hint">Nhập tỷ giá USD sang VND</string>
+    <string name="backup">Sao lưu</string>
+    <string name="backup_last_sync">Đã đồng bộ lần cuối: %1$s</string>
+    <string name="backup_never_synced">Chưa đồng bộ</string>
+    <string name="backup_sync_success">Đồng bộ sao lưu thành công</string>
     <string name="language_option_vietnamese">Tiếng Việt</string>
     <string name="language_option_english">English</string>
     <string name="language_dialog_confirm">Xác nhận</string>

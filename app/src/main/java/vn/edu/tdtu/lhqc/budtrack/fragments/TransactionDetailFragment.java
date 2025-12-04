@@ -34,11 +34,9 @@ import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager;
-import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.models.Wallet;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.NumberInputFormatter;
@@ -152,17 +150,6 @@ public class TransactionDetailFragment extends Fragment {
                     ivIcon.setImageResource(categoryIconResId);
                     ivIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.primary_green));
                 }
-            } else if (transaction.getCategoryId() != null) {
-                Category category = findCategoryById(transaction.getCategoryId());
-                if (category != null) {
-                    if (tvCategory != null) {
-                        tvCategory.setText(category.getName());
-                    }
-                    if (ivIcon != null) {
-                        ivIcon.setImageResource(category.getIconResId());
-                        ivIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.primary_green));
-                    }
-                }
             } else {
                 // No category - show default or hide
                 if (tvCategory != null) {
@@ -241,18 +228,6 @@ public class TransactionDetailFragment extends Fragment {
         if (btnDelete != null) {
             btnDelete.setOnClickListener(v -> showDeleteConfirmationDialog(transaction));
         }
-    }
-
-    private Category findCategoryById(Long categoryId) {
-        if (categoryId == null) {
-            return null;
-        }
-        for (Category category : MockCategoryData.getSampleCategories()) {
-            if (category.getId() == categoryId) {
-                return category;
-            }
-        }
-        return null;
     }
 
     private void showDeleteConfirmationDialog(Transaction transaction) {

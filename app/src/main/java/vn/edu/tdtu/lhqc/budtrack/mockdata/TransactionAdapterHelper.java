@@ -12,7 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import vn.edu.tdtu.lhqc.budtrack.adapters.TransactionHistoryAdapter;
-import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
@@ -47,19 +46,11 @@ public class TransactionAdapterHelper {
                     ? "+" + CurrencyUtils.formatCurrency(context, transaction.getAmount())
                     : "-" + CurrencyUtils.formatCurrency(context, transaction.getAmount());
             
-            // Look up category icon or use default wallet icon
-            // Use categoryIconResId from transaction (user-defined categories), fallback to categoryId for legacy
+            // Determine category icon (prefer user-defined icon, otherwise use default wallet icon)
             int iconResId = vn.edu.tdtu.lhqc.budtrack.R.drawable.ic_wallet_24dp; // Default
             Integer categoryIconResId = transaction.getCategoryIconResId();
             if (categoryIconResId != null) {
-                // Use user-defined category icon
                 iconResId = categoryIconResId;
-            } else if (transaction.getCategoryId() != null) {
-                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
-                Category category = findCategoryById(transaction.getCategoryId());
-                if (category != null) {
-                    iconResId = category.getIconResId();
-                }
             }
             
             TransactionHistoryAdapter.Transaction adapterTransaction =
@@ -124,18 +115,11 @@ public class TransactionAdapterHelper {
                     ? "+" + CurrencyUtils.formatCurrency(context, transaction.getAmount())
                     : "-" + CurrencyUtils.formatCurrency(context, transaction.getAmount());
             
-            // Use categoryIconResId from transaction (user-defined categories), fallback to categoryId for legacy
+            // Determine category icon (prefer user-defined icon, otherwise use default wallet icon)
             int iconResId = vn.edu.tdtu.lhqc.budtrack.R.drawable.ic_wallet_24dp; // Default
             Integer categoryIconResId = transaction.getCategoryIconResId();
             if (categoryIconResId != null) {
-                // Use user-defined category icon
                 iconResId = categoryIconResId;
-            } else if (transaction.getCategoryId() != null) {
-                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
-                Category category = findCategoryById(transaction.getCategoryId());
-                if (category != null) {
-                    iconResId = category.getIconResId();
-                }
             }
             
             TransactionHistoryAdapter.Transaction adapterTransaction =
@@ -196,19 +180,5 @@ public class TransactionAdapterHelper {
         return groups;
     }
 
-    /**
-     * Helper method to find category by ID.
-     * 
-     * @param categoryId Category ID
-     * @return Category object or null if not found
-     */
-    private static Category findCategoryById(Long categoryId) {
-        for (Category category : MockCategoryData.getSampleCategories()) {
-            if (category.getId() == categoryId) {
-                return category;
-            }
-        }
-        return null;
-    }
 }
 

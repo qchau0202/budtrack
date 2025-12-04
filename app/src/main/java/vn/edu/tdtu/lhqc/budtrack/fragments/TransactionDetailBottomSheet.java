@@ -23,11 +23,9 @@ import java.util.Locale;
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.WalletManager;
-import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.models.Wallet;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 
 public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
@@ -173,34 +171,17 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
             }
         }
 
-        // Set category (use categoryName and categoryIconResId from transaction, fallback to categoryId for legacy)
+        // Set category (prefer categoryName and categoryIconResId from transaction)
         if (tvExpenseCategory != null) {
             String categoryName = transaction.getCategoryName();
             Integer categoryIconResId = transaction.getCategoryIconResId();
             
             if (categoryName != null && categoryIconResId != null) {
-                // Use user-defined category (name + icon)
                 tvExpenseCategory.setText(categoryName);
                 tvExpenseCategory.setVisibility(View.VISIBLE);
                 if (ivExpenseCategoryIcon != null) {
                     ivExpenseCategoryIcon.setImageResource(categoryIconResId);
                     ivExpenseCategoryIcon.setVisibility(View.VISIBLE);
-                }
-            } else if (transaction.getCategoryId() != null) {
-                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
-                Category category = findCategoryById(transaction.getCategoryId());
-                if (category != null) {
-                    tvExpenseCategory.setText(category.getName());
-                    tvExpenseCategory.setVisibility(View.VISIBLE);
-                    if (ivExpenseCategoryIcon != null) {
-                        ivExpenseCategoryIcon.setImageResource(category.getIconResId());
-                        ivExpenseCategoryIcon.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    tvExpenseCategory.setVisibility(View.GONE);
-                    if (ivExpenseCategoryIcon != null) {
-                        ivExpenseCategoryIcon.setVisibility(View.GONE);
-                    }
                 }
             } else {
                 tvExpenseCategory.setVisibility(View.GONE);
@@ -244,22 +225,6 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
                 tvExpenseNote.setVisibility(View.GONE);
             }
         }
-    }
-
-    /**
-     * Find category by ID from MockCategoryData.
-     */
-    private Category findCategoryById(Long categoryId) {
-        if (categoryId == null) {
-            return null;
-        }
-        List<Category> categories = MockCategoryData.getSampleCategories();
-        for (Category category : categories) {
-            if (category.getId() == categoryId) {
-                return category;
-            }
-        }
-        return null;
     }
 
     @Override

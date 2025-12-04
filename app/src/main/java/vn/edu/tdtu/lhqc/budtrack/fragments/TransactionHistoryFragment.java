@@ -32,8 +32,6 @@ import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionDetailFragment;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
-import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 
 /**
@@ -349,18 +347,11 @@ public class TransactionHistoryFragment extends Fragment {
             TextView tvAmount = rowView.findViewById(R.id.tv_amount);
             View divider = rowView.findViewById(R.id.divider);
             
-            // Set icon (use categoryIconResId from transaction, fallback to categoryId for legacy)
+            // Set icon (prefer user-defined category icon, otherwise use default wallet icon)
             int iconResId = R.drawable.ic_wallet_24dp; // Default
             Integer categoryIconResId = transaction.getCategoryIconResId();
             if (categoryIconResId != null) {
-                // Use user-defined category icon
                 iconResId = categoryIconResId;
-            } else if (transaction.getCategoryId() != null) {
-                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
-                Category category = findCategoryById(transaction.getCategoryId());
-                if (category != null) {
-                    iconResId = category.getIconResId();
-                }
             }
             if (ivIcon != null) {
                 ivIcon.setImageResource(iconResId);
@@ -412,18 +403,6 @@ public class TransactionHistoryFragment extends Fragment {
             
             container.addView(rowView);
         }
-    }
-
-    private Category findCategoryById(Long categoryId) {
-        if (categoryId == null) {
-            return null;
-        }
-        for (Category category : MockCategoryData.getSampleCategories()) {
-            if (category.getId() == categoryId) {
-                return category;
-            }
-        }
-        return null;
     }
 
 }
