@@ -79,6 +79,24 @@ public final class AuthController {
     }
 
     /**
+     * Save or login an externally authenticated user (e.g. Google Sign-In).
+     * This will mark the user as registered and logged in and store basic profile info.
+     */
+    public static void loginWithExternalAccount(Context context, String email, String fullName) {
+        SharedPreferences prefs = getPrefs(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        if (fullName != null) {
+            editor.putString(KEY_FULL_NAME, fullName);
+        }
+        if (email != null) {
+            editor.putString(KEY_EMAIL, email);
+        }
+        editor.putBoolean(KEY_IS_REGISTERED, true);
+        editor.putBoolean(KEY_IS_LOGGED_IN, true);
+        editor.apply();
+    }
+
+    /**
      * Login with email and password
      * @param context Application context
      * @param email User's email
