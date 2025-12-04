@@ -16,8 +16,10 @@ public final class AuthController {
     private static final String KEY_PASSWORD = "user_password";
     private static final String KEY_FULL_NAME = "user_full_name";
     private static final String KEY_ADDRESS = "user_address";
+    private static final String KEY_PROFILE_PHOTO = "user_photo_url";
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
     private static final String KEY_IS_REGISTERED = "is_registered";
+    private static final String KEY_IS_GOOGLE_SIGN_IN = "is_google_sign_in";
 
     private AuthController() {
     }
@@ -81,8 +83,9 @@ public final class AuthController {
     /**
      * Save or login an externally authenticated user (e.g. Google Sign-In).
      * This will mark the user as registered and logged in and store basic profile info.
+     * Also marks the account as Google-authenticated (email cannot be changed).
      */
-    public static void loginWithExternalAccount(Context context, String email, String fullName) {
+    public static void loginWithExternalAccount(Context context, String email, String fullName, String photoUrl) {
         SharedPreferences prefs = getPrefs(context);
         SharedPreferences.Editor editor = prefs.edit();
         if (fullName != null) {
@@ -91,9 +94,40 @@ public final class AuthController {
         if (email != null) {
             editor.putString(KEY_EMAIL, email);
         }
+        if (photoUrl != null) {
+            editor.putString(KEY_PROFILE_PHOTO, photoUrl);
+        }
         editor.putBoolean(KEY_IS_REGISTERED, true);
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
+        editor.putBoolean(KEY_IS_GOOGLE_SIGN_IN, true);
         editor.apply();
+        // Clear any locally-saved profile image so remote Google avatar takes precedence
+        try {
+            android.content.SharedPreferences profilePrefs = context.getApplicationContext().getSharedPreferences("profile_prefs", 0);
+            if (profilePrefs.contains("profile_image_uri")) {
+                profilePrefs.edit().remove("profile_image_uri").apply();
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * Get stored profile photo URL for current user
+     */
+    public static String getCurrentUserPhotoUrl(Context context) {
+        if (!isLoggedIn(context)) return null;
+        SharedPreferences prefs = getPrefs(context);
+        return prefs.getString(KEY_PROFILE_PHOTO, null);
+    }
+
+    /**
+     * Check if the current logged-in user authenticated via Google Sign-In.
+     * Google-authenticated users cannot change their email.
+     */
+    public static boolean isGoogleSignInUser(Context context) {
+        if (!isLoggedIn(context)) return false;
+        SharedPreferences prefs = getPrefs(context);
+        return prefs.getBoolean(KEY_IS_GOOGLE_SIGN_IN, false);
     }
 
     /**
@@ -160,6 +194,7 @@ public final class AuthController {
         SharedPreferences prefs = getPrefs(context);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(KEY_IS_LOGGED_IN, false);
+        editor.putBoolean(KEY_IS_GOOGLE_SIGN_IN, false);
         editor.apply();
     }
 

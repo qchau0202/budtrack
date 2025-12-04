@@ -35,6 +35,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import android.content.Intent;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
+import com.bumptech.glide.Glide;
 import vn.edu.tdtu.lhqc.budtrack.activities.LoginActivity;
 import vn.edu.tdtu.lhqc.budtrack.controllers.auth.AuthController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.exchangerate.ExchangeRateService;
@@ -177,6 +178,19 @@ public class ProfileFragment extends Fragment {
                     android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(savedPath);
                     imgProfilePicture.setImageBitmap(bitmap);
                 }
+            } else {
+                // No saved local image — try loading Google account avatar if available
+                String photoUrl = AuthController.getCurrentUserPhotoUrl(requireContext());
+                if (photoUrl != null && !photoUrl.isEmpty()) {
+                    try {
+                        Glide.with(this)
+                                .load(photoUrl)
+                                .centerCrop()
+                                .into(imgProfilePicture);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
 
@@ -297,6 +311,12 @@ public class ProfileFragment extends Fragment {
         if (editEmail != null && currentEmail != null) editEmail.setText(currentEmail);
         if (editAddress != null && currentAddress != null) editAddress.setText(currentAddress);
 
+        // Disable email field if user signed in via Google (email cannot be changed)
+        if (editEmail != null && AuthController.isGoogleSignInUser(requireContext())) {
+            editEmail.setEnabled(false);
+            editEmail.setAlpha(0.5f);
+        }
+
         AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
                 .setView(dialogView)
                 .create();
@@ -323,6 +343,9 @@ public class ProfileFragment extends Fragment {
                 }
                 return;
             }
+
+            // Update Firestore (if signed in) as well
+            vn.edu.tdtu.lhqc.budtrack.controllers.auth.UserRepository.updateProfileFields(requireContext(), newName, newEmail, newAddress);
 
             updateProfileValues(tvName, tvEmail, tvAddress);
             dialog.dismiss();
