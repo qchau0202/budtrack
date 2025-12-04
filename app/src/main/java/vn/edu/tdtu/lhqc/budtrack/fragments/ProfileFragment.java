@@ -311,10 +311,17 @@ public class ProfileFragment extends Fragment {
         if (editEmail != null && currentEmail != null) editEmail.setText(currentEmail);
         if (editAddress != null && currentAddress != null) editAddress.setText(currentAddress);
 
-        // Disable email field if user signed in via Google (email cannot be changed)
-        if (editEmail != null && AuthController.isGoogleSignInUser(requireContext())) {
-            editEmail.setEnabled(false);
-            editEmail.setAlpha(0.5f);
+        // Disable email and name fields if user signed in via Google (cannot be changed)
+        boolean isGoogleUser = AuthController.isGoogleSignInUser(requireContext());
+        if (isGoogleUser) {
+            if (editEmail != null) {
+                editEmail.setEnabled(false);
+                editEmail.setAlpha(0.5f);
+            }
+            if (editName != null) {
+                editName.setEnabled(false);
+                editName.setAlpha(0.5f);
+            }
         }
 
         AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
