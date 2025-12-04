@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="vn.edu.tdtu.lhqc.budtrack" />
+                  <option name="mobileSdkAppId" value="1:833868423078:android:0cc646903a6f907554b967" />
+                  <option name="projectId" value="budtrack-d33ca" />
+                  <option name="projectNumber" value="833868423078" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

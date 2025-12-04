@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "833868423078",
+    "project_id": "budtrack-d33ca",
+    "storage_bucket": "budtrack-d33ca.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833868423078:android:0cc646903a6f907554b967",
+        "android_client_info": {
+          "package_name": "vn.edu.tdtu.lhqc.budtrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYmYUMeJMTk_PUH1-Bq4oS57LMqnNIFmc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -241,23 +241,6 @@ public class MainActivity extends AppCompatActivity {
 				});
 	}
 
-	// PHƯƠNG THỨC showOcrResultDialog ĐÃ BỊ XÓA KHỎI ACTIVITY (vì nó được chuyển vào Fragment)
-    /*
-    private void showOcrResultDialog(Text visionText) {
-       String fullText = visionText.getText();
-       new MaterialAlertDialogBuilder(this)
-             .setTitle("Scanned Text")
-             .setMessage(fullText.isEmpty() ? "No text found." : fullText)
-             .setPositiveButton("Continue", (dialog, which) -> {
-                // Pass the full text to the fragment to be parsed there
-                openTransactionCreate("expense", true, fullText);
-             })
-             .setNegativeButton("Cancel", null)
-             .show();
-    }
-    */
-
-
 	private void setNavSelected(int navId) {
 		FragmentManager fm = getSupportFragmentManager();
 

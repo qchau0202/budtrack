@@ -18,6 +18,8 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -233,6 +235,14 @@ public class ProfileFragment extends Fragment {
         if (currencyRow != null && tvCurrencyValue != null) {
             updateCurrencyValue(tvCurrencyValue);
             currencyRow.setOnClickListener(v -> showCurrencyDialog(tvCurrencyValue));
+        }
+
+        TextView tvBackupLastSync = root.findViewById(R.id.tv_backup_last_sync);
+        ImageView iconBackupSync = root.findViewById(R.id.icon_backup_sync);
+        View backupRow = root.findViewById(R.id.row_backup);
+        if (backupRow != null && tvBackupLastSync != null && iconBackupSync != null) {
+            updateBackupLastSyncValue(tvBackupLastSync);
+            backupRow.setOnClickListener(v -> performBackupSync(iconBackupSync, tvBackupLastSync));
         }
 
         // Set up sign out button
@@ -805,5 +815,63 @@ public class ProfileFragment extends Fragment {
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
+    }
+
+    private void updateBackupLastSyncValue(TextView textView) {
+        if (getContext() == null) return;
+        String lastSync = SettingsHandler.formatBackupLastSyncTime(requireContext());
+        if (lastSync != null) {
+            textView.setText(getString(R.string.backup_last_sync, lastSync));
+        } else {
+            textView.setText(R.string.backup_never_synced);
+        }
+    }
+
+    private void performBackupSync(ImageView syncIcon, TextView tvBackupLastSync) {
+        if (getContext() == null) return;
+
+        // Start rotation animation
+        RotateAnimation rotateAnimation = new RotateAnimation(
+                0f, 360f,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+        );
+        rotateAnimation.setDuration(1000);
+        rotateAnimation.setRepeatCount(Animation.INFINITE);
+        rotateAnimation.setInterpolator(new android.view.animation.LinearInterpolator());
+        syncIcon.startAnimation(rotateAnimation);
+
+        // Disable the row to prevent multiple taps
+        View backupRow = getView() != null ? getView().findViewById(R.id.row_backup) : null;
+        if (backupRow != null) {
+            backupRow.setEnabled(false);
+        }
+
+        // Simulate backup sync (replace with actual backup logic)
+        new Thread(() -> {
+            try {
+                // Simulate network/backup operation
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            requireActivity().runOnUiThread(() -> {
+                // Stop animation
+                syncIcon.clearAnimation();
+
+                // Update last sync time
+                SettingsHandler.setBackupLastSync(requireContext());
+                updateBackupLastSyncValue(tvBackupLastSync);
+
+                // Re-enable the row
+                if (backupRow != null) {
+                    backupRow.setEnabled(true);
+                }
+
+                // Show success message
+                Toast.makeText(requireContext(), R.string.backup_sync_success, Toast.LENGTH_SHORT).show();
+            });
+        }).start();
     }
 }

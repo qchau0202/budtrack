@@ -174,29 +174,46 @@ public class MapFragment extends Fragment {
     }
 
     private void performSearch(String query) {
-        // Use Geocoder to search for location
-        try {
-            android.location.Geocoder geocoder = new android.location.Geocoder(requireContext(), java.util.Locale.getDefault());
-            java.util.List<android.location.Address> addresses = geocoder.getFromLocationName(query, 1);
-            
-            if (addresses != null && !addresses.isEmpty()) {
-                android.location.Address address = addresses.get(0);
-                GeoPoint geoPoint = new GeoPoint(address.getLatitude(), address.getLongitude());
-                
-                // Center map on found location
-                mapView.getController().animateTo(geoPoint);
-                mapView.getController().setZoom(15.0);
-                
-                // If in selection mode, automatically select this location
-                if (isSelectionMode) {
-                    selectLocationOnMap(geoPoint);
-                }
-            } else {
-                Toast.makeText(requireContext(), "Location not found: " + query, Toast.LENGTH_SHORT).show();
+        // Use Geocoder to search for location on a background thread to avoid ANR
+        new Thread(() -> {
+            try {
+                android.location.Geocoder geocoder =
+                        new android.location.Geocoder(requireContext(), java.util.Locale.getDefault());
+                java.util.List<android.location.Address> addresses =
+                        geocoder.getFromLocationName(query, 1);
+
+                if (!isAdded()) return;
+
+                requireActivity().runOnUiThread(() -> {
+                    if (!isAdded()) return;
+
+                    if (addresses != null && !addresses.isEmpty()) {
+                        android.location.Address address = addresses.get(0);
+                        GeoPoint geoPoint = new GeoPoint(address.getLatitude(), address.getLongitude());
+
+                        // Center map on found location
+                        mapView.getController().animateTo(geoPoint);
+                        mapView.getController().setZoom(15.0);
+
+                        // If in selection mode, automatically select this location
+                        if (isSelectionMode) {
+                            selectLocationOnMap(geoPoint);
+                        }
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Location not found: " + query,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (Exception e) {
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(requireContext(),
+                                "Error searching location: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show()
+                );
             }
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error searching location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        }).start();
     }
 
     private void setupExpenseDetailsPanel(View root) {
@@ -350,36 +367,49 @@ public class MapFragment extends Fragment {
     }
     
     private void getAddressFromCoordinates(double lat, double lng) {
-        // Simple reverse geocoding - in production, use Geocoder or API
-        // For now, show coordinates as address
-        String address = String.format(Locale.getDefault(), "%.6f, %.6f", lat, lng);
-        
-        // Try to use Android Geocoder if available
-        try {
-            android.location.Geocoder geocoder = new android.location.Geocoder(requireContext(), java.util.Locale.getDefault());
-            java.util.List<android.location.Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-            if (addresses != null && !addresses.isEmpty()) {
-                android.location.Address addressObj = addresses.get(0);
-                StringBuilder addressBuilder = new StringBuilder();
-                for (int i = 0; i <= addressObj.getMaxAddressLineIndex(); i++) {
-                    if (i > 0) addressBuilder.append(", ");
-                    addressBuilder.append(addressObj.getAddressLine(i));
+        // Always have a fallback address as coordinates
+        String fallbackAddress = String.format(Locale.getDefault(), "%.6f, %.6f", lat, lng);
+
+        new Thread(() -> {
+            String resolvedAddress = fallbackAddress;
+
+            // Try to use Android Geocoder if available (background thread to avoid ANR)
+            try {
+                android.location.Geocoder geocoder =
+                        new android.location.Geocoder(requireContext(), java.util.Locale.getDefault());
+                java.util.List<android.location.Address> addresses =
+                        geocoder.getFromLocation(lat, lng, 1);
+                if (addresses != null && !addresses.isEmpty()) {
+                    android.location.Address addressObj = addresses.get(0);
+                    StringBuilder addressBuilder = new StringBuilder();
+                    for (int i = 0; i <= addressObj.getMaxAddressLineIndex(); i++) {
+                        if (i > 0) addressBuilder.append(", ");
+                        addressBuilder.append(addressObj.getAddressLine(i));
+                    }
+                    resolvedAddress = addressBuilder.toString();
                 }
-                address = addressBuilder.toString();
+            } catch (Exception e) {
+                // Ignore geocoder errors, fall back to coordinates
             }
-        } catch (Exception e) {
-            // If geocoding fails, use coordinates
-        }
-        
-        // Update UI
-        if (tvSelectedLocationAddress != null) {
-            tvSelectedLocationAddress.setText(address);
-        }
-        
-        // Store selected location
-        selectedLocationLat = lat;
-        selectedLocationLng = lng;
-        selectedLocationAddress = address;
+
+            final String finalAddress = resolvedAddress;
+
+            if (!isAdded()) return;
+
+            requireActivity().runOnUiThread(() -> {
+                if (!isAdded()) return;
+
+                // Update UI
+                if (tvSelectedLocationAddress != null) {
+                    tvSelectedLocationAddress.setText(finalAddress);
+                }
+
+                // Store selected location
+                selectedLocationLat = lat;
+                selectedLocationLng = lng;
+                selectedLocationAddress = finalAddress;
+            });
+        }).start();
     }
     
     private void confirmLocationSelection() {

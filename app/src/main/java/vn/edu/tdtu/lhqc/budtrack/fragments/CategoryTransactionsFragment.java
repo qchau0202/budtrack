@@ -26,10 +26,8 @@ import java.util.List;
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.adapters.TransactionHistoryAdapter;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
-import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
 import vn.edu.tdtu.lhqc.budtrack.mockdata.TransactionAdapterHelper;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
@@ -169,13 +167,6 @@ public class CategoryTransactionsFragment extends Fragment {
             if (transaction.getCategoryName() != null && transaction.getCategoryIconResId() != null) {
                 matches = transaction.getCategoryName().equals(categoryName) &&
                          transaction.getCategoryIconResId() == categoryIconResId;
-            } else if (transaction.getCategoryId() != null) {
-                // Legacy: try to match by categoryId
-                Category category = findCategoryById(transaction.getCategoryId());
-                if (category != null) {
-                    matches = category.getName().equals(categoryName) &&
-                             category.getIconResId() == categoryIconResId;
-                }
             }
 
             if (matches) {
@@ -291,18 +282,6 @@ public class CategoryTransactionsFragment extends Fragment {
         } else {
             TabStyleUtils.selectTab(requireContext(), tabExpense, tabIncome);
         }
-    }
-
-    private Category findCategoryById(Long categoryId) {
-        if (categoryId == null) {
-            return null;
-        }
-        for (Category category : MockCategoryData.getSampleCategories()) {
-            if (category.getId() == categoryId) {
-                return category;
-            }
-        }
-        return null;
     }
 
     @Override

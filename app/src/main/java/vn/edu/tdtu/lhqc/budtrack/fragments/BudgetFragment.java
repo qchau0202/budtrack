@@ -28,10 +28,10 @@ import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCalculator;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCategoryManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager;
+import vn.edu.tdtu.lhqc.budtrack.controllers.category.CategoryManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.models.Budget;
 import vn.edu.tdtu.lhqc.budtrack.models.Category;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.ProgressBarUtils;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
@@ -443,48 +443,48 @@ public class BudgetFragment extends Fragment {
         }
 
         container.setVisibility(View.VISIBLE);
-        List<Category> allCategories = MockCategoryData.getSampleCategories();
 
-        // Create icon views for each category
+        // Build a lookup map of categoryId -> iconResId based on user-defined categories
+        List<CategoryManager.CategoryItem> userCategories = CategoryManager.getCategories(requireContext());
+        java.util.Map<Long, Integer> categoryIdToIcon = new java.util.HashMap<>();
+        for (CategoryManager.CategoryItem item : userCategories) {
+            long id = (long) (item.name.hashCode() * 31 + item.iconResId);
+            categoryIdToIcon.put(id, item.iconResId);
+        }
+
+        // Create icon views for each category associated with this budget
         for (Long categoryId : categoryIds) {
-            // Find the category by ID
-            Category category = null;
-            for (Category cat : allCategories) {
-                if (cat.getId() == categoryId) {
-                    category = cat;
-                    break;
-                }
+            Integer iconResId = categoryIdToIcon.get(categoryId);
+            if (iconResId == null || iconResId == 0) {
+                continue;
             }
 
-            if (category != null) {
-                // Create ImageView for category icon
-                ImageView iconView = new ImageView(requireContext());
-                int iconSize = (int) (32 * requireContext().getResources().getDisplayMetrics().density);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(iconSize, iconSize);
-                params.setMarginEnd((int) (8 * requireContext().getResources().getDisplayMetrics().density));
-                iconView.setLayoutParams(params);
-                iconView.setImageResource(category.getIconResId());
-                iconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                iconView.setPadding(
-                    (int) (4 * requireContext().getResources().getDisplayMetrics().density),
-                    (int) (4 * requireContext().getResources().getDisplayMetrics().density),
-                    (int) (4 * requireContext().getResources().getDisplayMetrics().density),
-                    (int) (4 * requireContext().getResources().getDisplayMetrics().density)
-                );
+            ImageView iconView = new ImageView(requireContext());
+            int iconSize = (int) (32 * requireContext().getResources().getDisplayMetrics().density);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(iconSize, iconSize);
+            params.setMarginEnd((int) (8 * requireContext().getResources().getDisplayMetrics().density));
+            iconView.setLayoutParams(params);
+            iconView.setImageResource(iconResId);
+            iconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            iconView.setPadding(
+                (int) (4 * requireContext().getResources().getDisplayMetrics().density),
+                (int) (4 * requireContext().getResources().getDisplayMetrics().density),
+                (int) (4 * requireContext().getResources().getDisplayMetrics().density),
+                (int) (4 * requireContext().getResources().getDisplayMetrics().density)
+            );
 
-                // Set icon color based on budget color
-                int colorValue = 0;
-                if (budget.getCustomColor() != null) {
-                    colorValue = budget.getCustomColor();
-                } else if (budget.getColorResId() != 0) {
-                    colorValue = ContextCompat.getColor(requireContext(), budget.getColorResId());
-                }
-                if (colorValue != 0) {
-                    iconView.setColorFilter(colorValue);
-                }
-
-                container.addView(iconView);
+            // Set icon color based on budget color
+            int colorValue = 0;
+            if (budget.getCustomColor() != null) {
+                colorValue = budget.getCustomColor();
+            } else if (budget.getColorResId() != 0) {
+                colorValue = ContextCompat.getColor(requireContext(), budget.getColorResId());
             }
+            if (colorValue != 0) {
+                iconView.setColorFilter(colorValue);
+            }
+
+            container.addView(iconView);
         }
     }
 

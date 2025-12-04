@@ -19,8 +19,6 @@ import java.util.Map;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
-import vn.edu.tdtu.lhqc.budtrack.mockdata.MockCategoryData;
-import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
@@ -86,15 +84,6 @@ public final class HomePieChartController {
                 // Use user-defined category (name + icon)
                 categoryKey = transaction.getCategoryName() + "|" + transaction.getCategoryIconResId();
                 iconResId = transaction.getCategoryIconResId();
-            } else if (transaction.getCategoryId() != null) {
-                // Legacy: try to match categoryId to MockCategoryData (for backward compatibility)
-                for (Category category : MockCategoryData.getSampleCategories()) {
-                    if (category.getId() == transaction.getCategoryId()) {
-                        categoryKey = category.getName() + "|" + category.getIconResId();
-                        iconResId = category.getIconResId();
-                        break;
-                    }
-                }
             }
 
             if (categoryKey == null) {
