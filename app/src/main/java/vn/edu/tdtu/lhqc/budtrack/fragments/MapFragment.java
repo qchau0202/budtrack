@@ -1,6 +1,7 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -36,12 +37,16 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.activities.MainActivity;
+import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
+import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 
 // Fragment to display expense locations on an OpenStreetMap view.
@@ -104,12 +109,7 @@ public class MapFragment extends Fragment {
         }
 
         // Only load expense locations if not in selection mode
-        if (!isSelectionMode) {
-            expenseLocations = new ArrayList<>();
-            // No hardcoded data - expense locations will be loaded from database/transactions
-        } else {
         expenseLocations = new ArrayList<>();
-        }
     }
 
     @Override
@@ -125,8 +125,9 @@ public class MapFragment extends Fragment {
         if (isSelectionMode) {
             setupLocationSelectionPanel(root);
         } else {
-        setupExpenseDetailsPanel(root);
+            setupExpenseDetailsPanel(root);
         }
+
         setupMap(root);
         requestLocationPermission();
 
@@ -227,10 +228,17 @@ public class MapFragment extends Fragment {
         btnViewDetails = root.findViewById(R.id.btn_view_details);
         btnCloseDetails = root.findViewById(R.id.btn_close_details);
 
+        // This inline panel is no longer used for transaction taps;
+        // tapping a marker will show a full bottom sheet instead.
         btnCloseDetails.setOnClickListener(v -> hideExpenseDetails());
         btnViewDetails.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), R.string.feature_coming_soon, Toast.LENGTH_SHORT).show();
+            hideExpenseDetails();
         });
+
+        // Hide by default; it can still be reused in future if needed.
+        if (expenseDetailsPanel != null) {
+            expenseDetailsPanel.setVisibility(View.GONE);
+        }
     }
 
     private void showExpenseDetails(ExpenseLocation expense) {
@@ -315,13 +323,13 @@ public class MapFragment extends Fragment {
                 }
             });
         } else {
-        // Hide keyboard when map is tapped
-        mapView.setOnTouchListener((v, event) -> {
+            // Hide keyboard when map is tapped
+            mapView.setOnTouchListener((v, event) -> {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                hideKeyboardAndClearFocus();
-            }
-            return false; // Let the map handle the touch event
-        });
+                    hideKeyboardAndClearFocus();
+                }
+                return false; // Let the map handle the touch event
+            });
         }
         
         GeoPoint defaultPoint = new GeoPoint(10.762622, 106.660172);
@@ -329,7 +337,73 @@ public class MapFragment extends Fragment {
         mapView.getController().setCenter(defaultPoint);
 
         if (!isSelectionMode) {
-        addExpenseMarkers();
+            // Load all transactions that have location information and add markers
+            loadExpenseLocationsFromTransactions(root.getContext());
+            addExpenseMarkers();
+        }
+    }
+
+    /**
+     * Load all transactions that have location data and adapt them into ExpenseLocation items
+     * for display on the map.
+     */
+    private void loadExpenseLocationsFromTransactions(Context context) {
+        if (context == null) return;
+
+        List<Transaction> transactions = TransactionManager.getTransactions(context);
+        expenseLocations.clear();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
+
+        for (Transaction transaction : transactions) {
+            if (transaction == null || !transaction.hasLocation()) {
+                continue;
+            }
+
+            Double lat = transaction.getLatitude();
+            Double lng = transaction.getLongitude();
+            if (lat == null || lng == null) {
+                continue;
+            }
+
+            String name = transaction.getMerchantName();
+            if (name == null || name.trim().isEmpty()) {
+                // Fallback to category name or a generic label
+                name = transaction.getCategoryName();
+                if (name == null || name.trim().isEmpty()) {
+                    name = getString(R.string.unknown);
+                }
+            }
+
+            String category = transaction.getCategoryName();
+            if (category == null || category.trim().isEmpty()) {
+                category = transaction.getType() != null ? transaction.getType().name() : "";
+            }
+
+            String address = transaction.getAddress();
+            if (address == null || address.trim().isEmpty()) {
+                address = String.format(Locale.getDefault(), "%.6f, %.6f", lat, lng);
+            }
+
+            String dateText = "";
+            Date date = transaction.getDate();
+            if (date != null) {
+                dateText = dateFormat.format(date);
+            }
+
+            String note = transaction.getNote();
+
+            expenseLocations.add(new ExpenseLocation(
+                    transaction.getId(),
+                    lat,
+                    lng,
+                    name,
+                    transaction.getAmount(),
+                    category,
+                    address,
+                    dateText,
+                    note
+            ));
         }
     }
 
@@ -532,10 +606,15 @@ public class MapFragment extends Fragment {
             // Add click listener
             marker.setOnMarkerClickListener((marker1, mapView) -> {
                 ExpenseLocation clickedExpense = (ExpenseLocation) marker1.getRelatedObject();
-                if (clickedExpense != null) {
+                if (clickedExpense != null && getActivity() != null) {
                     // Hide keyboard and clear focus when marker is clicked
                     hideKeyboardAndClearFocus();
-                    showExpenseDetails(clickedExpense);
+
+                    // Show full transaction details in a bottom sheet
+                    TransactionDetailBottomSheet sheet =
+                            TransactionDetailBottomSheet.newInstance(clickedExpense.transactionId);
+                    sheet.show(getActivity().getSupportFragmentManager(), TransactionDetailBottomSheet.TAG);
+
                     // Center map on marker
                     mapView.getController().animateTo(marker1.getPosition());
                 }
@@ -676,6 +755,7 @@ public class MapFragment extends Fragment {
     }
 
     private static class ExpenseLocation {
+        final long transactionId;
         final double latitude;
         final double longitude;
         final String name;
@@ -685,8 +765,16 @@ public class MapFragment extends Fragment {
         final String date;
         final String note;
 
-        ExpenseLocation(double latitude, double longitude, String name, double amount, 
-                       String category, String address, String date, String note) {
+        ExpenseLocation(long transactionId,
+                        double latitude,
+                        double longitude,
+                        String name,
+                        double amount,
+                        String category,
+                        String address,
+                        String date,
+                        String note) {
+            this.transactionId = transactionId;
             this.latitude = latitude;
             this.longitude = longitude;
             this.name = name;
