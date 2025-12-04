@@ -500,7 +500,7 @@ public class TransactionDetailFragment extends Fragment {
         btnSave.setOnClickListener(v -> {
             // Validate and save
             String title = editTitle != null ? editTitle.getText().toString().trim() : "";
-            String amountText = editAmount != null ? editAmount.getText().toString().trim().replace(",", "") : "";
+            String amountText = editAmount != null ? editAmount.getText().toString().trim() : "";
             String note = editNote != null ? editNote.getText().toString().trim() : "";
 
             if (amountText.isEmpty()) {
@@ -514,16 +514,25 @@ public class TransactionDetailFragment extends Fragment {
             }
 
             try {
-                double amount = Double.parseDouble(amountText);
                 String selectedCurrency = SettingsHandler.getCurrency(requireContext());
-                
+
                 // Convert from display currency to VND for storage
                 long amountVnd;
                 if ("USD".equals(selectedCurrency)) {
+                    double amountUsd = CurrencyUtils.parseFormattedNumber(amountText);
+                    if (amountUsd <= 0) {
+                        Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     double exchangeRate = SettingsHandler.getExchangeRate(requireContext());
-                    amountVnd = (long) (amount * exchangeRate);
+                    amountVnd = (long) (amountUsd * exchangeRate);
                 } else {
-                    amountVnd = (long) amount;
+                    long amountLong = CurrencyUtils.parseFormattedNumberLong(amountText);
+                    if (amountLong <= 0) {
+                        Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    amountVnd = amountLong;
                 }
 
                 // Combine date and time

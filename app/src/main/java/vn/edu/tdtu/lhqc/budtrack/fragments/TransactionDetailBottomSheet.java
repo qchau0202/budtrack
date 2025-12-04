@@ -116,13 +116,8 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
         }
 
         // Initialize views
-        TextView tvExpenseName = view.findViewById(R.id.tv_expense_name);
-        TextView tvExpenseAddress = view.findViewById(R.id.tv_expense_address);
-        TextView tvExpenseCategory = view.findViewById(R.id.tv_expense_category);
-        TextView tvExpenseAmount = view.findViewById(R.id.tv_expense_amount);
-        TextView tvExpenseDate = view.findViewById(R.id.tv_expense_date);
-        TextView tvExpenseNote = view.findViewById(R.id.tv_expense_note);
         ImageButton btnClose = view.findViewById(R.id.btn_close_details);
+        View btnViewDetails = view.findViewById(R.id.btn_view_details);
 
         // Update transaction display
         updateTransactionDisplay(view, transaction);
@@ -132,10 +127,20 @@ public class TransactionDetailBottomSheet extends BottomSheetDialogFragment {
             btnClose.setOnClickListener(v -> dismiss());
         }
 
-        // Hide view details button
-        View btnViewDetails = view.findViewById(R.id.btn_view_details);
+        // View full details button: open full-screen TransactionDetailFragment
         if (btnViewDetails != null) {
-            btnViewDetails.setVisibility(View.GONE);
+            btnViewDetails.setVisibility(View.VISIBLE);
+            btnViewDetails.setOnClickListener(v -> {
+                dismiss();
+                if (getActivity() != null) {
+                    TransactionDetailFragment fragment = TransactionDetailFragment.newInstance(transactionId);
+                    getActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_container, fragment, "TRANSACTION_DETAIL_FRAGMENT")
+                            .addToBackStack(null)
+                            .commit();
+                }
+            });
         }
 
         return view;

@@ -797,17 +797,36 @@ public class TransactionCreateFragment extends BottomSheetDialogFragment {
         }
 
         try {
-            double amount = CurrencyUtils.parseFormattedNumber(amountText);
-            if (amount <= 0) {
-                Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
-                editAmount.requestFocus();
-                return;
-            }
-            if ("USD".equals(SettingsHandler.getCurrency(requireContext()))) {
+            String currency = SettingsHandler.getCurrency(requireContext());
+            double amountVnd;
+
+            if ("USD".equals(currency)) {
+                // For USD we allow decimals; parse robustly and convert to VND
+                double amountUsd = CurrencyUtils.parseFormattedNumber(amountText);
+                if (amountUsd <= 0) {
+                    Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
+                    editAmount.requestFocus();
+                    return;
+                }
                 float exchangeRate = SettingsHandler.getExchangeRate(requireContext());
-                if (exchangeRate > 0) amount *= exchangeRate;
+                if (exchangeRate <= 0) {
+                    Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
+                    editAmount.requestFocus();
+                    return;
+                }
+                amountVnd = amountUsd * exchangeRate;
+            } else {
+                // For VND we treat the value as an integer amount with dot thousand separators
+                long amountLong = CurrencyUtils.parseFormattedNumberLong(amountText);
+                if (amountLong <= 0) {
+                    Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
+                    editAmount.requestFocus();
+                    return;
+                }
+                amountVnd = amountLong;
             }
-            saveTransactionToDatabase(amount, title, note, location);
+
+            saveTransactionToDatabase(amountVnd, title, note, location);
         } catch (NumberFormatException e) {
             Toast.makeText(requireContext(), getString(R.string.error_amount_invalid), Toast.LENGTH_SHORT).show();
             editAmount.requestFocus();
