@@ -23,6 +23,8 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FieldValue;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.auth.AuthController;
@@ -148,19 +150,25 @@ public class LoginActivity extends AppCompatActivity {
 
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
-            if (task.isSuccessful()) {
-                FirebaseUser user = mAuth.getCurrentUser();
-                String email = user != null ? user.getEmail() : null;
-                String name = user != null ? user.getDisplayName() : null;
+                if (task.isSuccessful()) {
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    String email = user != null ? user.getEmail() : null;
+                    String name = user != null ? user.getDisplayName() : null;
+                    String photoUrl = user != null && user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null;
 
-                // Persist in app's AuthController (SharedPreferences)
-                AuthController.loginWithExternalAccount(LoginActivity.this, email, name);
+                    // Persist in app's AuthController (SharedPreferences)
+                    AuthController.loginWithExternalAccount(LoginActivity.this, email, name, photoUrl);
 
-                Toast.makeText(LoginActivity.this, getString(R.string.login_successful), Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
+                    // Create or update user document in Firestore (centralized)
+                    if (user != null) {
+                        vn.edu.tdtu.lhqc.budtrack.controllers.auth.UserRepository.createOrUpdateUserOnSignIn(LoginActivity.this, user, photoUrl);
+                    }
+
+                    Toast.makeText(LoginActivity.this, getString(R.string.login_successful), Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
                 Log.w(TAG, "signInWithCredential:failure", task.getException());
                 Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
             }

@@ -20,7 +20,7 @@
     <string name="btn_login">Đăng nhập</string>
     <string name="no_account">Chưa có tài khoản? </string>
     <string name="sign_up_link">Đăng ký</string>
-    <string name="sign_up_with_google">Đăng ký bằng Google</string>
+    <string name="sign_up_with_google">Đăng nhập bằng Google</string>
     <string name="or">Hoặc</string>
 
 <!--Register-->
