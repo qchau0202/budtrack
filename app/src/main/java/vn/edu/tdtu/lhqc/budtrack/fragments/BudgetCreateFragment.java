@@ -564,11 +564,6 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
     private void showCategorySelectionDialog() {
         // Reload categories in case new ones were added
         loadAvailableCategories();
-        
-        if (availableCategories == null || availableCategories.isEmpty()) {
-            Toast.makeText(requireContext(), getString(R.string.no_categories_available), Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         final Set<Long> pendingSelection = new HashSet<>(selectedCategoryIds);
         
@@ -582,6 +577,51 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
         LinearLayout containerCategories = dialogView.findViewById(R.id.container_categories);
         MaterialButton btnCancel = dialogView.findViewById(R.id.btn_cancel);
         MaterialButton btnConfirm = dialogView.findViewById(R.id.btn_confirm);
+
+        // Create AlertDialog first so we can dismiss and recreate it after adding a category
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        // Add "Create Category" button at the top (styled like a category selection item)
+        View addCategoryView = inflater.inflate(R.layout.item_category_selection, containerCategories, false);
+        MaterialCardView addCategoryCard = addCategoryView.findViewById(R.id.card_category);
+        View addCategoryContainer = addCategoryView.findViewById(R.id.container_category);
+        ImageView addCategoryIcon = addCategoryView.findViewById(R.id.icon_category);
+        TextView addCategoryName = addCategoryView.findViewById(R.id.tv_category_name);
+        ImageView addCategoryCheck = addCategoryView.findViewById(R.id.icon_check);
+        
+        if (addCategoryIcon != null) {
+            addCategoryIcon.setImageResource(R.drawable.ic_add_24dp);
+            addCategoryIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.primary_green));
+        }
+        if (addCategoryName != null) {
+            addCategoryName.setText(getString(R.string.add_new_category));
+        }
+        if (addCategoryCheck != null) {
+            addCategoryCheck.setVisibility(View.GONE);
+        }
+        
+        View.OnClickListener addCategoryClickListener = v -> {
+            // Show category create bottom sheet
+            CategoryCreateBottomSheet createBottomSheet = CategoryCreateBottomSheet.newInstance();
+            createBottomSheet.setOnCategoryCreateListener((name, iconResId) -> {
+                // After creating category, reload and refresh the dialog
+                loadAvailableCategories();
+                // Dismiss current dialog and show a new one with updated categories
+                dialog.dismiss();
+                showCategorySelectionDialog();
+            });
+            createBottomSheet.show(getParentFragmentManager(), "CategoryCreateBottomSheet");
+        };
+        
+        if (addCategoryCard != null) {
+            addCategoryCard.setOnClickListener(addCategoryClickListener);
+        }
+        if (addCategoryContainer != null) {
+            addCategoryContainer.setOnClickListener(addCategoryClickListener);
+        }
+        containerCategories.addView(addCategoryView);
 
         // Create category cards dynamically
         List<MaterialCardView> categoryCards = new ArrayList<>();
@@ -663,10 +703,6 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
             containers.add(container);
             containerCategories.addView(categoryItemView);
         }
-
-        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
-                .setView(dialogView)
-                .create();
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnConfirm.setOnClickListener(v -> {
@@ -849,21 +885,27 @@ public class BudgetCreateFragment extends BottomSheetDialogFragment {
 
         try {
             // Parse user-entered amount in the current display currency
-            double amount = CurrencyUtils.parseFormattedNumber(amountText);
-
-            // Convert from display currency to stored currency (VND)
             String selectedCurrency = SettingsHandler.getCurrency(requireContext());
             long budgetAmount;
+            
             if ("USD".equals(selectedCurrency)) {
+                // For USD we allow decimals; parse robustly and convert to VND
+                double amountUsd = CurrencyUtils.parseFormattedNumber(amountText);
+                if (amountUsd <= 0) {
+                    Toast.makeText(requireContext(), getString(R.string.budget_amount_invalid), Toast.LENGTH_SHORT).show();
+                    if (editBudgetAmount != null) editBudgetAmount.requestFocus();
+                    return;
+                }
                 float exchangeRate = SettingsHandler.getExchangeRate(requireContext());
                 if (exchangeRate <= 0f) {
-                    // Fallback: avoid dividing/multiplying by zero; treat as 1:1 if misconfigured
-                    exchangeRate = 1f;
+                    Toast.makeText(requireContext(), getString(R.string.budget_amount_invalid), Toast.LENGTH_SHORT).show();
+                    if (editBudgetAmount != null) editBudgetAmount.requestFocus();
+                    return;
                 }
-                budgetAmount = (long) (amount * exchangeRate);
+                budgetAmount = (long) (amountUsd * exchangeRate);
             } else {
-                // VND mode: amount is already in VND
-                budgetAmount = (long) amount;
+                // For VND we treat the value as an integer amount with dot thousand separators
+                budgetAmount = CurrencyUtils.parseFormattedNumberLong(amountText);
             }
 
             if (budgetAmount <= 0) {

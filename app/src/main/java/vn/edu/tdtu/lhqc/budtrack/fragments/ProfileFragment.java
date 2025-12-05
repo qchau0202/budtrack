@@ -544,6 +544,8 @@ public class ProfileFragment extends Fragment {
             if (!selected.equals(current)) {
                 SettingsHandler.setCurrency(requireContext(), selected);
                 updateCurrencyValue(tvCurrencyValue);
+                // Show toast notification
+                Toast.makeText(requireContext(), getString(R.string.currency_changed, selected), Toast.LENGTH_SHORT).show();
                 // Currency change will be automatically detected by SharedPreferences listeners in all fragments
                 // No need to manually broadcast - the preference change listener handles it
             }

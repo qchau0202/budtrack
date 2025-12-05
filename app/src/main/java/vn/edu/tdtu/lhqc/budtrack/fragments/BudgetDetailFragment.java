@@ -458,6 +458,7 @@ public class BudgetDetailFragment extends Fragment {
         MaterialButton tabIncome = root.findViewById(R.id.tabIncome);
         MaterialButton tabExpense = root.findViewById(R.id.tabExpense);
         RecyclerView recyclerView = root.findViewById(R.id.recycler_transactions);
+        TextView tvEmptyState = root.findViewById(R.id.tv_empty_state);
 
         if (recyclerView == null || tabIncome == null || tabExpense == null) {
             return;
@@ -477,19 +478,34 @@ public class BudgetDetailFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(expenseAdapter); // Default to expenses
 
+        // Helper method to update empty state visibility
+        Runnable updateEmptyState = () -> {
+            TransactionHistoryAdapter currentAdapter = (TransactionHistoryAdapter) recyclerView.getAdapter();
+            boolean isEmpty = currentAdapter != null && currentAdapter.getItemCount() == 0;
+            if (tvEmptyState != null) {
+                tvEmptyState.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+            }
+            if (recyclerView != null) {
+                recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+            }
+        };
+
         // Setup tab listeners
         tabIncome.setOnClickListener(v -> {
             selectTab(true, tabIncome, tabExpense);
             recyclerView.setAdapter(incomeAdapter);
+            updateEmptyState.run();
         });
 
         tabExpense.setOnClickListener(v -> {
             selectTab(false, tabIncome, tabExpense);
             recyclerView.setAdapter(expenseAdapter);
+            updateEmptyState.run();
         });
 
         // Default to expenses tab
         selectTab(false, tabIncome, tabExpense);
+        updateEmptyState.run();
     }
 
 

@@ -467,20 +467,21 @@ public class TransactionDetailFragment extends Fragment {
 
         // Setup location selection
         cardLocation.setOnClickListener(v -> {
+            // Hide the edit bottom sheet so the map is fully interactive
+            if (dialog.isShowing()) {
+                dialog.hide();
+            }
+
             android.content.SharedPreferences locationPrefs = requireContext().getSharedPreferences("location_selection", android.content.Context.MODE_PRIVATE);
             locationPrefs.edit()
                     .putBoolean("has_location", false)
                     .apply();
             
             MapFragment mapFragment = MapFragment.newInstanceForLocationSelection();
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, mapFragment, "MAP_FRAGMENT")
-                    .addToBackStack(null)
-                    .commit();
-            
-            // Listen for location result
-            requireActivity().getSupportFragmentManager().setFragmentResultListener(
+            final androidx.fragment.app.FragmentManager fm = requireActivity().getSupportFragmentManager();
+
+            // Listen for location result and re-show the sheet
+            fm.setFragmentResultListener(
                 MapFragment.RESULT_KEY_LOCATION,
                 this,
                 (requestKey, result) -> {
@@ -489,10 +490,33 @@ public class TransactionDetailFragment extends Fragment {
                         selectedLocationLat.set(result.getDouble(MapFragment.RESULT_LOCATION_LAT));
                         selectedLocationLng.set(result.getDouble(MapFragment.RESULT_LOCATION_LNG));
                         updateLocationText(tvLocation, selectedLocationAddress.get());
-                        requireActivity().getSupportFragmentManager().clearFragmentResultListener(MapFragment.RESULT_KEY_LOCATION);
+                        fm.clearFragmentResultListener(MapFragment.RESULT_KEY_LOCATION);
+                        if (!dialog.isShowing()) {
+                            dialog.show();
+                        }
                     }
                 }
             );
+
+            // Fallback: if user cancels map (back), re-show the sheet
+            androidx.fragment.app.FragmentManager.OnBackStackChangedListener listener = new androidx.fragment.app.FragmentManager.OnBackStackChangedListener() {
+                @Override
+                public void onBackStackChanged() {
+                    Fragment map = fm.findFragmentByTag("MAP_FRAGMENT");
+                    if (map == null || !map.isAdded()) {
+                        if (!dialog.isShowing()) {
+                            dialog.show();
+                        }
+                        fm.removeOnBackStackChangedListener(this);
+                    }
+                }
+            };
+            fm.addOnBackStackChangedListener(listener);
+
+            fm.beginTransaction()
+                    .replace(R.id.fragment_container, mapFragment, "MAP_FRAGMENT")
+                    .addToBackStack(null)
+                    .commit();
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());

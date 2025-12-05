@@ -1,8 +1,10 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -164,12 +166,19 @@ public class DashboardFragment extends Fragment {
 
         // Send initial date selection (current date) to TransactionHistoryFragment after view is created
         root.post(() -> {
+            if (!isAdded()) {
+                return;
+            }
+            FragmentActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
             long selectedMillis = selectedDate.getTimeInMillis();
 
             // Notify via FragmentResult so any listener (including TransactionHistoryFragment) can react
             Bundle result = new Bundle();
             result.putLong(RESULT_SELECTED_DATE_MILLIS, selectedMillis);
-            requireActivity().getSupportFragmentManager()
+            activity.getSupportFragmentManager()
                     .setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
 
             // Also directly notify the embedded TransactionHistoryFragment for extra reliability
@@ -332,6 +341,13 @@ public class DashboardFragment extends Fragment {
         // Set click listener for all dates (including dates from other months)
         // This allows users to select dates from previous/next months to view their transactions
         cell.setOnClickListener(v -> {
+            if (!isAdded()) {
+                return;
+            }
+            FragmentActivity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
             selectedDate = (Calendar) date.clone();
             long selectedMillis = selectedDate.getTimeInMillis();
 
@@ -345,7 +361,7 @@ public class DashboardFragment extends Fragment {
             // Notify TransactionHistoryFragment about date selection via FragmentResult
             Bundle result = new Bundle();
             result.putLong(RESULT_SELECTED_DATE_MILLIS, selectedMillis);
-            requireActivity().getSupportFragmentManager().setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
+            activity.getSupportFragmentManager().setFragmentResult(RESULT_KEY_DATE_SELECTED, result);
 
             // Also directly notify the embedded TransactionHistoryFragment for reliability
             Fragment child = getChildFragmentManager().findFragmentById(R.id.transaction_history_fragment_container);
