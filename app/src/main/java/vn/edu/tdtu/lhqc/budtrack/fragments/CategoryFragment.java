@@ -204,16 +204,26 @@ public class CategoryFragment extends Fragment {
 
             if (card != null) {
                 card.setOnClickListener(v -> {
-                    if (!isEditMode) {
-                        return;
+                    if (isEditMode) {
+                        // In edit mode: open edit bottom sheet
+                        CategoryCreateBottomSheet editSheet =
+                                CategoryCreateBottomSheet.newInstanceForEdit(category.name, category.iconResId);
+                        editSheet.setOnCategoryCreateListener((newName, newIconResId) -> {
+                            allCategories = CategoryManager.getCategories(requireContext());
+                            updateCategoryGrid(allCategories);
+                        });
+                        editSheet.show(requireActivity().getSupportFragmentManager(), "EditCategoryBottomSheet");
+                    } else {
+                        // In normal mode: navigate to category transactions
+                        CategoryTransactionsFragment fragment = CategoryTransactionsFragment.newInstance(
+                                category.name, category.iconResId
+                        );
+                        requireActivity().getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragment_container, fragment, "CATEGORY_TRANSACTIONS_FRAGMENT")
+                                .addToBackStack(null)
+                                .commit();
                     }
-                    CategoryCreateBottomSheet editSheet =
-                            CategoryCreateBottomSheet.newInstanceForEdit(category.name, category.iconResId);
-                    editSheet.setOnCategoryCreateListener((newName, newIconResId) -> {
-                        allCategories = CategoryManager.getCategories(requireContext());
-                        updateCategoryGrid(allCategories);
-                    });
-                    editSheet.show(requireActivity().getSupportFragmentManager(), "EditCategoryBottomSheet");
                 });
             }
 

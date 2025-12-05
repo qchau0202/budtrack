@@ -97,6 +97,11 @@ public class MainActivity extends AppCompatActivity {
 		if (SettingsHandler.getNextUpdateTime(this) == 0) {
 			SettingsHandler.scheduleWeeklyExchangeRateUpdate(this);
 		}
+		// If no exchange rate has ever been fetched, fetch once now (background)
+		if (SettingsHandler.getExchangeRateLastUpdate(this) == 0) {
+			new Thread(() -> vn.edu.tdtu.lhqc.budtrack.controllers.exchangerate.ExchangeRateService
+					.updateExchangeRateFromAPI(getApplicationContext())).start();
+		}
 
 		setContentView(R.layout.activity_main);
 		bottomBarContainer = findViewById(R.id.bottom_bar_container);

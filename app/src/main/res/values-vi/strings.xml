@@ -48,8 +48,8 @@
     <string name="total_income">Tổng thu nhập</string>
     <string name="tab_income">Thu nhập</string>
     <string name="tab_expenses">Chi tiêu</string>
-    <string name="total_spent">Tổng đã chi</string>
-    <string name="this_month_total_spend">Tổng chi tháng này</string>
+    <string name="total_spent">Tổng giao dịch</string>
+    <string name="this_month_total_spend">Tổng giao dịch tháng này</string>
     <string name="transactions_in_month">Giao dịch trong %1$s</string>
     <string name="view_all_transactions">Xem các giao dịch</string>
     <string name="categories">Danh mục</string>
@@ -59,6 +59,7 @@
     <!--Budget-->
     <string name="budget_page">Trang ngân sách</string>
     <string name="budgets">Ngân sách</string>
+    <string name="wallets">Ví</string>
     <string name="total_budget">Tổng ngân sách</string>
     <string name="spent">đã chi</string>
     <string name="left">còn lại</string>
@@ -123,6 +124,7 @@
     <string name="currency_exchange_updated">Cập nhật tỷ giá thành công</string>
     <string name="currency_exchange_updating">Đang cập nhật tỷ giá…</string>
     <string name="currency_exchange_update_failed">Không thể cập nhật tỷ giá. Vui lòng thử lại.</string>
+    <string name="currency_changed">Đã đổi đơn vị tiền tệ sang %1$s</string>
     <string name="currency_exchange_rate_hint">Nhập tỷ giá USD sang VND</string>
     <string name="backup">Sao lưu</string>
     <string name="backup_last_sync">Đã đồng bộ lần cuối: %1$s</string>
@@ -244,6 +246,11 @@
     <string name="map_preview_placeholder">Xem trước bản đồ</string>
     <string name="location_permission_denied">Cần quyền vị trí để hiển thị vị trí của bạn trên bản đồ</string>
     <string name="search_location">Tìm vị trí</string>
+    <string name="search_results">Kết Quả Tìm Kiếm</string>
+    <plurals name="search_results_count">
+        <item quantity="one">Tìm thấy %d kết quả</item>
+        <item quantity="other">Tìm thấy %d kết quả</item>
+    </plurals>
     <string name="feature_coming_soon">Tính năng này sẽ sớm ra mắt</string>
 
     <!--Map Bottom Sheet-->

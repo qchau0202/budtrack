@@ -5,6 +5,9 @@ import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Patterns;
 
+import vn.edu.tdtu.lhqc.budtrack.database.auth.UserEntity;
+import vn.edu.tdtu.lhqc.budtrack.database.auth.UserLocalRepository;
+
 /**
  * AuthController handles user authentication and registration.
  * Simple implementation using SharedPreferences for demo purposes.
@@ -12,14 +15,10 @@ import android.util.Patterns;
 public final class AuthController {
 
     private static final String PREFS_NAME = "auth_prefs";
-    private static final String KEY_EMAIL = "user_email";
-    private static final String KEY_PASSWORD = "user_password";
-    private static final String KEY_FULL_NAME = "user_full_name";
-    private static final String KEY_ADDRESS = "user_address";
-    private static final String KEY_PROFILE_PHOTO = "user_photo_url";
+    private static final String KEY_CURRENT_USER_ID = "current_user_id";
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
-    private static final String KEY_IS_REGISTERED = "is_registered";
     private static final String KEY_IS_GOOGLE_SIGN_IN = "is_google_sign_in";
+    private static final String KEY_PROFILE_PHOTO = "";
 
     private AuthController() {
     }
@@ -58,24 +57,27 @@ public final class AuthController {
             return new RegistrationResult(false, "password_min_length");
         }
 
-        // Check if user already exists
-        SharedPreferences prefs = getPrefs(context);
-        if (prefs.getBoolean(KEY_IS_REGISTERED, false)) {
-            String existingEmail = prefs.getString(KEY_EMAIL, "");
-            if (existingEmail.equalsIgnoreCase(email)) {
-                return new RegistrationResult(false, "email_already_exists");
-            }
+        UserLocalRepository repo = UserLocalRepository.getInstance(context);
+        UserEntity existing = repo.findByEmail(email);
+        if (existing != null) {
+            return new RegistrationResult(false, "email_already_exists");
         }
 
-        // Save user data
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(KEY_FULL_NAME, fullName);
-        editor.putString(KEY_EMAIL, email);
-        editor.putString(KEY_PASSWORD, password); // In production, this should be hashed
-        editor.putString(KEY_ADDRESS, ""); // no address yet
-        editor.putBoolean(KEY_IS_REGISTERED, true);
-        editor.putBoolean(KEY_IS_LOGGED_IN, false);
-        editor.apply();
+        UserEntity user = new UserEntity();
+        user.fullName = fullName;
+        user.email = email;
+        user.password = password; // TODO: hash in production
+        user.address = "";
+        user.isGoogleSignIn = false;
+        long userId = repo.insert(user);
+
+        // Not logged in yet; do not set is_logged_in
+        SharedPreferences prefs = getPrefs(context);
+        prefs.edit()
+                .putLong(KEY_CURRENT_USER_ID, userId)
+                .putBoolean(KEY_IS_LOGGED_IN, false)
+                .putBoolean(KEY_IS_GOOGLE_SIGN_IN, false)
+                .apply();
 
         return new RegistrationResult(true, null);
     }
@@ -86,28 +88,24 @@ public final class AuthController {
      * Also marks the account as Google-authenticated (email cannot be changed).
      */
     public static void loginWithExternalAccount(Context context, String email, String fullName, String photoUrl) {
-        SharedPreferences prefs = getPrefs(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        if (fullName != null) {
-            editor.putString(KEY_FULL_NAME, fullName);
-        }
-        if (email != null) {
-            editor.putString(KEY_EMAIL, email);
-        }
-        if (photoUrl != null) {
-            editor.putString(KEY_PROFILE_PHOTO, photoUrl);
-        }
-        editor.putBoolean(KEY_IS_REGISTERED, true);
-        editor.putBoolean(KEY_IS_LOGGED_IN, true);
-        editor.putBoolean(KEY_IS_GOOGLE_SIGN_IN, true);
-        editor.apply();
-        // Clear any locally-saved profile image so remote Google avatar takes precedence
-        try {
-            android.content.SharedPreferences profilePrefs = context.getApplicationContext().getSharedPreferences("profile_prefs", 0);
-            if (profilePrefs.contains("profile_image_uri")) {
-                profilePrefs.edit().remove("profile_image_uri").apply();
-            }
-        } catch (Exception ignored) {
+        UserLocalRepository repo = UserLocalRepository.getInstance(context);
+        UserEntity existing = repo.findByEmail(email);
+        if (existing == null) {
+            existing = new UserEntity();
+            existing.email = email;
+            existing.fullName = fullName != null ? fullName : "";
+            existing.password = ""; // Google sign-in users have no local password
+            existing.address = "";
+            existing.photoUrl = photoUrl;
+            existing.isGoogleSignIn = true;
+            long id = repo.insert(existing);
+            setCurrentUserPrefs(context, id, true, true);
+        } else {
+            existing.fullName = fullName != null ? fullName : existing.fullName;
+            existing.photoUrl = photoUrl != null ? photoUrl : existing.photoUrl;
+            existing.isGoogleSignIn = true;
+            repo.update(existing);
+            setCurrentUserPrefs(context, existing.id, true, true);
         }
     }
 
@@ -156,22 +154,13 @@ public final class AuthController {
         }
 
         // Check credentials
-        SharedPreferences prefs = getPrefs(context);
-        String storedEmail = prefs.getString(KEY_EMAIL, "");
-        String storedPassword = prefs.getString(KEY_PASSWORD, "");
-
-        if (storedEmail.isEmpty() || !storedEmail.equalsIgnoreCase(email)) {
+        UserLocalRepository repo = UserLocalRepository.getInstance(context);
+        UserEntity user = repo.findByEmail(email);
+        if (user == null || user.password == null || !user.password.equals(password)) {
             return new LoginResult(false, "invalid_credentials");
         }
 
-        if (!storedPassword.equals(password)) {
-            return new LoginResult(false, "invalid_credentials");
-        }
-
-        // Mark as logged in
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(KEY_IS_LOGGED_IN, true);
-        editor.apply();
+        setCurrentUserPrefs(context, user.id, true, user.isGoogleSignIn);
 
         return new LoginResult(true, null);
     }
@@ -183,7 +172,7 @@ public final class AuthController {
      */
     public static boolean isLoggedIn(Context context) {
         SharedPreferences prefs = getPrefs(context);
-        return prefs.getBoolean(KEY_IS_LOGGED_IN, false);
+        return prefs.getBoolean(KEY_IS_LOGGED_IN, false) && prefs.getLong(KEY_CURRENT_USER_ID, -1) > 0;
     }
 
     /**
@@ -195,6 +184,7 @@ public final class AuthController {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(KEY_IS_LOGGED_IN, false);
         editor.putBoolean(KEY_IS_GOOGLE_SIGN_IN, false);
+        editor.putLong(KEY_CURRENT_USER_ID, -1);
         editor.apply();
     }
 
@@ -204,11 +194,8 @@ public final class AuthController {
      * @return User's email or null if not logged in
      */
     public static String getCurrentUserEmail(Context context) {
-        if (!isLoggedIn(context)) {
-            return null;
-        }
-        SharedPreferences prefs = getPrefs(context);
-        return prefs.getString(KEY_EMAIL, null);
+        UserEntity user = getCurrentUser(context);
+        return user != null ? user.email : null;
     }
 
     /**
@@ -217,22 +204,16 @@ public final class AuthController {
      * @return User's full name or null if not logged in
      */
     public static String getCurrentUserName(Context context) {
-        if (!isLoggedIn(context)) {
-            return null;
-        }
-        SharedPreferences prefs = getPrefs(context);
-        return prefs.getString(KEY_FULL_NAME, null);
+        UserEntity user = getCurrentUser(context);
+        return user != null ? user.fullName : null;
     }
 
     /**
      * Get current logged in user's address (optional).
      */
     public static String getCurrentUserAddress(Context context) {
-        if (!isLoggedIn(context)) {
-            return null;
-        }
-        SharedPreferences prefs = getPrefs(context);
-        return prefs.getString(KEY_ADDRESS, null);
+        UserEntity user = getCurrentUser(context);
+        return user != null ? user.address : null;
     }
 
     /**
@@ -257,20 +238,36 @@ public final class AuthController {
             return new RegistrationResult(false, "email_invalid");
         }
 
-        SharedPreferences prefs = getPrefs(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(KEY_FULL_NAME, fullName);
-        editor.putString(KEY_EMAIL, email);
-        if (address != null) {
-            editor.putString(KEY_ADDRESS, address.trim());
+        UserEntity user = getCurrentUser(context);
+        if (user == null) {
+            return new RegistrationResult(false, "invalid_credentials");
         }
-        editor.apply();
-
+        user.fullName = fullName;
+        user.email = email;
+        if (address != null) {
+            user.address = address.trim();
+        }
+        UserLocalRepository.getInstance(context).update(user);
         return new RegistrationResult(true, null);
     }
 
     private static SharedPreferences getPrefs(Context context) {
         return context.getApplicationContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    }
+
+    private static void setCurrentUserPrefs(Context context, long userId, boolean isLoggedIn, boolean isGoogle) {
+        getPrefs(context).edit()
+                .putLong(KEY_CURRENT_USER_ID, userId)
+                .putBoolean(KEY_IS_LOGGED_IN, isLoggedIn)
+                .putBoolean(KEY_IS_GOOGLE_SIGN_IN, isGoogle)
+                .apply();
+    }
+
+    private static UserEntity getCurrentUser(Context context) {
+        SharedPreferences prefs = getPrefs(context);
+        long id = prefs.getLong(KEY_CURRENT_USER_ID, -1);
+        if (id <= 0) return null;
+        return UserLocalRepository.getInstance(context).findById(id);
     }
 
     /**

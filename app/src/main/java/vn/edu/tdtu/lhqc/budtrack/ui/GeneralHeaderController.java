@@ -8,7 +8,6 @@ import androidx.fragment.app.FragmentActivity;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.fragments.MapFragment;
-import vn.edu.tdtu.lhqc.budtrack.fragments.NotificationFragment;
 import vn.edu.tdtu.lhqc.budtrack.fragments.SearchFragment;
 
 /**
@@ -43,11 +42,7 @@ public final class GeneralHeaderController {
             }
         });
 
-        bindButton(header, R.id.btn_notifications, () -> {
-            if (!safeCallbacks.onNotificationsClick(fragment)) {
-                openNotifications(fragment);
-            }
-        });
+        // Notification button removed from header - reminder notifications still work via ReminderNotificationController
 
         bindButton(header, R.id.btn_map, () -> {
             if (!safeCallbacks.onMapClick(fragment)) {
@@ -95,20 +90,6 @@ public final class GeneralHeaderController {
                 .commit();
     }
 
-    private static void openNotifications(Fragment fragment) {
-        if (!fragment.isAdded()) {
-            return;
-        }
-        FragmentActivity activity = fragment.getActivity();
-        if (activity == null) {
-            return;
-        }
-        activity.getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.fragment_container, NotificationFragment.newInstance(), "NOTIFICATION_FRAGMENT")
-                .addToBackStack("NOTIFICATION_FRAGMENT")
-                .commit();
-    }
 
     public interface HeaderCallbacks {
         HeaderCallbacks EMPTY = new HeaderCallbacks() { };
@@ -117,9 +98,6 @@ public final class GeneralHeaderController {
             return false;
         }
 
-        default boolean onNotificationsClick(Fragment fragment) {
-            return false;
-        }
 
         default boolean onMapClick(Fragment fragment) {
             return false;

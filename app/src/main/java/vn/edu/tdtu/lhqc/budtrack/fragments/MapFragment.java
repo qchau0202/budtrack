@@ -175,6 +175,16 @@ public class MapFragment extends Fragment {
     }
 
     private void performSearch(String query) {
+        if (isSelectionMode) {
+            // In selection mode, search for locations using Geocoder
+            performLocationSearch(query);
+        } else {
+            // In normal mode, search for transactions
+            performTransactionSearch(query);
+        }
+    }
+
+    private void performLocationSearch(String query) {
         // Use Geocoder to search for location on a background thread to avoid ANR
         new Thread(() -> {
             try {
@@ -196,10 +206,8 @@ public class MapFragment extends Fragment {
                         mapView.getController().animateTo(geoPoint);
                         mapView.getController().setZoom(15.0);
 
-                        // If in selection mode, automatically select this location
-                        if (isSelectionMode) {
-                            selectLocationOnMap(geoPoint);
-                        }
+                        // Automatically select this location
+                        selectLocationOnMap(geoPoint);
                     } else {
                         Toast.makeText(requireContext(),
                                 "Location not found: " + query,
@@ -215,6 +223,73 @@ public class MapFragment extends Fragment {
                 );
             }
         }).start();
+    }
+
+    private void performTransactionSearch(String query) {
+        if (getContext() == null) return;
+
+        // Search transactions by merchant name, category name, note, or address
+        List<Transaction> allTransactions = TransactionManager.getTransactions(getContext());
+        List<Transaction> matchingTransactions = new ArrayList<>();
+
+        String queryLower = query.toLowerCase(Locale.getDefault());
+
+        for (Transaction transaction : allTransactions) {
+            boolean matches = false;
+
+            // Search in merchant name
+            String merchantName = transaction.getMerchantName();
+            if (merchantName != null && merchantName.toLowerCase(Locale.getDefault()).contains(queryLower)) {
+                matches = true;
+            }
+
+            // Search in category name
+            if (!matches) {
+                String categoryName = transaction.getCategoryName();
+                if (categoryName != null && categoryName.toLowerCase(Locale.getDefault()).contains(queryLower)) {
+                    matches = true;
+                }
+            }
+
+            // Search in note
+            if (!matches) {
+                String note = transaction.getNote();
+                if (note != null && note.toLowerCase(Locale.getDefault()).contains(queryLower)) {
+                    matches = true;
+                }
+            }
+
+            // Search in address
+            if (!matches) {
+                String address = transaction.getAddress();
+                if (address != null && address.toLowerCase(Locale.getDefault()).contains(queryLower)) {
+                    matches = true;
+                }
+            }
+
+            if (matches) {
+                matchingTransactions.add(transaction);
+            }
+        }
+
+        // Sort newest to oldest by date (nulls last), fallback by id desc
+        matchingTransactions.sort((t1, t2) -> {
+            Date d1 = t1.getDate();
+            Date d2 = t2.getDate();
+            if (d1 == null && d2 == null) return Long.compare(t2.getId(), t1.getId());
+            if (d1 == null) return 1;
+            if (d2 == null) return -1;
+            int cmp = d2.compareTo(d1); // newest first
+            if (cmp != 0) return cmp;
+            return Long.compare(t2.getId(), t1.getId());
+        });
+
+        // Show results in bottom sheet
+        if (getActivity() != null) {
+            TransactionSearchBottomSheet searchSheet =
+                    TransactionSearchBottomSheet.newInstance(query, matchingTransactions);
+            searchSheet.show(getActivity().getSupportFragmentManager(), TransactionSearchBottomSheet.TAG);
+        }
     }
 
     private void setupExpenseDetailsPanel(View root) {

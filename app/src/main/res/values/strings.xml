@@ -48,8 +48,8 @@
     <string name="total_income">Total Income</string>
     <string name="tab_income">Income</string>
     <string name="tab_expenses">Expenses</string>
-    <string name="total_spent">Total Spent</string>
-    <string name="this_month_total_spend">This month total spend</string>
+    <string name="total_spent">Total transactions</string>
+    <string name="this_month_total_spend">This month total transactions</string>
     <string name="transactions_in_month">Transactions in %1$s</string>
     <string name="view_all_transactions">View all transactions</string>
     <string name="categories">Categories</string>
@@ -58,6 +58,7 @@
     <!--budget-->
     <string name="budget_page">Budget page</string>
     <string name="budgets">Budgets</string>
+    <string name="wallets">Wallets</string>
     <string name="total_budget">Total Budget</string>
     <string name="spent">spent</string>
     <string name="left">left</string>
@@ -120,6 +121,7 @@
     <string name="currency_exchange_updated">Exchange rate updated successfully</string>
     <string name="currency_exchange_updating">Updating exchange rate…</string>
     <string name="currency_exchange_update_failed">Failed to update exchange rate. Please try again.</string>
+    <string name="currency_changed">Currency changed to %1$s</string>
     <string name="currency_exchange_rate_hint">Enter USD to VND rate</string>
     <string name="backup">Backup</string>
     <string name="backup_last_sync">Last synced: %1$s</string>
@@ -250,6 +252,11 @@
     <string name="map_preview_placeholder">Map preview</string>
     <string name="location_permission_denied">Location permission is required to show your location on the map</string>
     <string name="search_location">Search location</string>
+    <string name="search_results">Search Results</string>
+    <plurals name="search_results_count">
+        <item quantity="one">%d result found</item>
+        <item quantity="other">%d results found</item>
+    </plurals>
     <string name="feature_coming_soon">This feature is coming soon</string>
     <!--Map Bottom Sheet-->
     <string name="view_details">View details</string>
@@ -347,8 +354,4 @@
     <string name="wallet_created">Wallet created successfully</string>
     <string name="none">None</string>
     <string name="unknown">Unknown</string>
-    <string name="category_icon" />
-    <string name="select_date" />
-    <string name="select_location" />
-    <string name="select_time" />
 </resources>
