@@ -276,7 +276,7 @@
                     android:scaleType="fitCenter"
                     android:adjustViewBounds="true"
                     app:tint="@color/primary_green"
-                    android:contentDescription="@string/category_icon" />
+                    />
 
                 <TextView
                     android:id="@+id/tvCategory"
@@ -324,8 +324,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_calendar_24dp"
-                app:tint="@color/primary_grey"
-                android:contentDescription="@string/select_date" />
+                app:tint="@color/primary_grey" />
         </LinearLayout>
 
         <!-- Time Card -->
@@ -354,8 +353,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_calendar_24dp"
-                app:tint="@color/primary_grey"
-                android:contentDescription="@string/select_time" />
+                app:tint="@color/primary_grey" />
         </LinearLayout>
 
         <!-- Location Section -->
@@ -397,8 +395,7 @@
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:src="@drawable/ic_arrow_forward_24dp"
-                    app:tint="@color/primary_grey"
-                    android:contentDescription="@string/select_location" />
+                    app:tint="@color/primary_grey" />
             </LinearLayout>
         </LinearLayout>
 
