@@ -49,15 +49,6 @@ public class BudgetFragment extends Fragment {
         return new BudgetFragment();
     }
 
-    public static BudgetFragment newInstance(String param1, String param2) {
-        BudgetFragment fragment = new BudgetFragment();
-        Bundle args = new Bundle();
-        args.putString("param1", param1);
-        args.putString("param2", param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -60,6 +60,18 @@
             android:name=".controllers.exchangerate.ExchangeRateUpdateReceiver"
             android:exported="false"
             android:enabled="true" />
+        
+        <!-- Exchange Rate Update Service -->
+        <service
+            android:name=".services.ExchangeRateUpdateService"
+            android:exported="false"
+            android:enabled="true" />
+        
+        <!-- Data Sync Service -->
+        <service
+            android:name=".services.DataSyncService"
+            android:exported="false"
+            android:enabled="true" />
     </application>
 
 </manifest>

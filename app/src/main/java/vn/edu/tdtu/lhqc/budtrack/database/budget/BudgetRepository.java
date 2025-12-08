@@ -19,16 +19,8 @@ public class BudgetRepository {
         return budgetDao.insert(budget);
     }
 
-    public long insertOrReplaceBudget(BudgetEntity budget) {
-        return budgetDao.insertOrReplace(budget);
-    }
-
     public void updateBudget(BudgetEntity budget) {
         budgetDao.update(budget);
-    }
-
-    public void deleteBudget(BudgetEntity budget) {
-        budgetDao.delete(budget);
     }
 
     public void deleteBudgetById(long id) {
@@ -41,11 +33,6 @@ public class BudgetRepository {
 
     public BudgetEntity getBudgetById(long id) {
         return budgetDao.getBudgetById(id);
-    }
-
-    public Long getMaxId() {
-        Long maxId = budgetDao.getMaxId();
-        return maxId != null ? maxId : 0L;
     }
 }
 

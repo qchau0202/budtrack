@@ -42,18 +42,6 @@ public final class BudgetCategoryManager {
         return categoryIds;
     }
 
-    /**
-     * Get budget IDs for a category.
-     */
-    public static List<Long> getBudgetIdsForCategory(Context context, long categoryId) {
-        BudgetCategoryRepository repository = new BudgetCategoryRepository(context);
-        List<BudgetCategoryEntity> entities = repository.getRelationshipsByCategoryId(categoryId);
-        List<Long> budgetIds = new ArrayList<>();
-        for (BudgetCategoryEntity entity : entities) {
-            budgetIds.add(entity.budgetId);
-        }
-        return budgetIds;
-    }
 
     /**
      * Add a budget-category relationship.

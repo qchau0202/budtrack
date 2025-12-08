@@ -21,14 +21,6 @@ public class BudgetCategoryRepository {
         return budgetCategoryDao.insert(relationship);
     }
 
-    public long insertOrReplaceRelationship(BudgetCategoryEntity relationship) {
-        return budgetCategoryDao.insertOrReplace(relationship);
-    }
-
-    public void deleteRelationship(BudgetCategoryEntity relationship) {
-        budgetCategoryDao.delete(relationship);
-    }
-
     public void deleteRelationship(long budgetId, long categoryId) {
         budgetCategoryDao.deleteRelationship(budgetId, categoryId);
     }
@@ -43,10 +35,6 @@ public class BudgetCategoryRepository {
 
     public List<BudgetCategoryEntity> getRelationshipsByBudgetId(long budgetId) {
         return budgetCategoryDao.getRelationshipsByBudgetId(budgetId);
-    }
-
-    public List<BudgetCategoryEntity> getRelationshipsByCategoryId(long categoryId) {
-        return budgetCategoryDao.getRelationshipsByCategoryId(categoryId);
     }
 
     public BudgetCategoryEntity getRelationship(long budgetId, long categoryId) {

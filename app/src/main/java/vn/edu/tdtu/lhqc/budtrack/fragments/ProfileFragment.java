@@ -32,6 +32,7 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import android.content.Context;
 import android.content.Intent;
 
 import vn.edu.tdtu.lhqc.budtrack.R;
@@ -51,15 +52,6 @@ import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
  */
 public class ProfileFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     // Permission launcher for notification permission
     private ActivityResultLauncher<String> notificationPermissionLauncher;
 
@@ -75,31 +67,9 @@ public class ProfileFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
         // Initialize permission launcher
         notificationPermissionLauncher = registerForActivityResult(
@@ -512,30 +482,50 @@ public class ProfileFragment extends Fragment {
                 .create();
 
         btnUpdateExchange.setOnClickListener(v -> {
-            // Update from API
+            // Update from API using service
             btnUpdateExchange.setEnabled(false);
             btnUpdateExchange.setText(R.string.currency_exchange_updating);
             
-            new Thread(() -> {
-                boolean success = ExchangeRateService.updateExchangeRateFromAPI(requireContext());
-                requireActivity().runOnUiThread(() -> {
-                    btnUpdateExchange.setEnabled(true);
-                    btnUpdateExchange.setText(R.string.currency_exchange_update);
-                    
-                    if (success) {
-                        Toast.makeText(requireContext(), R.string.currency_exchange_updated, Toast.LENGTH_SHORT).show();
-                        // Schedule weekly updates if not already scheduled
-                        if (SettingsHandler.getNextUpdateTime(requireContext()) == 0) {
-                            SettingsHandler.scheduleWeeklyExchangeRateUpdate(requireContext());
+            // Start the service to update exchange rate
+            Intent serviceIntent = vn.edu.tdtu.lhqc.budtrack.services.ExchangeRateUpdateService
+                    .createUpdateIntent(requireContext());
+            requireContext().startService(serviceIntent);
+            
+            // Register broadcast receiver to listen for result
+            android.content.BroadcastReceiver receiver = new android.content.BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    boolean success = intent.getBooleanExtra("success", false);
+                    requireActivity().runOnUiThread(() -> {
+                        btnUpdateExchange.setEnabled(true);
+                        btnUpdateExchange.setText(R.string.currency_exchange_update);
+                        
+                        if (success) {
+                            float rate = intent.getFloatExtra("rate", 0);
+                            Toast.makeText(requireContext(), R.string.currency_exchange_updated, Toast.LENGTH_SHORT).show();
+                            // Schedule weekly updates if not already scheduled
+                            if (SettingsHandler.getNextUpdateTime(requireContext()) == 0) {
+                                SettingsHandler.scheduleWeeklyExchangeRateUpdate(requireContext());
+                            }
+                            // Refresh the dialog
+                            dialog.dismiss();
+                            showCurrencyDialog(tvCurrencyValue);
+                        } else {
+                            Toast.makeText(requireContext(), R.string.currency_exchange_update_failed, Toast.LENGTH_SHORT).show();
                         }
-                        // Refresh the dialog
-                        dialog.dismiss();
-                        showCurrencyDialog(tvCurrencyValue);
-                    } else {
-                        Toast.makeText(requireContext(), R.string.currency_exchange_update_failed, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }).start();
+                        // Unregister receiver
+                        try {
+                            requireContext().unregisterReceiver(this);
+                        } catch (Exception e) {
+                            // Receiver might already be unregistered
+                        }
+                    });
+                }
+            };
+            
+            // Register receiver with intent filter
+            android.content.IntentFilter filter = new android.content.IntentFilter("vn.edu.tdtu.lhqc.budtrack.EXCHANGE_RATE_UPDATED");
+            requireContext().registerReceiver(receiver, filter);
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());

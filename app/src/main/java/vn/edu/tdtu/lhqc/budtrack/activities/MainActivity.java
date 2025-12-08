@@ -99,8 +99,9 @@ public class MainActivity extends AppCompatActivity {
 		}
 		// If no exchange rate has ever been fetched, fetch once now (background)
 		if (SettingsHandler.getExchangeRateLastUpdate(this) == 0) {
-			new Thread(() -> vn.edu.tdtu.lhqc.budtrack.controllers.exchangerate.ExchangeRateService
-					.updateExchangeRateFromAPI(getApplicationContext())).start();
+			Intent serviceIntent = vn.edu.tdtu.lhqc.budtrack.services.ExchangeRateUpdateService
+					.createUpdateIntent(getApplicationContext());
+			startService(serviceIntent);
 		}
 
 		setContentView(R.layout.activity_main);

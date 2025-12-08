@@ -15,14 +15,8 @@ public interface BudgetDao {
     @Insert
     long insert(BudgetEntity budget);
 
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
-    long insertOrReplace(BudgetEntity budget);
-
     @Update
     void update(BudgetEntity budget);
-
-    @Delete
-    void delete(BudgetEntity budget);
 
     @Query("SELECT * FROM budgets ORDER BY id ASC")
     List<BudgetEntity> getAllBudgets();
@@ -32,8 +26,5 @@ public interface BudgetDao {
 
     @Query("DELETE FROM budgets WHERE id = :id")
     void deleteById(long id);
-
-    @Query("SELECT MAX(id) FROM budgets")
-    Long getMaxId();
 }
 
