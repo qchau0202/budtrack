@@ -4,13 +4,8 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
-/**
- * IntentService for syncing data between local Room database and remote Firestore.
- * This service handles background data synchronization tasks.
- * 
- * Note: This is a placeholder for future Firestore sync implementation.
- * Currently, the app uses Room as the main database.
- */
+import java.util.Objects;
+
 public class DataSyncService extends IntentService {
 
     private static final String TAG = "DataSyncService";
@@ -23,49 +18,13 @@ public class DataSyncService extends IntentService {
         super("DataSyncService");
     }
 
-    /**
-     * Create an Intent to start this service for syncing all data
-     */
-    public static Intent createSyncAllIntent(android.content.Context context) {
-        Intent intent = new Intent(context, DataSyncService.class);
-        intent.setAction(ACTION_SYNC_ALL);
-        return intent;
-    }
-
-    /**
-     * Create an Intent to start this service for syncing transactions only
-     */
-    public static Intent createSyncTransactionsIntent(android.content.Context context) {
-        Intent intent = new Intent(context, DataSyncService.class);
-        intent.setAction(ACTION_SYNC_TRANSACTIONS);
-        return intent;
-    }
-
-    /**
-     * Create an Intent to start this service for syncing wallets only
-     */
-    public static Intent createSyncWalletsIntent(android.content.Context context) {
-        Intent intent = new Intent(context, DataSyncService.class);
-        intent.setAction(ACTION_SYNC_WALLETS);
-        return intent;
-    }
-
-    /**
-     * Create an Intent to start this service for syncing budgets only
-     */
-    public static Intent createSyncBudgetsIntent(android.content.Context context) {
-        Intent intent = new Intent(context, DataSyncService.class);
-        intent.setAction(ACTION_SYNC_BUDGETS);
-        return intent;
-    }
-
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
             Log.d(TAG, "DataSyncService started with action: " + action);
             
-            switch (action) {
+            switch (Objects.requireNonNull(action)) {
                 case ACTION_SYNC_ALL:
                     handleSyncAll();
                     break;

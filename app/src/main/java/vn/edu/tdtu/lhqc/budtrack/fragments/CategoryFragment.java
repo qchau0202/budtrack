@@ -27,11 +27,9 @@ import vn.edu.tdtu.lhqc.budtrack.controllers.category.CategoryManager;
 public class CategoryFragment extends Fragment {
 
     private GridLayout gridAllCategories;
-    private AppCompatEditText etSearchCategories;
     private TextView tvEmptyCategories;
     private List<CategoryManager.CategoryItem> allCategories;
     private ImageButton btnEdit;
-    private ImageButton btnAdd;
     private boolean isEditMode = false;
 
     public CategoryFragment() {
@@ -54,10 +52,10 @@ public class CategoryFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         ImageButton btnBack = view.findViewById(R.id.btn_back);
-        btnAdd = view.findViewById(R.id.btn_add);
+        ImageButton btnAdd = view.findViewById(R.id.btn_add);
         btnEdit = view.findViewById(R.id.btn_edit);
         gridAllCategories = view.findViewById(R.id.grid_all_categories);
-        etSearchCategories = view.findViewById(R.id.et_search_categories);
+        AppCompatEditText etSearchCategories = view.findViewById(R.id.et_search_categories);
         tvEmptyCategories = view.findViewById(R.id.tv_empty_categories);
 
         if (btnBack != null) {

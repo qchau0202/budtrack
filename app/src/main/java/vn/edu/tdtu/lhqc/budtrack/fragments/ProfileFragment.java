@@ -1,18 +1,16 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -26,20 +24,19 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-
 import android.content.Context;
 import android.content.Intent;
-
 import vn.edu.tdtu.lhqc.budtrack.R;
 import com.bumptech.glide.Glide;
+
+import java.util.Objects;
+
 import vn.edu.tdtu.lhqc.budtrack.activities.LoginActivity;
 import vn.edu.tdtu.lhqc.budtrack.controllers.auth.AuthController;
-import vn.edu.tdtu.lhqc.budtrack.controllers.exchangerate.ExchangeRateService;
 import vn.edu.tdtu.lhqc.budtrack.controllers.notifications.ReminderNotificationController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
@@ -100,7 +97,9 @@ public class ProfileFragment extends Fragment {
                             java.io.OutputStream outputStream = new java.io.FileOutputStream(file);
                             byte[] buffer = new byte[4096];
                             int bytesRead;
-                            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                            while (true) {
+                                assert inputStream != null;
+                                if ((bytesRead = inputStream.read(buffer)) == -1) break;
                                 outputStream.write(buffer, 0, bytesRead);
                             }
                             inputStream.close();
@@ -175,17 +174,12 @@ public class ProfileFragment extends Fragment {
         if (sw != null && getContext() != null) {
             boolean isDark = ThemeManager.isDarkEnabled(getContext());
             sw.setChecked(isDark);
-            sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    ThemeManager.setTheme(
-                            requireContext(),
-                            isChecked
-                                    ? ThemeManager.ThemeMode.DARK
-                                    : ThemeManager.ThemeMode.LIGHT
-                    );
-                }
-            });
+            sw.setOnCheckedChangeListener((buttonView, isChecked) -> ThemeManager.setTheme(
+                    requireContext(),
+                    isChecked
+                            ? ThemeManager.ThemeMode.DARK
+                            : ThemeManager.ThemeMode.LIGHT
+            ));
         }
 
         TextView tvLanguageValue = root.findViewById(R.id.tv_language_value);
@@ -446,11 +440,7 @@ public class ProfileFragment extends Fragment {
 
         // Update next update text
         String nextUpdate = SettingsHandler.formatNextUpdateTime(requireContext());
-        if (nextUpdate != null) {
-            tvNextUpdate.setText(getString(R.string.currency_exchange_next_update, nextUpdate));
-        } else {
-            tvNextUpdate.setText(getString(R.string.currency_exchange_next_update, getString(R.string.currency_exchange_not_scheduled)));
-        }
+        tvNextUpdate.setText(getString(R.string.currency_exchange_next_update, Objects.requireNonNullElseGet(nextUpdate, () -> getString(R.string.currency_exchange_not_scheduled))));
 
         Runnable refreshState = () -> {
             styleCurrencyOption(cardVnd, iconVnd, pendingSelection[0].equals("VND"));
@@ -496,7 +486,7 @@ public class ProfileFragment extends Fragment {
                         btnUpdateExchange.setText(R.string.currency_exchange_update);
                         
                         if (success) {
-                            float rate = intent.getFloatExtra("rate", 0);
+                            intent.getFloatExtra("rate", 0);
                             Toast.makeText(requireContext(), R.string.currency_exchange_updated, Toast.LENGTH_SHORT).show();
                             // Schedule weekly updates if not already scheduled
                             if (SettingsHandler.getNextUpdateTime(requireContext()) == 0) {
@@ -598,7 +588,7 @@ public class ProfileFragment extends Fragment {
             if (!isChecked && pendingEnabled[0]) {
                 // User is trying to disable - show confirmation dialog
                 buttonView.setChecked(true); // Revert the switch
-                showDisableReminderConfirmationDialog(dialog, swReminderEnabled, containerReminderOptions, pendingEnabled);
+                showDisableReminderConfirmationDialog(swReminderEnabled, containerReminderOptions, pendingEnabled);
             } else {
                 pendingEnabled[0] = isChecked;
                 containerReminderOptions.setVisibility(isChecked ? View.VISIBLE : View.GONE);
@@ -770,7 +760,7 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    private void showDisableReminderConfirmationDialog(AlertDialog parentDialog, SwitchMaterial switchMaterial,
+    private void showDisableReminderConfirmationDialog(SwitchMaterial switchMaterial,
                                                        View containerReminderOptions, boolean[] pendingEnabled) {
         if (getContext() == null) return;
 

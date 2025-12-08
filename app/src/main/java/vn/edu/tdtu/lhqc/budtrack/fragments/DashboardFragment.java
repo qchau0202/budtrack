@@ -1,32 +1,21 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
-
-import android.app.Activity;
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.core.content.ContextCompat;
-
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;

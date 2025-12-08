@@ -19,17 +19,13 @@ import com.google.android.material.button.MaterialButton;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.activities.TransactionHistoryActivity;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
-import vn.edu.tdtu.lhqc.budtrack.fragments.TransactionDetailFragment;
 import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
@@ -37,7 +33,7 @@ import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 public class TransactionHistoryFragment extends Fragment {
 
     // Selected date for filtering transactions (defaults to current date)
-    private Calendar selectedDate = Calendar.getInstance();
+    private final Calendar selectedDate = Calendar.getInstance();
 
     // Listen for currency preference changes so we can refresh amounts immediately
     private SharedPreferences.OnSharedPreferenceChangeListener currencyPreferenceListener;

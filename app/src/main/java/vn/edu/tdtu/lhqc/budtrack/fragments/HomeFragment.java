@@ -11,30 +11,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-
 import com.google.android.material.button.MaterialButton;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.analytics.HomePieChartController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.analytics.HomeWeeklyAnalyticsController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
-import vn.edu.tdtu.lhqc.budtrack.controllers.transaction.TransactionManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.BalanceController;
-import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
-import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.TabStyleUtils;
@@ -64,7 +51,7 @@ public class HomeFragment extends Fragment {
                     // Immediately refresh data - data is already committed synchronously
                     // Use post to ensure we're on the UI thread and view is ready
                     if (getView() != null) {
-                        getView().post(() -> refreshDataInternal());
+                        getView().post(this::refreshDataInternal);
                     } else {
                         needsRefresh = true;
                     }
@@ -77,7 +64,7 @@ public class HomeFragment extends Fragment {
             if (SettingsHandler.KEY_CURRENCY.equals(key)) {
                 // Currency changed - refresh UI immediately
                 if (getView() != null && isAdded() && !isDetached()) {
-                    getView().post(() -> refreshData());
+                    getView().post(this::refreshData);
                 } else {
                     needsRefresh = true;
                 }
@@ -357,4 +344,11 @@ public class HomeFragment extends Fragment {
         transaction.commit();
     }
 
+    public boolean isNeedsRefresh() {
+        return needsRefresh;
+    }
+
+    public void setNeedsRefresh(boolean needsRefresh) {
+        this.needsRefresh = needsRefresh;
+    }
 }

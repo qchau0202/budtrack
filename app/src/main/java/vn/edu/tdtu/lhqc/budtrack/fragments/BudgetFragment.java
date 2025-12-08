@@ -1,6 +1,5 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
-import android.content.Context;
 import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
@@ -10,20 +9,14 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import android.widget.ImageView;
-
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCalculator;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCategoryManager;
@@ -31,7 +24,6 @@ import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.category.CategoryManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.models.Budget;
-import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.ProgressBarUtils;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
