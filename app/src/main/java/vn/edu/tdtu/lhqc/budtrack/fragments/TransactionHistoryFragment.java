@@ -34,11 +34,6 @@ import vn.edu.tdtu.lhqc.budtrack.models.Transaction;
 import vn.edu.tdtu.lhqc.budtrack.models.TransactionType;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TransactionHistoryFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class TransactionHistoryFragment extends Fragment {
 
     // Selected date for filtering transactions (defaults to current date)
