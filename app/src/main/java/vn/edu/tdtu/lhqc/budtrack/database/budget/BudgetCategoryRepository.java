@@ -21,24 +21,12 @@ public class BudgetCategoryRepository {
         budgetCategoryDao.insert(relationship);
     }
 
-    public void deleteRelationship(long budgetId, long categoryId) {
-        budgetCategoryDao.deleteRelationship(budgetId, categoryId);
-    }
-
     public void deleteAllForBudget(long budgetId) {
         budgetCategoryDao.deleteAllForBudget(budgetId);
     }
 
-    public List<BudgetCategoryEntity> getAllRelationships() {
-        return budgetCategoryDao.getAllRelationships();
-    }
-
     public List<BudgetCategoryEntity> getRelationshipsByBudgetId(long budgetId) {
         return budgetCategoryDao.getRelationshipsByBudgetId(budgetId);
-    }
-
-    public BudgetCategoryEntity getRelationship(long budgetId, long categoryId) {
-        return budgetCategoryDao.getRelationship(budgetId, categoryId);
     }
 
     public Set<Long> getCategoryIdsUsedByOtherBudgets(long excludeBudgetId) {

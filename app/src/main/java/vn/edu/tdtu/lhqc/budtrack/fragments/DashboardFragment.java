@@ -215,7 +215,6 @@ public class DashboardFragment extends Fragment {
 
                 for (int day = 0; day < daysPerWeek; day++) {
                     int cellIndex = week * daysPerWeek + day;
-                    if (cellIndex >= totalCells) break;
 
                     Calendar date = (Calendar) monthStart.clone();
                     date.add(Calendar.DAY_OF_MONTH, cellIndex);

@@ -8,7 +8,7 @@ import vn.edu.tdtu.lhqc.budtrack.database.AppDatabase;
 import vn.edu.tdtu.lhqc.budtrack.database.budget.dao.BudgetDao;
 
 public class BudgetRepository {
-    private BudgetDao budgetDao;
+    private final BudgetDao budgetDao;
 
     public BudgetRepository(Context context) {
         AppDatabase db = AppDatabase.getInstance(context);

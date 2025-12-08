@@ -224,16 +224,16 @@ public class MainActivity extends AppCompatActivity {
 					if (fullText.isEmpty()) {
 						Toast.makeText(this, "No text found on receipt. Please try manual input.", Toast.LENGTH_LONG).show();
 						// Fallback to manual input
-						openTransactionCreate("expense", false, null);
+						openTransactionCreate(false, null);
 					} else {
 						// Trực tiếp mở Fragment và truyền văn bản để Fragment tự hiển thị dialog xác nhận
-						openTransactionCreate("expense", true, fullText);
+						openTransactionCreate(true, fullText);
 					}
 				})
 				.addOnFailureListener(e -> {
 					Toast.makeText(this, "Text recognition failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
 					// Fallback to manual input on failure
-					openTransactionCreate("expense", false, null);
+					openTransactionCreate(false, null);
 				});
 	}
 
@@ -266,18 +266,14 @@ public class MainActivity extends AppCompatActivity {
 		if (target == activeFragment && target.isAdded() && !target.isHidden()) {
 			// Already showing this fragment, just update navigation highlight
 			highlightNavigation(fragmentTag);
-			if (fragmentTag != null) {
-				currentFragmentTag = fragmentTag;
-			}
-			return;
+            currentFragmentTag = fragmentTag;
+            return;
 		}
 
 		highlightNavigation(fragmentTag);
-		if (fragmentTag != null) {
-			currentFragmentTag = fragmentTag;
-		}
+        currentFragmentTag = fragmentTag;
 
-		FragmentTransaction ft = fm.beginTransaction();
+        FragmentTransaction ft = fm.beginTransaction();
 		ft.setReorderingAllowed(true);
 
 		// Remove any overlay fragments (Search, Notification, Map, etc.)
@@ -354,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
 		// Manual input button
 		view.findViewById(R.id.card_manual_input).setOnClickListener(v -> {
 			dialog.dismiss();
-			openTransactionCreate("expense", false, null);
+			openTransactionCreate(false, null);
 		});
 
 		// OCR scan button
@@ -388,11 +384,11 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 
-	private void openTransactionCreate(String transactionType, boolean isOCR, String ocrText) {
+	private void openTransactionCreate(boolean isOCR, String ocrText) {
 		TransactionCreateFragment transactionCreateFragment = new TransactionCreateFragment();
 
 		Bundle args = new Bundle();
-		args.putString("transaction_type", transactionType);
+		args.putString("transaction_type", "expense");
 		args.putBoolean("is_ocr", isOCR);
 		if (ocrText != null) {
 			args.putString("ocr_text", ocrText); // Pass the scanned text

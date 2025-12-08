@@ -431,7 +431,7 @@ public class BudgetFragment extends Fragment {
         List<CategoryManager.CategoryItem> userCategories = CategoryManager.getCategories(requireContext());
         java.util.Map<Long, Integer> categoryIdToIcon = new java.util.HashMap<>();
         for (CategoryManager.CategoryItem item : userCategories) {
-            long id = (long) (item.name.hashCode() * 31 + item.iconResId);
+            long id = (long) (item.name.hashCode() * 31L + item.iconResId);
             categoryIdToIcon.put(id, item.iconResId);
         }
 
