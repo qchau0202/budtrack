@@ -45,11 +45,6 @@ import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ProfileFragment extends Fragment {
 
     // Permission launcher for notification permission
@@ -525,7 +520,7 @@ public class ProfileFragment extends Fragment {
             
             // Register receiver with intent filter
             android.content.IntentFilter filter = new android.content.IntentFilter("vn.edu.tdtu.lhqc.budtrack.EXCHANGE_RATE_UPDATED");
-            requireContext().registerReceiver(receiver, filter);
+            ContextCompat.registerReceiver(requireContext(), receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());

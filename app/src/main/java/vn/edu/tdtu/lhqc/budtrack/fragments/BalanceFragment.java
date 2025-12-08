@@ -14,11 +14,6 @@ import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.wallet.BalanceController;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link BalanceFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class BalanceFragment extends Fragment {
 
     public BalanceFragment() {
