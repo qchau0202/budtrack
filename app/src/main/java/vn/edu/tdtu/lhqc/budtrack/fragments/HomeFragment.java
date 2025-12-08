@@ -344,4 +344,11 @@ public class HomeFragment extends Fragment {
         transaction.commit();
     }
 
+    public boolean isNeedsRefresh() {
+        return needsRefresh;
+    }
+
+    public void setNeedsRefresh(boolean needsRefresh) {
+        this.needsRefresh = needsRefresh;
+    }
 }

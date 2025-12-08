@@ -201,7 +201,6 @@ public class DashboardFragment extends Fragment {
 
             // Calculate total cells needed (including leading/trailing days from other months)
             // We need to show 6 weeks (42 days) to ensure full month display
-            int totalCells = 42;
             int daysPerWeek = 7;
 
             // Create date cells for the month in a grid (6 weeks x 7 days)
