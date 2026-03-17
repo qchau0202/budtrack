@@ -24,59 +24,21 @@ import java.util.List;
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.category.CategoryManager;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CategoryFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class CategoryFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private GridLayout gridAllCategories;
-    private AppCompatEditText etSearchCategories;
     private TextView tvEmptyCategories;
     private List<CategoryManager.CategoryItem> allCategories;
     private ImageButton btnEdit;
-    private ImageButton btnAdd;
     private boolean isEditMode = false;
 
     public CategoryFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CategoryFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CategoryFragment newInstance(String param1, String param2) {
-        CategoryFragment fragment = new CategoryFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -90,10 +52,10 @@ public class CategoryFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         ImageButton btnBack = view.findViewById(R.id.btn_back);
-        btnAdd = view.findViewById(R.id.btn_add);
+        ImageButton btnAdd = view.findViewById(R.id.btn_add);
         btnEdit = view.findViewById(R.id.btn_edit);
         gridAllCategories = view.findViewById(R.id.grid_all_categories);
-        etSearchCategories = view.findViewById(R.id.et_search_categories);
+        AppCompatEditText etSearchCategories = view.findViewById(R.id.et_search_categories);
         tvEmptyCategories = view.findViewById(R.id.tv_empty_categories);
 
         if (btnBack != null) {

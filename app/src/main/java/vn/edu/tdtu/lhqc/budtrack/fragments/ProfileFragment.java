@@ -1,18 +1,15 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -20,45 +17,30 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-
+import android.content.Context;
 import android.content.Intent;
-
 import vn.edu.tdtu.lhqc.budtrack.R;
 import com.bumptech.glide.Glide;
+
+import java.util.Objects;
+
 import vn.edu.tdtu.lhqc.budtrack.activities.LoginActivity;
 import vn.edu.tdtu.lhqc.budtrack.controllers.auth.AuthController;
-import vn.edu.tdtu.lhqc.budtrack.controllers.exchangerate.ExchangeRateService;
 import vn.edu.tdtu.lhqc.budtrack.controllers.notifications.ReminderNotificationController;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.utils.LanguageManager;
 import vn.edu.tdtu.lhqc.budtrack.utils.ThemeManager;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ProfileFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     // Permission launcher for notification permission
     private ActivityResultLauncher<String> notificationPermissionLauncher;
@@ -75,31 +57,9 @@ public class ProfileFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
         // Initialize permission launcher
         notificationPermissionLauncher = registerForActivityResult(
@@ -135,7 +95,9 @@ public class ProfileFragment extends Fragment {
                             java.io.OutputStream outputStream = new java.io.FileOutputStream(file);
                             byte[] buffer = new byte[4096];
                             int bytesRead;
-                            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                            while (true) {
+                                assert inputStream != null;
+                                if ((bytesRead = inputStream.read(buffer)) == -1) break;
                                 outputStream.write(buffer, 0, bytesRead);
                             }
                             inputStream.close();
@@ -210,17 +172,12 @@ public class ProfileFragment extends Fragment {
         if (sw != null && getContext() != null) {
             boolean isDark = ThemeManager.isDarkEnabled(getContext());
             sw.setChecked(isDark);
-            sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    ThemeManager.setTheme(
-                            requireContext(),
-                            isChecked
-                                    ? ThemeManager.ThemeMode.DARK
-                                    : ThemeManager.ThemeMode.LIGHT
-                    );
-                }
-            });
+            sw.setOnCheckedChangeListener((buttonView, isChecked) -> ThemeManager.setTheme(
+                    requireContext(),
+                    isChecked
+                            ? ThemeManager.ThemeMode.DARK
+                            : ThemeManager.ThemeMode.LIGHT
+            ));
         }
 
         TextView tvLanguageValue = root.findViewById(R.id.tv_language_value);
@@ -481,11 +438,7 @@ public class ProfileFragment extends Fragment {
 
         // Update next update text
         String nextUpdate = SettingsHandler.formatNextUpdateTime(requireContext());
-        if (nextUpdate != null) {
-            tvNextUpdate.setText(getString(R.string.currency_exchange_next_update, nextUpdate));
-        } else {
-            tvNextUpdate.setText(getString(R.string.currency_exchange_next_update, getString(R.string.currency_exchange_not_scheduled)));
-        }
+        tvNextUpdate.setText(getString(R.string.currency_exchange_next_update, Objects.requireNonNullElseGet(nextUpdate, () -> getString(R.string.currency_exchange_not_scheduled))));
 
         Runnable refreshState = () -> {
             styleCurrencyOption(cardVnd, iconVnd, pendingSelection[0].equals("VND"));
@@ -512,30 +465,50 @@ public class ProfileFragment extends Fragment {
                 .create();
 
         btnUpdateExchange.setOnClickListener(v -> {
-            // Update from API
+            // Update from API using service
             btnUpdateExchange.setEnabled(false);
             btnUpdateExchange.setText(R.string.currency_exchange_updating);
             
-            new Thread(() -> {
-                boolean success = ExchangeRateService.updateExchangeRateFromAPI(requireContext());
-                requireActivity().runOnUiThread(() -> {
-                    btnUpdateExchange.setEnabled(true);
-                    btnUpdateExchange.setText(R.string.currency_exchange_update);
-                    
-                    if (success) {
-                        Toast.makeText(requireContext(), R.string.currency_exchange_updated, Toast.LENGTH_SHORT).show();
-                        // Schedule weekly updates if not already scheduled
-                        if (SettingsHandler.getNextUpdateTime(requireContext()) == 0) {
-                            SettingsHandler.scheduleWeeklyExchangeRateUpdate(requireContext());
+            // Start the service to update exchange rate
+            Intent serviceIntent = vn.edu.tdtu.lhqc.budtrack.services.ExchangeRateUpdateService
+                    .createUpdateIntent(requireContext());
+            requireContext().startService(serviceIntent);
+            
+            // Register broadcast receiver to listen for result
+            android.content.BroadcastReceiver receiver = new android.content.BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    boolean success = intent.getBooleanExtra("success", false);
+                    requireActivity().runOnUiThread(() -> {
+                        btnUpdateExchange.setEnabled(true);
+                        btnUpdateExchange.setText(R.string.currency_exchange_update);
+                        
+                        if (success) {
+                            intent.getFloatExtra("rate", 0);
+                            Toast.makeText(requireContext(), R.string.currency_exchange_updated, Toast.LENGTH_SHORT).show();
+                            // Schedule weekly updates if not already scheduled
+                            if (SettingsHandler.getNextUpdateTime(requireContext()) == 0) {
+                                SettingsHandler.scheduleWeeklyExchangeRateUpdate(requireContext());
+                            }
+                            // Refresh the dialog
+                            dialog.dismiss();
+                            showCurrencyDialog(tvCurrencyValue);
+                        } else {
+                            Toast.makeText(requireContext(), R.string.currency_exchange_update_failed, Toast.LENGTH_SHORT).show();
                         }
-                        // Refresh the dialog
-                        dialog.dismiss();
-                        showCurrencyDialog(tvCurrencyValue);
-                    } else {
-                        Toast.makeText(requireContext(), R.string.currency_exchange_update_failed, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }).start();
+                        // Unregister receiver
+                        try {
+                            requireContext().unregisterReceiver(this);
+                        } catch (Exception e) {
+                            // Receiver might already be unregistered
+                        }
+                    });
+                }
+            };
+            
+            // Register receiver with intent filter
+            android.content.IntentFilter filter = new android.content.IntentFilter("vn.edu.tdtu.lhqc.budtrack.EXCHANGE_RATE_UPDATED");
+            ContextCompat.registerReceiver(requireContext(), receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
@@ -613,7 +586,7 @@ public class ProfileFragment extends Fragment {
             if (!isChecked && pendingEnabled[0]) {
                 // User is trying to disable - show confirmation dialog
                 buttonView.setChecked(true); // Revert the switch
-                showDisableReminderConfirmationDialog(dialog, swReminderEnabled, containerReminderOptions, pendingEnabled);
+                showDisableReminderConfirmationDialog(swReminderEnabled, containerReminderOptions, pendingEnabled);
             } else {
                 pendingEnabled[0] = isChecked;
                 containerReminderOptions.setVisibility(isChecked ? View.VISIBLE : View.GONE);
@@ -785,7 +758,7 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    private void showDisableReminderConfirmationDialog(AlertDialog parentDialog, SwitchMaterial switchMaterial,
+    private void showDisableReminderConfirmationDialog(SwitchMaterial switchMaterial,
                                                        View containerReminderOptions, boolean[] pendingEnabled) {
         if (getContext() == null) return;
 

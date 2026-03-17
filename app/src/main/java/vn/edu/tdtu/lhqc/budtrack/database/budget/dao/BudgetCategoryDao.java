@@ -1,12 +1,8 @@
 package vn.edu.tdtu.lhqc.budtrack.database.budget.dao;
-
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
-
 import java.util.List;
-
 import vn.edu.tdtu.lhqc.budtrack.database.budget.BudgetCategoryEntity;
 
 @Dao
@@ -14,20 +10,11 @@ public interface BudgetCategoryDao {
     @Insert
     long insert(BudgetCategoryEntity relationship);
 
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
-    long insertOrReplace(BudgetCategoryEntity relationship);
-
-    @Delete
-    void delete(BudgetCategoryEntity relationship);
-
     @Query("SELECT * FROM budget_categories")
     List<BudgetCategoryEntity> getAllRelationships();
 
     @Query("SELECT * FROM budget_categories WHERE budgetId = :budgetId")
     List<BudgetCategoryEntity> getRelationshipsByBudgetId(long budgetId);
-
-    @Query("SELECT * FROM budget_categories WHERE categoryId = :categoryId")
-    List<BudgetCategoryEntity> getRelationshipsByCategoryId(long categoryId);
 
     @Query("SELECT * FROM budget_categories WHERE budgetId = :budgetId AND categoryId = :categoryId LIMIT 1")
     BudgetCategoryEntity getRelationship(long budgetId, long categoryId);

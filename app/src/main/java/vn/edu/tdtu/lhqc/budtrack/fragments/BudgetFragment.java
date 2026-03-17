@@ -1,6 +1,5 @@
 package vn.edu.tdtu.lhqc.budtrack.fragments;
 
-import android.content.Context;
 import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
@@ -10,20 +9,14 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import android.widget.ImageView;
-
 import vn.edu.tdtu.lhqc.budtrack.R;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCalculator;
 import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetCategoryManager;
@@ -31,7 +24,6 @@ import vn.edu.tdtu.lhqc.budtrack.controllers.budget.BudgetManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.category.CategoryManager;
 import vn.edu.tdtu.lhqc.budtrack.controllers.settings.SettingsHandler;
 import vn.edu.tdtu.lhqc.budtrack.models.Budget;
-import vn.edu.tdtu.lhqc.budtrack.models.Category;
 import vn.edu.tdtu.lhqc.budtrack.utils.CurrencyUtils;
 import vn.edu.tdtu.lhqc.budtrack.utils.ProgressBarUtils;
 import vn.edu.tdtu.lhqc.budtrack.ui.GeneralHeaderController;
@@ -47,15 +39,6 @@ public class BudgetFragment extends Fragment {
 
     public static BudgetFragment newInstance() {
         return new BudgetFragment();
-    }
-
-    public static BudgetFragment newInstance(String param1, String param2) {
-        BudgetFragment fragment = new BudgetFragment();
-        Bundle args = new Bundle();
-        args.putString("param1", param1);
-        args.putString("param2", param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -448,7 +431,7 @@ public class BudgetFragment extends Fragment {
         List<CategoryManager.CategoryItem> userCategories = CategoryManager.getCategories(requireContext());
         java.util.Map<Long, Integer> categoryIdToIcon = new java.util.HashMap<>();
         for (CategoryManager.CategoryItem item : userCategories) {
-            long id = (long) (item.name.hashCode() * 31 + item.iconResId);
+            long id = item.name.hashCode() * 31L + item.iconResId;
             categoryIdToIcon.put(id, item.iconResId);
         }
 
