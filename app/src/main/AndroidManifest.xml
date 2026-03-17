@@ -60,6 +60,7 @@
             android:exported="false"
             android:enabled="true" />
         
+
         <!-- Exchange Rate Update Service -->
         <service
             android:name=".services.ExchangeRateUpdateService"
