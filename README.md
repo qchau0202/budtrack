@@ -1,5 +1,5 @@
 ## Budtrack
-A simple expense management app with insightful charts
+A simple budget tracking app, track spending and visualize your financial habits with intuitive, real-time insights
 
 # Highlighted functionalities
 - Smart OCR Scanning: Use your device’s camera to scan receipts and bills. The app automatically extracts key details, like amount, date, and vendor, so you don't have to enter them manually.
