@@ -7,3 +7,4 @@ A simple budget tracking app, track spending and visualize your financial habits
 - Category-Based Budgeting: Set and monitor spending limits for specific categories. The app tracks your progress in real-time, helping you stay within your financial goals for dining, travel, or groceries.
 
 ## Screenshots
+![App Screenshot](/screenshot/budtrack-screens.png)
